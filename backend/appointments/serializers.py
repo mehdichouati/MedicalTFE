@@ -44,6 +44,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
     professional_username = serializers.CharField(source='professional.username', read_only=True)
     professional_role = serializers.CharField(source='professional.role', read_only=True)
     medical_house_name = serializers.CharField(source='medical_house.name', read_only=True)
+    patient = serializers.PrimaryKeyRelatedField(
+        queryset=Appointment._meta.get_field('patient').related_model.objects.all(), required=False,
+    )
+    professional = serializers.PrimaryKeyRelatedField(
+        queryset=Appointment._meta.get_field('professional').related_model.objects.all(),
+    )
 
     class Meta:
         model = Appointment
