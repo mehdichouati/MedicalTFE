@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: mm_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: maison_medicale
+      POSTGRES_USER: mm_user
+      POSTGRES_PASSWORD: mm_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
