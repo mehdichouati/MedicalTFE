@@ -5,6 +5,11 @@ from django.utils.dateparse import parse_date
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from users.models import User
+from triage.models import TriageAssessment
+from triage.serializers import TriageAssessmentSerializer
 
 from .models import WeeklyAvailability, Absence, Appointment
 from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer
@@ -180,3 +185,70 @@ class AvailableSlotsView(generics.GenericAPIView):
                 cursor = slot_end
 
         return Response({'date': date_str, 'professional': professional_id, 'slots': slots})
+
+
+class PatientHistoryView(APIView):
+    """F6 — Consultation de l'historique patient.
+
+    GET /api/patients/history/                 -> historique du patient connecte
+    GET /api/patients/history/?patient=<id>     -> historique d'un patient donne
+                                                    (professionnel ou admin uniquement)
+
+    Secret medical : un professionnel ne peut consulter l'historique que
+    d'un patient avec lequel il a au moins un rendez-vous. Un admin peut
+    tout consulter. Un patient ne voit que son propre historique.
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        patient_id = request.query_params.get('patient')
+
+        if user.role == 'PATIENT':
+            patient = user
+
+        elif user.role == 'ADMIN':
+            if not patient_id:
+                return Response(
+                    {'detail': "Le parametre 'patient' est requis pour ce role."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            patient = User.objects.filter(pk=patient_id, role='PATIENT').first()
+            if patient is None:
+                return Response({'detail': 'Patient introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        elif user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
+            if not patient_id:
+                return Response(
+                    {'detail': "Le parametre 'patient' est requis pour ce role."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # Secret medical : il faut un lien de soin reel (au moins un RDV)
+            # entre ce professionnel et ce patient pour autoriser l'acces.
+            has_relation = Appointment.objects.filter(professional=user, patient_id=patient_id).exists()
+            if not has_relation:
+                return Response(
+                    {'detail': "Vous n'avez pas accès à l'historique de ce patient."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            patient = User.objects.filter(pk=patient_id, role='PATIENT').first()
+            if patient is None:
+                return Response({'detail': 'Patient introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            return Response({'detail': 'Rôle non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+
+        appointments = Appointment.objects.filter(patient=patient).order_by('-start_datetime')
+        triage_assessments = TriageAssessment.objects.filter(patient=patient).order_by('-created_at')
+
+        return Response({
+            'patient': patient.id,
+            'patient_username': patient.username,
+            'appointments': AppointmentSerializer(appointments, many=True).data,
+            'triage_assessments': TriageAssessmentSerializer(triage_assessments, many=True).data,
+            # F4 (paiements) et F5 (documents) pas encore implementes :
+            # ces cles seront remplies quand ces cartes seront codees.
+            'payments': [],
+            'documents': [],
+        })
