@@ -28,7 +28,9 @@ INSTALLED_APPS = [
     'payments',
     'notifications',
     'dashboard',
+    'triage',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
