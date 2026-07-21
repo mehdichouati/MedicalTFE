@@ -36,3 +36,28 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'language', 'profile_photo', 'is_email_verified', 'created_at',
         )
         read_only_fields = ('id', 'is_email_verified', 'created_at')
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """F9 — Changement de mot de passe (exige l'ancien pour confirmation)."""
+
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, validators=[validate_password])
+    new_password2 = serializers.CharField(write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Ancien mot de passe incorrect.")
+        return value
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password2']:
+            raise serializers.ValidationError({"new_password": "Les deux nouveaux mots de passe ne correspondent pas."})
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save(update_fields=['password'])
+        return user
