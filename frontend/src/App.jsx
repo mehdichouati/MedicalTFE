@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
+import TriagePage from './pages/TriagePage'
 
 function App() {
   return (
@@ -15,6 +16,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/triage"
+            element={
+              <ProtectedRoute>
+                <TriagePage />
               </ProtectedRoute>
             }
           />
