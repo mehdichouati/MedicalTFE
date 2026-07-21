@@ -17,3 +17,6 @@ build/
 
 # OS
 .DS_Store
+
+# Django media (fichiers uploadés par les utilisateurs)
+backend/media/
