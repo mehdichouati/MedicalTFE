@@ -9,7 +9,11 @@ export default function HomePage() {
       <h1>Maison Médicale</h1>
       <p>Connecté en tant que <b>{user?.username}</b> ({user?.role})</p>
       {user?.role === 'PATIENT' && (
-        <p><Link to="/triage">Aide à l'orientation</Link></p>
+        <p>
+          <Link to="/triage">Aide à l'orientation</Link>
+          {' · '}
+          <Link to="/history">Mon historique</Link>
+        </p>
       )}
       <button onClick={logout} style={{ padding: '8px 16px' }}>Se déconnecter</button>
     </div>
