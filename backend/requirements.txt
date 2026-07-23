@@ -11,3 +11,4 @@ PyJWT==2.13.0
 sqlparse==0.5.5
 tzdata==2026.2
 stripe==15.3.1
+reportlab==5.0.0

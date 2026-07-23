@@ -1,6 +1,12 @@
+import io
+
 import stripe
 from django.conf import settings
+from django.http import FileResponse
 from django.views.decorators.csrf import csrf_exempt
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -11,7 +17,6 @@ from .models import Payment
 from .serializers import PaymentSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
 
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     """F4 — Consultation des paiements (lecture seule : la creation passe
@@ -125,3 +130,122 @@ def stripe_webhook(request):
         Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status=Payment.Status.FAILED)
 
     return Response(status=status.HTTP_200_OK)
+
+class ReceiptPDFView(APIView):
+    """F5 — Genere le document justificatif de paiement (PDF) pour un RDV.
+
+    Conditions : le RDV doit etre marque COMPLETED par le professionnel
+    (F5) et le paiement doit etre SUCCEEDED ou PARTIALLY_REFUNDED/REFUNDED
+    (on genere le justificatif meme apres un remboursement partiel, il
+    documente ce qui a reellement ete percu).
+
+    ATTENTION : ceci n'est PAS l'attestation de soins officielle INAMI
+    (qui necessite l'integration eHealth/MyCareNet, cf. F14/#26 — hors
+    scope). C'est un document justificatif de paiement, conforme a
+    l'obligation de remise d'un document justificatif au patient (loi SSI,
+    art. 53 §1er/2), que le patient peut le cas echeant transmettre
+    lui-meme a sa mutuelle.
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, appointment_id):
+        appointment = Appointment.objects.filter(pk=appointment_id).first()
+        if appointment is None:
+            return Response({'detail': 'Rendez-vous introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        is_owner_patient = user.role == 'PATIENT' and appointment.patient_id == user.id
+        is_owner_professional = user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE') and appointment.professional_id == user.id
+        is_admin = user.role == 'ADMIN'
+        if not (is_owner_patient or is_owner_professional or is_admin):
+            return Response({'detail': "Vous n'avez pas accès à ce document."}, status=status.HTTP_403_FORBIDDEN)
+
+        if appointment.status != Appointment.Status.COMPLETED:
+            return Response(
+                {'detail': "Le document justificatif n'est disponible qu'une fois la consultation terminée."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payment = Payment.objects.filter(appointment=appointment).first()
+        if payment is None or payment.status not in (
+            Payment.Status.SUCCEEDED, Payment.Status.PARTIALLY_REFUNDED, Payment.Status.REFUNDED,
+        ):
+            return Response(
+                {'detail': "Aucun paiement enregistré pour cette consultation."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+
+        y = height - 30 * mm
+
+        p.setFont('Helvetica-Bold', 16)
+        p.drawString(20 * mm, y, "Document justificatif de paiement")
+        y -= 8 * mm
+
+        p.setFont('Helvetica', 9)
+        p.setFillColorRGB(0.4, 0.4, 0.4)
+        p.drawString(20 * mm, y, "Ceci n'est pas une attestation de soins INAMI officielle.")
+        y -= 12 * mm
+
+        p.setFillColorRGB(0, 0, 0)
+        p.setFont('Helvetica-Bold', 11)
+        p.drawString(20 * mm, y, "Praticien")
+        y -= 6 * mm
+        p.setFont('Helvetica', 10)
+        p.drawString(20 * mm, y, f"{appointment.professional.get_full_name() or appointment.professional.username}")
+        y -= 5 * mm
+        p.drawString(20 * mm, y, f"Rôle : {appointment.professional.get_role_display() if hasattr(appointment.professional, 'get_role_display') else appointment.professional.role}")
+        y -= 5 * mm
+        p.drawString(20 * mm, y, f"{appointment.medical_house.name} — {appointment.medical_house.address}, {appointment.medical_house.city}")
+        y -= 10 * mm
+
+        p.setFont('Helvetica-Bold', 11)
+        p.drawString(20 * mm, y, "Patient")
+        y -= 6 * mm
+        p.setFont('Helvetica', 10)
+        p.drawString(20 * mm, y, f"{appointment.patient.get_full_name() or appointment.patient.username}")
+        y -= 10 * mm
+
+        p.setFont('Helvetica-Bold', 11)
+        p.drawString(20 * mm, y, "Prestation")
+        y -= 6 * mm
+        p.setFont('Helvetica', 10)
+
+        from django.utils import timezone as django_timezone
+        local_start = django_timezone.localtime(appointment.start_datetime)
+        p.drawString(20 * mm, y, f"Date : {local_start.strftime('%d/%m/%Y à %H:%M')}")
+        y -= 5 * mm
+        p.drawString(20 * mm, y, f"Motif : {appointment.reason or 'Consultation'}")
+        y -= 10 * mm
+
+        p.setFont('Helvetica-Bold', 11)
+        p.drawString(20 * mm, y, "Paiement")
+        y -= 6 * mm
+        p.setFont('Helvetica', 10)
+        p.drawString(20 * mm, y, f"Montant payé : {payment.amount_cents / 100:.2f} EUR")
+        y -= 5 * mm
+        if payment.refunded_amount_cents > 0:
+            p.drawString(20 * mm, y, f"Montant remboursé : {payment.refunded_amount_cents / 100:.2f} EUR")
+            y -= 5 * mm
+            net = (payment.amount_cents - payment.refunded_amount_cents) / 100
+            p.drawString(20 * mm, y, f"Montant net perçu : {net:.2f} EUR")
+            y -= 5 * mm
+        p.drawString(20 * mm, y, f"Statut : {payment.get_status_display()}")
+        y -= 15 * mm
+
+        p.setFont('Helvetica', 8)
+        p.setFillColorRGB(0.4, 0.4, 0.4)
+        p.drawString(20 * mm, y, "Ce document ne donne pas automatiquement droit à un remboursement de la mutualité.")
+        y -= 4 * mm
+        p.drawString(20 * mm, y, "Pour un remboursement INAMI, l'attestation de soins électronique officielle (eAttest) doit être émise par le praticien.")
+
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+
+        filename = f"justificatif-paiement-rdv-{appointment.id}.pdf"
+        return FileResponse(buffer, as_attachment=True, filename=filename, content_type='application/pdf')
