@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import apiClient from '../api/client'
 
@@ -10,9 +10,19 @@ const CARD_STYLE = {
   color: '#e4e7eb',
 }
 
-function StatCard({ label, value, accent }) {
+function StatCard({ label, value, accent, onClick }) {
   return (
-    <div style={{ ...CARD_STYLE, borderTop: `3px solid ${accent}` }}>
+    <div
+      onClick={onClick}
+      style={{
+        ...CARD_STYLE,
+        borderTop: `3px solid ${accent}`,
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'transform 0.1s ease',
+      }}
+      onMouseEnter={(e) => onClick && (e.currentTarget.style.transform = 'translateY(-2px)')}
+      onMouseLeave={(e) => onClick && (e.currentTarget.style.transform = 'translateY(0)')}
+    >
       <p style={{ margin: 0, fontSize: 13, color: '#9aa3b2' }}>{label}</p>
       <p style={{ margin: '6px 0 0', fontSize: 28, fontWeight: 700 }}>{value}</p>
     </div>
@@ -25,6 +35,7 @@ function formatDateShort(isoDate) {
 }
 
 export default function AdminDashboardPage() {
+  const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
 
@@ -59,13 +70,13 @@ export default function AdminDashboardPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
-          <StatCard label="Rendez-vous aujourd'hui" value={summary.appointments_today} accent="#5b8def" />
-          <StatCard label="En attente" value={summary.pending_appointments} accent="#f0a94e" />
-          <StatCard label="Terminés" value={summary.completed_appointments} accent="#4caf7d" />
-          <StatCard label="Annulés / Absences" value={summary.cancelled_appointments + summary.no_show_appointments} accent="#e0574f" />
+          <StatCard label="Rendez-vous aujourd'hui" value={summary.appointments_today} accent="#5b8def" onClick={() => navigate('/admin/appointments')} />
+          <StatCard label="En attente" value={summary.pending_appointments} accent="#f0a94e" onClick={() => navigate('/admin/appointments?status=PENDING')} />
+          <StatCard label="Terminés" value={summary.completed_appointments} accent="#4caf7d" onClick={() => navigate('/admin/appointments?status=COMPLETED')} />
+          <StatCard label="Annulés / Absences" value={summary.cancelled_appointments + summary.no_show_appointments} accent="#e0574f" onClick={() => navigate('/admin/appointments')} />
           <StatCard label="Revenu net" value={`${summary.net_revenue_eur.toFixed(2)} €`} accent="#c084fc" />
-          <StatCard label="Patients" value={summary.total_patients} accent="#5b8def" />
-          <StatCard label="Professionnels" value={summary.total_professionals} accent="#5b8def" />
+          <StatCard label="Patients" value={summary.total_patients} accent="#5b8def" onClick={() => navigate('/admin/users?role=PATIENT')} />
+          <StatCard label="Professionnels" value={summary.total_professionals} accent="#5b8def" onClick={() => navigate('/admin/users')} />
           <StatCard label="Maisons médicales" value={summary.total_medical_houses} accent="#5b8def" />
         </div>
 

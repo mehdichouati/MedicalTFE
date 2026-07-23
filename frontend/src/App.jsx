@@ -9,6 +9,8 @@ import ProfilePage from './pages/ProfilePage'
 import PaymentPage from './pages/PaymentPage'
 import ProfessionalAppointmentsPage from './pages/ProfessionalAppointmentsPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
+import AdminUsersPage from './pages/AdminUsersPage'
+import AdminAppointmentsPage from './pages/AdminAppointmentsPage'
 
 function App() {
   return (
@@ -69,6 +71,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/appointments"
+            element={
+              <ProtectedRoute>
+                <AdminAppointmentsPage />
               </ProtectedRoute>
             }
           />
