@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import serializers
-from .models import WeeklyAvailability, Absence, Appointment
+from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument
 
 PROFESSIONAL_ROLES = ('MEDECIN', 'KINE', 'PSYCHOLOGUE')
 
@@ -117,3 +117,15 @@ class AppointmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Vous avez déjà un rendez-vous sur ce créneau.")
 
         return attrs
+
+class MedicalDocumentSerializer(serializers.ModelSerializer):
+    document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
+    uploaded_by_username = serializers.CharField(source='uploaded_by.username', read_only=True)
+
+    class Meta:
+        model = MedicalDocument
+        fields = (
+            'id', 'patient', 'uploaded_by', 'uploaded_by_username',
+            'document_type', 'document_type_display', 'title', 'file', 'uploaded_at',
+        )
+        read_only_fields = ('id', 'uploaded_by', 'uploaded_at')

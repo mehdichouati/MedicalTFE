@@ -12,8 +12,9 @@ from users.models import User
 from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
 
-from .models import WeeklyAvailability, Absence, Appointment
-from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer
+from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument
+from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer, MedicalDocumentSerializer
+
 
 SLOT_DURATION_MINUTES = 30
 
@@ -341,3 +342,52 @@ class PatientHistoryView(APIView):
             'payments': [],
             'documents': [],
         })
+
+class MedicalDocumentViewSet(viewsets.ModelViewSet):
+    """F5 — Documents medicaux (resultats, rapports).
+
+    Reserve aux medecins pour l'upload. Visibilite : patient concerne +
+    medecins ayant un lien de soin avec ce patient. Kines/psychologues
+    n'ont pas acces (secret medical restreint au champ medical).
+    """
+
+    serializer_class = MedicalDocumentSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    http_method_names = ['get', 'post', 'head']  # pas de modification/suppression
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.role == 'ADMIN':
+            return MedicalDocument.objects.all()
+
+        if user.role == 'PATIENT':
+            return MedicalDocument.objects.filter(patient=user)
+
+        if user.role == 'MEDECIN':
+            patient_id = self.request.query_params.get('patient')
+            if not patient_id:
+                # Sans patient precise, un medecin voit les documents des
+                # patients avec lesquels il a un lien de soin.
+                patient_ids = Appointment.objects.filter(professional=user).values_list('patient_id', flat=True)
+                return MedicalDocument.objects.filter(patient_id__in=patient_ids)
+
+            has_relation = Appointment.objects.filter(professional=user, patient_id=patient_id).exists()
+            if not has_relation:
+                return MedicalDocument.objects.none()
+            return MedicalDocument.objects.filter(patient_id=patient_id)
+
+        # Kines/psychologues : pas d'acces aux documents medicaux.
+        return MedicalDocument.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role != 'MEDECIN':
+            raise ValidationError("Seul un médecin peut déposer un document médical.")
+
+        patient = serializer.validated_data.get('patient')
+        has_relation = Appointment.objects.filter(professional=user, patient=patient).exists()
+        if not has_relation:
+            raise ValidationError("Vous ne pouvez déposer un document que pour un patient que vous avez déjà suivi.")
+
+        serializer.save(uploaded_by=user)

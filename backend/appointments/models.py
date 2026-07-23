@@ -84,3 +84,33 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"RDV {self.patient} avec {self.professional} le {self.start_datetime}"
+
+
+class MedicalDocument(models.Model):
+    """F5 — Documents medicaux (resultats, rapports) deposes par un medecin.
+
+    Reserve aux medecins (pas kines/psychologues) : visibilite limitee au
+    patient concerne et aux medecins ayant un lien de soin avec lui.
+    """
+
+    class DocumentType(models.TextChoices):
+        LAB_RESULT = 'LAB_RESULT', 'Résultat de prise de sang'
+        REPORT = 'REPORT', 'Rapport médical'
+        OTHER = 'OTHER', 'Autre document'
+
+    patient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='medical_documents',
+    )
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='medical_documents_uploaded',
+    )
+    document_type = models.CharField(max_length=20, choices=DocumentType.choices, default=DocumentType.OTHER)
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to='medical_documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"{self.get_document_type_display()} — {self.patient} ({self.uploaded_at:%d/%m/%Y})"
