@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from rest_framework import viewsets, permissions, generics, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,6 +16,54 @@ from .models import WeeklyAvailability, Absence, Appointment
 from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer
 
 SLOT_DURATION_MINUTES = 30
+
+# F4 — Politique d'annulation.
+LATE_CANCELLATION_WINDOW = timedelta(hours=24)
+LATE_CANCELLATION_FEE_CENTS = 500  # 5 EUR
+
+
+def _apply_cancellation_policy(appointment):
+    """F4 — Applique la politique d'annulation/no-show a un rendez-vous.
+
+    - Annulation/no-show a plus de 24h du RDV : remboursement complet si
+      deja paye.
+    - Annulation/no-show a moins de 24h : remboursement partiel (montant
+      moins 5 EUR de penalite) si deja paye, ou dette de 5 EUR enregistree
+      si le RDV n'avait pas encore ete paye.
+    - Rien a faire si aucun paiement n'a jamais ete initie pour ce RDV.
+    """
+    from payments.models import Payment
+    import stripe
+    from django.conf import settings
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    payment = Payment.objects.filter(appointment=appointment).first()
+    if payment is None:
+        return
+
+    now = timezone.now()
+    is_late = (appointment.start_datetime - now) < LATE_CANCELLATION_WINDOW
+
+    if payment.status == Payment.Status.SUCCEEDED:
+        if is_late:
+            refund_amount = max(payment.amount_cents - LATE_CANCELLATION_FEE_CENTS, 0)
+            if refund_amount > 0:
+                stripe.Refund.create(payment_intent=payment.stripe_payment_intent_id, amount=refund_amount)
+            payment.refunded_amount_cents = refund_amount
+            payment.status = (
+                Payment.Status.PARTIALLY_REFUNDED if refund_amount > 0 else Payment.Status.REFUNDED
+            )
+            payment.save(update_fields=['refunded_amount_cents', 'status'])
+        else:
+            stripe.Refund.create(payment_intent=payment.stripe_payment_intent_id)
+            payment.refunded_amount_cents = payment.amount_cents
+            payment.status = Payment.Status.REFUNDED
+            payment.save(update_fields=['refunded_amount_cents', 'status'])
+    else:
+        if is_late:
+            payment.late_cancellation_fee_due_cents = LATE_CANCELLATION_FEE_CENTS
+            payment.save(update_fields=['late_cancellation_fee_due_cents'])
 
 
 class IsOwnerOrAdmin(permissions.BasePermission):
@@ -116,12 +165,33 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         # F2 : on n'efface pas un rendez-vous, on l'annule (traçabilité).
+        # F4 : applique la politique d'annulation (remboursement/dette).
         appointment = self.get_object()
         appointment.status = Appointment.Status.CANCELLED
         appointment.cancelled_at = timezone.now()
         appointment.cancelled_by = request.user
         appointment.save(update_fields=['status', 'cancelled_at', 'cancelled_by'])
+        _apply_cancellation_policy(appointment)
         return Response(AppointmentSerializer(appointment).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='mark-no-show')
+    def mark_no_show(self, request, pk=None):
+        """F4 — Le professionnel (ou l'admin) marque une absence patient.
+
+        Applique la meme penalite que pour une annulation tardive : le
+        rendez-vous non honore est traite comme "moins de 24h", puisque
+        l'heure du RDV est deja passee au moment ou l'absence est constatee.
+        """
+        appointment = self.get_object()
+        if request.user.role not in ('MEDECIN', 'KINE', 'PSYCHOLOGUE', 'ADMIN'):
+            return Response(
+                {'detail': "Seul le professionnel concerné ou l'administrateur peut signaler une absence."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        appointment.status = Appointment.Status.NO_SHOW
+        appointment.save(update_fields=['status'])
+        _apply_cancellation_policy(appointment)
+        return Response(AppointmentSerializer(appointment).data)
 
 
 class AvailableSlotsView(generics.GenericAPIView):
@@ -224,8 +294,6 @@ class PatientHistoryView(APIView):
                     {'detail': "Le parametre 'patient' est requis pour ce role."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            # Secret medical : il faut un lien de soin reel (au moins un RDV)
-            # entre ce professionnel et ce patient pour autoriser l'acces.
             has_relation = Appointment.objects.filter(professional=user, patient_id=patient_id).exists()
             if not has_relation:
                 return Response(
@@ -247,8 +315,6 @@ class PatientHistoryView(APIView):
             'patient_username': patient.username,
             'appointments': AppointmentSerializer(appointments, many=True).data,
             'triage_assessments': TriageAssessmentSerializer(triage_assessments, many=True).data,
-            # F4 (paiements) et F5 (documents) pas encore implementes :
-            # ces cles seront remplies quand ces cartes seront codees.
             'payments': [],
             'documents': [],
         })
