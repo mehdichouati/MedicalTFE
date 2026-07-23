@@ -42,15 +42,25 @@ function formatDateTime(isoString) {
 
 export default function HistoryPage() {
   const [history, setHistory] = useState(null)
+  const [payments, setPayments] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    apiClient.get('/patients/history/')
-      .then(({ data }) => setHistory(data))
+    Promise.all([
+      apiClient.get('/patients/history/'),
+      apiClient.get('/payments/'),
+    ])
+      .then(([historyRes, paymentsRes]) => {
+        setHistory(historyRes.data)
+        setPayments(paymentsRes.data)
+      })
       .catch(() => setError("Impossible de charger l'historique."))
       .finally(() => setLoading(false))
   }, [])
+
+  const getPaymentForAppointment = (appointmentId) =>
+    payments.find((p) => p.appointment === appointmentId)
 
   if (loading) {
     return <p style={{ textAlign: 'center', marginTop: 80 }}>Chargement...</p>
@@ -74,28 +84,44 @@ export default function HistoryPage() {
       {history.appointments.length === 0 && (
         <p style={{ fontSize: 14 }}>Aucun rendez-vous pour le moment.</p>
       )}
-      {history.appointments.map((appt) => (
-        <div
-          key={appt.id}
-          style={{
-            border: '1px solid var(--color-border)',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 12,
-          }}
-        >
-          <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-text)' }}>
-            {formatDateTime(appt.start_datetime)}
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>
-            {appt.professional_username} ({appt.professional_role}) — {appt.medical_house_name}
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>
-            Statut : {STATUS_LABELS[appt.status] || appt.status}
-            {appt.reason && ` — ${appt.reason}`}
-          </p>
-        </div>
-      ))}
+      {history.appointments.map((appt) => {
+        const payment = getPaymentForAppointment(appt.id)
+        const canPay = appt.status !== 'CANCELLED' && (!payment || payment.status === 'FAILED')
+
+        return (
+          <div
+            key={appt.id}
+            style={{
+              border: '1px solid var(--color-border)',
+              borderRadius: 8,
+              padding: 16,
+              marginBottom: 12,
+            }}
+          >
+            <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-text)' }}>
+              {formatDateTime(appt.start_datetime)}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+              {appt.professional_username} ({appt.professional_role}) — {appt.medical_house_name}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+              Statut : {STATUS_LABELS[appt.status] || appt.status}
+              {appt.reason && ` — ${appt.reason}`}
+            </p>
+            {payment && (
+              <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+                Paiement : {payment.status_display} ({payment.amount_eur} €)
+                {payment.refunded_amount_cents > 0 && ` — Remboursé : ${(payment.refunded_amount_cents / 100).toFixed(2)} €`}
+              </p>
+            )}
+            {canPay && (
+              <p style={{ marginTop: 8 }}>
+                <Link to={`/pay/${appt.id}`}>Payer cette consultation</Link>
+              </p>
+            )}
+          </div>
+        )
+      })}
 
       <h2 style={{ marginTop: 32 }}>Évaluations d'orientation</h2>
       {history.triage_assessments.length === 0 && (
@@ -117,9 +143,6 @@ export default function HistoryPage() {
           </div>
         )
       })}
-
-      <h2 style={{ marginTop: 32 }}>Paiements</h2>
-      <p style={{ fontSize: 14 }}>Fonctionnalité à venir (F4).</p>
 
       <h2 style={{ marginTop: 32 }}>Documents</h2>
       <p style={{ fontSize: 14 }}>Fonctionnalité à venir (F5).</p>

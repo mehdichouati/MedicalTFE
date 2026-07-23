@@ -73,6 +73,7 @@ class CreatePaymentIntentView(APIView):
         # sinon en cree un nouveau cote Stripe.
         if payment.stripe_payment_intent_id:
             intent = stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
+
         else:
             intent = stripe.PaymentIntent.create(
                 amount=amount_cents,
@@ -81,7 +82,13 @@ class CreatePaymentIntentView(APIView):
                 # DSP2 : Stripe declenche automatiquement le 3D Secure quand
                 # la banque emettrice l'exige, sans code supplementaire ici.
                 automatic_payment_methods={'enabled': True},
+                # Idempotence : si cet appel est declenche deux fois de suite
+                # (ex. React StrictMode en dev), Stripe renvoie le MEME
+                # PaymentIntent au lieu d'en creer un second, evitant toute
+                # incoherence entre le formulaire affiche et la base.
+                idempotency_key=f'payment-intent-appointment-{appointment.id}',
             )
+       
             payment.stripe_payment_intent_id = intent.id
             payment.amount_cents = amount_cents
             payment.save(update_fields=['stripe_payment_intent_id', 'amount_cents'])
