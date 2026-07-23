@@ -25,6 +25,12 @@ export default function HomePage() {
             {' · '}
           </>
         )}
+        {user?.role === 'ADMIN' && (
+          <>
+            <Link to="/admin/dashboard">Tableau de bord</Link>
+            {' · '}
+          </>
+        )}
         <Link to="/profile">Mon profil</Link>
       </p>
       <button onClick={logout} style={{ padding: '8px 16px' }}>Se déconnecter</button>
