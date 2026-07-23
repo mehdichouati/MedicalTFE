@@ -7,6 +7,7 @@ import TriagePage from './pages/TriagePage'
 import HistoryPage from './pages/HistoryPage'
 import ProfilePage from './pages/ProfilePage'
 import PaymentPage from './pages/PaymentPage'
+import ProfessionalAppointmentsPage from './pages/ProfessionalAppointmentsPage'
 
 function App() {
   return (
@@ -51,6 +52,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-appointments"
+            element={
+              <ProtectedRoute>
+                <ProfessionalAppointmentsPage />
               </ProtectedRoute>
             }
           />

@@ -40,6 +40,20 @@ function formatDateTime(isoString) {
   })
 }
 
+async function downloadReceipt(appointmentId) {
+  const response = await apiClient.get(`/payments/receipt/${appointmentId}/`, {
+    responseType: 'blob',
+  })
+  const url = window.URL.createObjectURL(new Blob([response.data]))
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `justificatif-paiement-rdv-${appointmentId}.pdf`)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
 export default function HistoryPage() {
   const [history, setHistory] = useState(null)
   const [payments, setPayments] = useState([])
@@ -117,6 +131,16 @@ export default function HistoryPage() {
             {canPay && (
               <p style={{ marginTop: 8 }}>
                 <Link to={`/pay/${appt.id}`}>Payer cette consultation</Link>
+              </p>
+            )}
+           {appt.status === 'COMPLETED' && payment && ['SUCCEEDED', 'PARTIALLY_REFUNDED', 'REFUNDED'].includes(payment.status) && (
+              <p style={{ marginTop: 8 }}>
+                <button
+                  onClick={() => downloadReceipt(appt.id)}
+                  style={{ padding: '4px 12px', fontSize: 14 }}
+                >
+                  Télécharger le document justificatif
+                </button>
               </p>
             )}
           </div>

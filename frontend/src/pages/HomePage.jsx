@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+const PROFESSIONAL_ROLES = ['MEDECIN', 'KINE', 'PSYCHOLOGUE']
+
 export default function HomePage() {
   const { user, logout } = useAuth()
 
@@ -14,6 +16,12 @@ export default function HomePage() {
             <Link to="/triage">Aide à l'orientation</Link>
             {' · '}
             <Link to="/history">Mon historique</Link>
+            {' · '}
+          </>
+        )}
+        {PROFESSIONAL_ROLES.includes(user?.role) && (
+          <>
+            <Link to="/my-appointments">Mes rendez-vous</Link>
             {' · '}
           </>
         )}
