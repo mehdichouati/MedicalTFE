@@ -1,6 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from .models import User
+from .models import User, AuditLog
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -61,3 +61,44 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password'])
         user.save(update_fields=['password'])
         return user
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    """F10 — Gestion des utilisateurs par l'administrateur (liste, creation, activation)."""
+
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'username', 'first_name', 'last_name', 'full_name', 'email',
+            'role', 'phone_number', 'is_active', 'created_at',
+        )
+        read_only_fields = ('id', 'created_at')
+
+    def get_full_name(self, obj):
+        return obj.get_full_name() or obj.username
+
+
+class AdminUserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'role', 'phone_number', 'password')
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    actor_username = serializers.CharField(source='actor.username', read_only=True)
+    action_display = serializers.CharField(source='get_action_display', read_only=True)
+
+    class Meta:
+        model = AuditLog
+        fields = ('id', 'actor', 'actor_username', 'action', 'action_display', 'target_description', 'timestamp')

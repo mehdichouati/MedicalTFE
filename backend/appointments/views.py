@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-from rest_framework import viewsets, permissions, generics, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, permissions, generics, status, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -135,6 +136,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     serializer_class = AppointmentSerializer
     permission_classes = (IsPatientOwnerProOrAdmin,)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filterset_fields = ('status', 'medical_house', 'professional')
+    ordering_fields = ('start_datetime',)
+    ordering = ('-start_datetime',)
 
     def get_queryset(self):
         user = self.request.user
