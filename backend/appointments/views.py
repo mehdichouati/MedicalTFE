@@ -193,6 +193,29 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         _apply_cancellation_policy(appointment)
         return Response(AppointmentSerializer(appointment).data)
 
+    @action(detail=True, methods=['post'], url_path='mark-completed')
+    def mark_completed(self, request, pk=None):
+        """F5 — Le professionnel marque la consultation comme terminee.
+
+        Condition prealable a la generation du recu/document justificatif
+        (F5) : aucun document n'est genere pour un RDV non honore par le
+        professionnel lui-meme.
+        """
+        appointment = self.get_object()
+        if request.user.role not in ('MEDECIN', 'KINE', 'PSYCHOLOGUE', 'ADMIN'):
+            return Response(
+                {'detail': "Seul le professionnel concerné ou l'administrateur peut terminer une consultation."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if request.user.role != 'ADMIN' and appointment.professional_id != request.user.id:
+            return Response(
+                {'detail': "Vous ne pouvez terminer que vos propres consultations."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        appointment.status = Appointment.Status.COMPLETED
+        appointment.save(update_fields=['status'])
+        return Response(AppointmentSerializer(appointment).data)
+
 
 class AvailableSlotsView(generics.GenericAPIView):
     """F2 — Renvoie les créneaux libres d'un professionnel pour une date donnée.
