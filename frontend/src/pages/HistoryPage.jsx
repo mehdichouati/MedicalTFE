@@ -57,6 +57,7 @@ async function downloadReceipt(appointmentId) {
 export default function HistoryPage() {
   const [history, setHistory] = useState(null)
   const [payments, setPayments] = useState([])
+  const [documents, setDocuments] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -64,10 +65,12 @@ export default function HistoryPage() {
     Promise.all([
       apiClient.get('/patients/history/'),
       apiClient.get('/payments/'),
+      apiClient.get('/medical-documents/'),
     ])
-      .then(([historyRes, paymentsRes]) => {
+      .then(([historyRes, paymentsRes, documentsRes]) => {
         setHistory(historyRes.data)
         setPayments(paymentsRes.data)
+        setDocuments(documentsRes.data)
       })
       .catch(() => setError("Impossible de charger l'historique."))
       .finally(() => setLoading(false))
@@ -168,8 +171,31 @@ export default function HistoryPage() {
         )
       })}
 
-      <h2 style={{ marginTop: 32 }}>Documents</h2>
-      <p style={{ fontSize: 14 }}>Fonctionnalité à venir (F5).</p>
+      <h2 style={{ marginTop: 32 }}>Documents médicaux</h2>
+      {documents.length === 0 && (
+        <p style={{ fontSize: 14 }}>Aucun document pour le moment.</p>
+      )}
+      {documents.map((doc) => (
+        <div
+          key={doc.id}
+          style={{
+            border: '1px solid var(--color-border)',
+            borderRadius: 8,
+            padding: 16,
+            marginBottom: 12,
+          }}
+        >
+          <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-text)' }}>
+            {doc.title}
+          </p>
+          <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+            {doc.document_type_display} — déposé par {doc.uploaded_by_username} le {formatDateTime(doc.uploaded_at)}
+          </p>
+          <p style={{ marginTop: 6 }}>
+            <a href={doc.file} target="_blank" rel="noreferrer">Télécharger</a>
+          </p>
+        </div>
+      ))}
     </div>
   )
 }
