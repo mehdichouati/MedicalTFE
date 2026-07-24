@@ -69,8 +69,8 @@ export default function HistoryPage() {
     ])
       .then(([historyRes, paymentsRes, documentsRes]) => {
         setHistory(historyRes.data)
-        setPayments(paymentsRes.data)
-        setDocuments(documentsRes.data)
+        setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : paymentsRes.data.results)
+        setDocuments(Array.isArray(documentsRes.data) ? documentsRes.data : documentsRes.data.results)
       })
       .catch(() => setError("Impossible de charger l'historique."))
       .finally(() => setLoading(false))

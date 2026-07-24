@@ -98,7 +98,7 @@ export default function ProfessionalAppointmentsPage() {
   const loadAppointments = () => {
     setLoading(true)
     apiClient.get('/appointments/')
-      .then(({ data }) => setAppointments(data))
+      .then(({ data }) => setAppointments(Array.isArray(data) ? data : data.results))
       .catch(() => setError('Impossible de charger vos rendez-vous.'))
       .finally(() => setLoading(false))
   }
