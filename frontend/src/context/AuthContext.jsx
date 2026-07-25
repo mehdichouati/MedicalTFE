@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import i18n from '../i18n'
 import apiClient from '../api/client'
 
 const AuthContext = createContext(null)
@@ -11,6 +12,9 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await apiClient.get('/auth/me/')
       setUser(data)
+      if (data.language) {
+        i18n.changeLanguage(data.language)
+      }
     } catch {
       setUser(null)
     } finally {

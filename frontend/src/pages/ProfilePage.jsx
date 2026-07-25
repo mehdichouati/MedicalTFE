@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function ProfilePage() {
+  const { t, i18n } = useTranslation()
   const { user, setUser } = useAuth()
 
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -42,9 +44,10 @@ export default function ProfilePage() {
         language,
       })
       setUser(data)
-      setProfileMessage('Profil mis à jour.')
+      i18n.changeLanguage(language)
+      setProfileMessage(t('profile.profile_updated'))
     } catch {
-      setProfileError('Une erreur est survenue.')
+      setProfileError(t('common.error_generic'))
     } finally {
       setSavingProfile(false)
     }
@@ -61,9 +64,9 @@ export default function ProfilePage() {
       formData.append('profile_photo', photoFile)
       const { data } = await apiClient.patch('/auth/me/', formData)
       setUser(data)
-      setPhotoMessage('Photo mise à jour.')
+      setPhotoMessage(t('profile.photo_updated'))
     } catch {
-      setPhotoError("Une erreur est survenue lors de l'envoi de la photo.")
+      setPhotoError(t('common.error_generic'))
     } finally {
       setSavingPhoto(false)
     }
@@ -75,7 +78,7 @@ export default function ProfilePage() {
     setPasswordError('')
 
     if (newPassword !== newPassword2) {
-      setPasswordError('Les deux nouveaux mots de passe ne correspondent pas.')
+      setPasswordError(t('profile.password_mismatch'))
       return
     }
 
@@ -86,14 +89,14 @@ export default function ProfilePage() {
         new_password: newPassword,
         new_password2: newPassword2,
       })
-      setPasswordMessage('Mot de passe modifié avec succès.')
+      setPasswordMessage(t('profile.password_updated'))
       setOldPassword('')
       setNewPassword('')
       setNewPassword2('')
     } catch (err) {
       const detail = err.response?.data?.old_password?.[0]
         || err.response?.data?.new_password?.[0]
-        || 'Une erreur est survenue.'
+        || t('common.error_generic')
       setPasswordError(detail)
     } finally {
       setSavingPassword(false)
@@ -104,22 +107,22 @@ export default function ProfilePage() {
 
   return (
     <div style={{ maxWidth: 480, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Mon profil</h1>
-      <p><Link to="/">Retour à l'accueil</Link></p>
+      <h1>{t('profile.title')}</h1>
+      <p><Link to="/">{t('common.back_to_home')}</Link></p>
 
       <section style={{ marginTop: 32 }}>
-        <h2>Photo de profil</h2>
+        <h2>{t('profile.photo_section')}</h2>
         {user.profile_photo && (
           <img
             src={user.profile_photo}
-            alt="Photo de profil"
+            alt={t('profile.photo_section')}
             style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', display: 'block', marginBottom: 12 }}
           />
         )}
         <form onSubmit={handlePhotoSubmit}>
           <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])} />
           <button type="submit" disabled={savingPhoto || !photoFile} style={{ marginLeft: 12, padding: '6px 16px' }}>
-            {savingPhoto ? 'Envoi...' : 'Envoyer'}
+            {savingPhoto ? '...' : t('common.send')}
           </button>
           {photoMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{photoMessage}</p>}
           {photoError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{photoError}</p>}
@@ -127,10 +130,10 @@ export default function ProfilePage() {
       </section>
 
       <section style={{ marginTop: 32 }}>
-        <h2>Informations</h2>
+        <h2>{t('profile.info_section')}</h2>
         <form onSubmit={handleProfileSubmit}>
           <div style={{ marginBottom: 12 }}>
-            <label>Téléphone</label><br />
+            <label>{t('profile.phone')}</label><br />
             <input
               type="tel"
               value={phoneNumber}
@@ -139,14 +142,14 @@ export default function ProfilePage() {
             />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label>Langue</label><br />
+            <label>{t('profile.language')}</label><br />
             <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: 8 }}>
               <option value="fr">Français</option>
               <option value="en">English</option>
             </select>
           </div>
           <button type="submit" disabled={savingProfile} style={{ padding: '8px 16px' }}>
-            {savingProfile ? 'Enregistrement...' : 'Enregistrer'}
+            {savingProfile ? '...' : t('common.save')}
           </button>
           {profileMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{profileMessage}</p>}
           {profileError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{profileError}</p>}
@@ -154,10 +157,10 @@ export default function ProfilePage() {
       </section>
 
       <section style={{ marginTop: 32 }}>
-        <h2>Changer le mot de passe</h2>
+        <h2>{t('profile.password_section')}</h2>
         <form onSubmit={handlePasswordSubmit}>
           <div style={{ marginBottom: 12 }}>
-            <label>Ancien mot de passe</label><br />
+            <label>{t('profile.old_password')}</label><br />
             <input
               type="password"
               value={oldPassword}
@@ -167,7 +170,7 @@ export default function ProfilePage() {
             />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label>Nouveau mot de passe</label><br />
+            <label>{t('profile.new_password')}</label><br />
             <input
               type="password"
               value={newPassword}
@@ -177,7 +180,7 @@ export default function ProfilePage() {
             />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label>Confirmer le nouveau mot de passe</label><br />
+            <label>{t('profile.confirm_password')}</label><br />
             <input
               type="password"
               value={newPassword2}
@@ -187,7 +190,7 @@ export default function ProfilePage() {
             />
           </div>
           <button type="submit" disabled={savingPassword} style={{ padding: '8px 16px' }}>
-            {savingPassword ? 'Modification...' : 'Changer le mot de passe'}
+            {savingPassword ? '...' : t('common.confirm')}
           </button>
           {passwordMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{passwordMessage}</p>}
           {passwordError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{passwordError}</p>}
