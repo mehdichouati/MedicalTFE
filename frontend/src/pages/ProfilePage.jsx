@@ -14,6 +14,10 @@ export default function ProfilePage() {
   const [profileError, setProfileError] = useState('')
   const [savingProfile, setSavingProfile] = useState(false)
 
+  const [emailEnabled, setEmailEnabled] = useState(true)
+  const [notifMessage, setNotifMessage] = useState('')
+  const [savingNotif, setSavingNotif] = useState(false)
+
   const [photoFile, setPhotoFile] = useState(null)
   const [photoMessage, setPhotoMessage] = useState('')
   const [photoError, setPhotoError] = useState('')
@@ -31,7 +35,24 @@ export default function ProfilePage() {
       setPhoneNumber(user.phone_number || '')
       setLanguage(user.language || 'fr')
     }
+    apiClient.get('/notifications/preferences/')
+      .then(({ data }) => setEmailEnabled(data.email_enabled))
+      .catch(() => {})
   }, [user])
+
+  const handleNotifSubmit = async (e) => {
+    e.preventDefault()
+    setNotifMessage('')
+    setSavingNotif(true)
+    try {
+      await apiClient.patch('/notifications/preferences/', { email_enabled: emailEnabled })
+      setNotifMessage(t('profile.profile_updated'))
+    } catch {
+      setNotifMessage(t('common.error_generic'))
+    } finally {
+      setSavingNotif(false)
+    }
+  }
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault()
@@ -194,6 +215,24 @@ export default function ProfilePage() {
           </button>
           {passwordMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{passwordMessage}</p>}
           {passwordError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{passwordError}</p>}
+        </form>
+      </section>
+
+      <section style={{ marginTop: 32 }}>
+        <h2>{t('profile.notifications_section', 'Notifications')}</h2>
+        <form onSubmit={handleNotifSubmit}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={emailEnabled}
+              onChange={(e) => setEmailEnabled(e.target.checked)}
+            />
+            {t('profile.email_notifications', 'Recevoir les notifications par email')}
+          </label>
+          <button type="submit" disabled={savingNotif} style={{ marginTop: 12, padding: '8px 16px' }}>
+            {savingNotif ? '...' : t('common.save')}
+          </button>
+          {notifMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{notifMessage}</p>}
         </form>
       </section>
     </div>
