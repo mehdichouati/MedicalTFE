@@ -57,6 +57,12 @@
     "COMPLETED": "Completed",
     "NO_SHOW": "No-show"
   },
+  "orientation": {
+    "URGENCE": "Emergency — call for help / go to the emergency room",
+    "CONSULTATION_SUR_PLACE": "In-person consultation",
+    "TELECONSULTATION": "Teleconsultation",
+    "REPOS": "Rest and monitoring"
+  },
   "profile": {
     "title": "My profile",
     "photo_section": "Profile photo",
@@ -74,6 +80,11 @@
   },
   "triage": {
     "title": "Orientation assistant",
+    "q1": "Do you feel a sign of immediate severity? (difficulty breathing, chest pain, loss of consciousness, severe bleeding)",
+    "q2": "Do you have a visible worrying sign? (open wound, significant swelling, widespread redness, high fever)",
+    "q3": "Do you feel intense pain (8 to 10 out of 10)?",
+    "q4": "Is this preventing you from carrying out your daily activities?",
+    "q5": "Has this been going on for more than 3 days?",
     "question_of": "Question {{current}} of {{total}}",
     "result_title": "Orientation result",
     "restart": "Start over",

@@ -1,28 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 
-const QUESTIONS = [
-  {
-    key: 'signe_gravite_immediat',
-    label: "Ressentez-vous un signe de gravite immediate ? (difficulte a respirer, douleur thoracique, perte de connaissance, saignement important)",
-  },
-  {
-    key: 'signe_visible_inquietant',
-    label: "Avez-vous un signe visible inquietant ? (plaie ouverte, gonflement important, rougeur etendue, fievre elevee)",
-  },
-  {
-    key: 'douleur_intense',
-    label: "Ressentez-vous une douleur intense (8 a 10 sur 10) ?",
-  },
-  {
-    key: 'impact_activites_quotidiennes',
-    label: "Est-ce que cela vous empeche de mener vos activites quotidiennes ?",
-  },
-  {
-    key: 'depuis_plus_de_3_jours',
-    label: "Est-ce que cela dure depuis plus de 3 jours ?",
-  },
+const QUESTION_KEYS = [
+  { key: 'signe_gravite_immediat', labelKey: 'q1' },
+  { key: 'signe_visible_inquietant', labelKey: 'q2' },
+  { key: 'douleur_intense', labelKey: 'q3' },
+  { key: 'impact_activites_quotidiennes', labelKey: 'q4' },
+  { key: 'depuis_plus_de_3_jours', labelKey: 'q5' },
 ]
 
 const ORIENTATION_STYLES = {
@@ -49,19 +35,21 @@ const ORIENTATION_STYLES = {
 }
 
 export default function TriagePage() {
+  const { t } = useTranslation()
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const currentQuestion = QUESTIONS[stepIndex]
+  const questions = QUESTION_KEYS.map((q) => ({ ...q, label: t(`triage.${q.labelKey}`) }))
+  const currentQuestion = questions[stepIndex]
 
   const handleAnswer = async (value) => {
     const updatedAnswers = { ...answers, [currentQuestion.key]: value }
     setAnswers(updatedAnswers)
 
-    if (stepIndex + 1 < QUESTIONS.length) {
+    if (stepIndex + 1 < questions.length) {
       setStepIndex(stepIndex + 1)
       return
     }
@@ -72,7 +60,7 @@ export default function TriagePage() {
       const { data } = await apiClient.post('/triage-assessments/', updatedAnswers)
       setResult(data)
     } catch {
-      setError("Une erreur est survenue lors du calcul de l'orientation.")
+      setError(t('common.error_generic'))
     } finally {
       setSubmitting(false)
     }
@@ -89,24 +77,23 @@ export default function TriagePage() {
     const style = ORIENTATION_STYLES[result.orientation] || {}
     return (
       <div style={{ maxWidth: 480, margin: '60px auto', fontFamily: 'system-ui, sans-serif' }}>
-        <h1>Résultat de l'orientation</h1>
+        <h1>{t('triage.result_title')}</h1>
         <div style={{ ...style, padding: 20, borderRadius: 8, marginTop: 16 }}>
-          <h2 style={{ margin: 0, color: 'inherit' }}>{result.orientation_display}</h2>
+          <h2 style={{ margin: 0, color: 'inherit' }}>{t(`orientation.${result.orientation}`)}</h2>
         </div>
         {result.orientation === 'URGENCE' && (
           <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--color-urgence-text)' }}>
-            Appelez immédiatement les secours (112) ou rendez-vous aux urgences les plus proches.
+            {t('triage.urgency_message')}
           </p>
         )}
         <p style={{ marginTop: 16, fontSize: 14 }}>
-          Ce résultat est une aide à l'orientation, pas un diagnostic médical.
-          En cas de doute, contactez un professionnel de santé.
+          {t('triage.disclaimer')}
         </p>
         <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
           <button onClick={restart} style={{ padding: '8px 16px' }}>
-            Refaire une évaluation
+            {t('triage.restart')}
           </button>
-          <Link to="/">Retour à l'accueil</Link>
+          <Link to="/">{t('common.back_to_home')}</Link>
         </div>
       </div>
     )
@@ -114,9 +101,9 @@ export default function TriagePage() {
 
   return (
     <div style={{ maxWidth: 480, margin: '60px auto', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Aide à l'orientation</h1>
+      <h1>{t('triage.title')}</h1>
       <p style={{ fontSize: 14 }}>
-        Question {stepIndex + 1} sur {QUESTIONS.length}
+        {t('triage.question_of', { current: stepIndex + 1, total: questions.length })}
       </p>
       <p style={{ fontSize: 18, margin: '24px 0', color: 'var(--color-text)' }}>{currentQuestion.label}</p>
       {error && <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>}
@@ -127,17 +114,17 @@ export default function TriagePage() {
           disabled={submitting}
           style={{ padding: '10px 24px' }}
         >
-          Oui
+          {t('common.yes')}
         </button>
         <button
           onClick={() => handleAnswer(false)}
           disabled={submitting}
           style={{ padding: '10px 24px' }}
         >
-          Non
+          {t('common.no')}
         </button>
       </div>
-      {submitting && <p style={{ marginTop: 16 }}>Calcul en cours...</p>}
+      {submitting && <p style={{ marginTop: 16 }}>{t('common.loading')}</p>}
     </div>
   )
 }

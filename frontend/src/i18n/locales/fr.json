@@ -57,6 +57,12 @@
     "COMPLETED": "Terminé",
     "NO_SHOW": "Absence"
   },
+  "orientation": {
+    "URGENCE": "Urgence — appeler les secours / se rendre aux urgences",
+    "CONSULTATION_SUR_PLACE": "Consultation sur place",
+    "TELECONSULTATION": "Téléconsultation",
+    "REPOS": "Repos et surveillance"
+  },
   "profile": {
     "title": "Mon profil",
     "photo_section": "Photo de profil",
@@ -74,6 +80,11 @@
   },
   "triage": {
     "title": "Aide à l'orientation",
+    "q1": "Ressentez-vous un signe de gravité immédiate ? (difficulté à respirer, douleur thoracique, perte de connaissance, saignement important)",
+    "q2": "Avez-vous un signe visible inquiétant ? (plaie ouverte, gonflement important, rougeur étendue, fièvre élevée)",
+    "q3": "Ressentez-vous une douleur intense (8 à 10 sur 10) ?",
+    "q4": "Est-ce que cela vous empêche de mener vos activités quotidiennes ?",
+    "q5": "Est-ce que cela dure depuis plus de 3 jours ?",
     "question_of": "Question {{current}} sur {{total}}",
     "result_title": "Résultat de l'orientation",
     "restart": "Refaire une évaluation",
