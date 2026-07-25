@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from appointments.models import Appointment
+from notifications.services import notify_payment_succeeded, notify_payment_refunded
 from .models import Payment
 from .serializers import PaymentSerializer
 
@@ -123,7 +124,11 @@ def stripe_webhook(request):
 
     if event['type'] == 'payment_intent.succeeded':
         intent = event['data']['object']
-        Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status=Payment.Status.SUCCEEDED)
+        payment = Payment.objects.filter(stripe_payment_intent_id=intent['id']).first()
+        if payment:
+            payment.status = Payment.Status.SUCCEEDED
+            payment.save(update_fields=['status'])
+            notify_payment_succeeded(payment)
 
     elif event['type'] == 'payment_intent.payment_failed':
         intent = event['data']['object']

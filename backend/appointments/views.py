@@ -12,10 +12,10 @@ from rest_framework.views import APIView
 from users.models import User
 from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
+from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
 
 from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument
 from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer, MedicalDocumentSerializer
-
 
 SLOT_DURATION_MINUTES = 30
 
@@ -35,6 +35,7 @@ def _apply_cancellation_policy(appointment):
     - Rien a faire si aucun paiement n'a jamais ete initie pour ce RDV.
     """
     from payments.models import Payment
+    from notifications.services import notify_payment_refunded
     import stripe
     from django.conf import settings
 
@@ -57,11 +58,13 @@ def _apply_cancellation_policy(appointment):
                 Payment.Status.PARTIALLY_REFUNDED if refund_amount > 0 else Payment.Status.REFUNDED
             )
             payment.save(update_fields=['refunded_amount_cents', 'status'])
+            notify_payment_refunded(payment)
         else:
             stripe.Refund.create(payment_intent=payment.stripe_payment_intent_id)
             payment.refunded_amount_cents = payment.amount_cents
             payment.status = Payment.Status.REFUNDED
             payment.save(update_fields=['refunded_amount_cents', 'status'])
+            notify_payment_refunded(payment)
     else:
         if is_late:
             payment.late_cancellation_fee_due_cents = LATE_CANCELLATION_FEE_CENTS
@@ -155,9 +158,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         # Un patient ne peut réserver que pour lui-même. Seul un admin peut
         # créer un RDV pour un autre patient (ex. accueil téléphonique).
         if user.role == 'PATIENT':
-            serializer.save(patient=user)
+            appointment = serializer.save(patient=user)
         else:
-            serializer.save()
+            appointment = serializer.save()
+        notify_appointment_confirmation(appointment)
 
     def perform_update(self, serializer):
         # Empêche un patient de "voler" un rendez-vous d'un autre patient
@@ -178,6 +182,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.cancelled_by = request.user
         appointment.save(update_fields=['status', 'cancelled_at', 'cancelled_by'])
         _apply_cancellation_policy(appointment)
+        notify_appointment_cancellation(appointment)
         return Response(AppointmentSerializer(appointment).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='mark-no-show')
@@ -347,6 +352,7 @@ class PatientHistoryView(APIView):
             'payments': [],
             'documents': [],
         })
+
 
 class MedicalDocumentViewSet(viewsets.ModelViewSet):
     """F5 — Documents medicaux (resultats, rapports).
