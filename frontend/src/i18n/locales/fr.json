@@ -1,0 +1,139 @@
+{
+  "common": {
+    "back_to_home": "Retour à l'accueil",
+    "back_to_dashboard": "Retour au tableau de bord",
+    "loading": "Chargement...",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "save": "Enregistrer",
+    "send": "Envoyer",
+    "download": "Télécharger",
+    "logout": "Se déconnecter",
+    "error_generic": "Une erreur est survenue.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page_of": "Page {{current}} / {{total}}"
+  },
+  "login": {
+    "title": "Connexion",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion...",
+    "error": "Identifiants incorrects."
+  },
+  "home": {
+    "title": "Maison Médicale",
+    "connected_as": "Connecté en tant que",
+    "link_triage": "Aide à l'orientation",
+    "link_history": "Mon historique",
+    "link_my_appointments": "Mes rendez-vous",
+    "link_dashboard": "Tableau de bord",
+    "link_profile": "Mon profil"
+  },
+  "history": {
+    "title": "Mon historique",
+    "appointments": "Rendez-vous",
+    "no_appointments": "Aucun rendez-vous pour le moment.",
+    "status": "Statut",
+    "payment": "Paiement",
+    "refunded": "Remboursé",
+    "pay_button": "Payer cette consultation",
+    "download_receipt": "Télécharger le document justificatif",
+    "triage_section": "Évaluations d'orientation",
+    "no_triage": "Aucune évaluation pour le moment.",
+    "documents_section": "Documents médicaux",
+    "no_documents": "Aucun document pour le moment.",
+    "deposited_by": "déposé par",
+    "on_date": "le",
+    "load_error": "Impossible de charger l'historique."
+  },
+  "status": {
+    "PENDING": "En attente",
+    "CONFIRMED": "Confirmé",
+    "CANCELLED": "Annulé",
+    "COMPLETED": "Terminé",
+    "NO_SHOW": "Absence"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "photo_section": "Photo de profil",
+    "info_section": "Informations",
+    "phone": "Téléphone",
+    "language": "Langue",
+    "password_section": "Changer le mot de passe",
+    "old_password": "Ancien mot de passe",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le nouveau mot de passe",
+    "photo_updated": "Photo mise à jour.",
+    "profile_updated": "Profil mis à jour.",
+    "password_updated": "Mot de passe modifié avec succès.",
+    "password_mismatch": "Les deux nouveaux mots de passe ne correspondent pas."
+  },
+  "triage": {
+    "title": "Aide à l'orientation",
+    "question_of": "Question {{current}} sur {{total}}",
+    "result_title": "Résultat de l'orientation",
+    "restart": "Refaire une évaluation",
+    "disclaimer": "Ce résultat est une aide à l'orientation, pas un diagnostic médical. En cas de doute, contactez un professionnel de santé.",
+    "urgency_message": "Appelez immédiatement les secours (112) ou rendez-vous aux urgences les plus proches."
+  },
+  "payment": {
+    "title": "Paiement de la consultation",
+    "pay_button": "Payer {{amount}} €",
+    "processing": "Traitement...",
+    "loading_form": "Chargement du formulaire de paiement...",
+    "init_error": "Impossible d'initialiser le paiement."
+  },
+  "professional_appointments": {
+    "title": "Mes rendez-vous",
+    "no_appointments": "Aucun rendez-vous pour le moment.",
+    "patient_label": "Patient",
+    "complete_button": "Terminer la consultation",
+    "no_show_button": "Signaler une absence",
+    "upload_document_button": "Déposer un document médical",
+    "document_uploaded": "Document envoyé avec succès."
+  },
+  "admin_dashboard": {
+    "title": "Tableau de bord administrateur",
+    "appointments_today": "Rendez-vous aujourd'hui",
+    "pending": "En attente",
+    "completed": "Terminés",
+    "cancelled_noshow": "Annulés / Absences",
+    "net_revenue": "Revenu net",
+    "patients": "Patients",
+    "professionals": "Professionnels",
+    "medical_houses": "Maisons médicales",
+    "chart_title": "Activité des 14 derniers jours",
+    "by_house": "Par maison médicale",
+    "top_professionals": "Top professionnels"
+  },
+  "admin_users": {
+    "title": "Utilisateurs",
+    "search_placeholder": "Rechercher nom, prénom, email...",
+    "all_roles": "Tous les rôles",
+    "all_statuses": "Tous les statuts",
+    "active": "Actifs",
+    "inactive": "Désactivés",
+    "sort_name_asc": "Trier : Nom (A-Z)",
+    "sort_name_desc": "Trier : Nom (Z-A)",
+    "sort_newest": "Trier : Plus récent",
+    "sort_oldest": "Trier : Plus ancien",
+    "create_button": "+ Créer un compte",
+    "close": "Fermer",
+    "deactivated_badge": "DÉSACTIVÉ",
+    "deactivate": "Désactiver",
+    "reactivate": "Réactiver",
+    "confirm_question": "Confirmer ?",
+    "no_users": "Aucun utilisateur trouvé."
+  },
+  "admin_appointments": {
+    "title": "Rendez-vous",
+    "all_statuses": "Tous les statuts",
+    "sort_newest": "Trier : Plus récent",
+    "sort_oldest": "Trier : Plus ancien",
+    "no_appointments": "Aucun rendez-vous trouvé."
+  }
+}

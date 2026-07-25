@@ -1,0 +1,139 @@
+{
+  "common": {
+    "back_to_home": "Back to home",
+    "back_to_dashboard": "Back to dashboard",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "send": "Send",
+    "download": "Download",
+    "logout": "Log out",
+    "error_generic": "An error occurred.",
+    "previous": "Previous",
+    "next": "Next",
+    "page_of": "Page {{current}} / {{total}}"
+  },
+  "login": {
+    "title": "Login",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in...",
+    "error": "Incorrect credentials."
+  },
+  "home": {
+    "title": "Medical Practice",
+    "connected_as": "Logged in as",
+    "link_triage": "Orientation assistant",
+    "link_history": "My history",
+    "link_my_appointments": "My appointments",
+    "link_dashboard": "Dashboard",
+    "link_profile": "My profile"
+  },
+  "history": {
+    "title": "My history",
+    "appointments": "Appointments",
+    "no_appointments": "No appointments yet.",
+    "status": "Status",
+    "payment": "Payment",
+    "refunded": "Refunded",
+    "pay_button": "Pay for this consultation",
+    "download_receipt": "Download payment receipt",
+    "triage_section": "Orientation assessments",
+    "no_triage": "No assessments yet.",
+    "documents_section": "Medical documents",
+    "no_documents": "No documents yet.",
+    "deposited_by": "uploaded by",
+    "on_date": "on",
+    "load_error": "Unable to load history."
+  },
+  "status": {
+    "PENDING": "Pending",
+    "CONFIRMED": "Confirmed",
+    "CANCELLED": "Cancelled",
+    "COMPLETED": "Completed",
+    "NO_SHOW": "No-show"
+  },
+  "profile": {
+    "title": "My profile",
+    "photo_section": "Profile photo",
+    "info_section": "Information",
+    "phone": "Phone number",
+    "language": "Language",
+    "password_section": "Change password",
+    "old_password": "Old password",
+    "new_password": "New password",
+    "confirm_password": "Confirm new password",
+    "photo_updated": "Photo updated.",
+    "profile_updated": "Profile updated.",
+    "password_updated": "Password changed successfully.",
+    "password_mismatch": "The two new passwords do not match."
+  },
+  "triage": {
+    "title": "Orientation assistant",
+    "question_of": "Question {{current}} of {{total}}",
+    "result_title": "Orientation result",
+    "restart": "Start over",
+    "disclaimer": "This result is an orientation aid, not a medical diagnosis. If in doubt, contact a healthcare professional.",
+    "urgency_message": "Call emergency services (112) immediately or go to the nearest emergency room."
+  },
+  "payment": {
+    "title": "Consultation payment",
+    "pay_button": "Pay {{amount}} €",
+    "processing": "Processing...",
+    "loading_form": "Loading payment form...",
+    "init_error": "Unable to initialize payment."
+  },
+  "professional_appointments": {
+    "title": "My appointments",
+    "no_appointments": "No appointments yet.",
+    "patient_label": "Patient",
+    "complete_button": "Complete consultation",
+    "no_show_button": "Report a no-show",
+    "upload_document_button": "Upload a medical document",
+    "document_uploaded": "Document uploaded successfully."
+  },
+  "admin_dashboard": {
+    "title": "Admin dashboard",
+    "appointments_today": "Appointments today",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled_noshow": "Cancelled / No-shows",
+    "net_revenue": "Net revenue",
+    "patients": "Patients",
+    "professionals": "Professionals",
+    "medical_houses": "Medical practices",
+    "chart_title": "Activity over the last 14 days",
+    "by_house": "By medical practice",
+    "top_professionals": "Top professionals"
+  },
+  "admin_users": {
+    "title": "Users",
+    "search_placeholder": "Search name, first name, email...",
+    "all_roles": "All roles",
+    "all_statuses": "All statuses",
+    "active": "Active",
+    "inactive": "Deactivated",
+    "sort_name_asc": "Sort: Name (A-Z)",
+    "sort_name_desc": "Sort: Name (Z-A)",
+    "sort_newest": "Sort: Newest",
+    "sort_oldest": "Sort: Oldest",
+    "create_button": "+ Create account",
+    "close": "Close",
+    "deactivated_badge": "DEACTIVATED",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "confirm_question": "Confirm?",
+    "no_users": "No users found."
+  },
+  "admin_appointments": {
+    "title": "Appointments",
+    "all_statuses": "All statuses",
+    "sort_newest": "Sort: Newest",
+    "sort_oldest": "Sort: Oldest",
+    "no_appointments": "No appointments found."
+  }
+}
