@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -18,7 +21,7 @@ export default function LoginPage() {
       await login(username, password)
       navigate('/')
     } catch {
-      setError('Identifiants incorrects.')
+      setError(t('login.error'))
     } finally {
       setSubmitting(false)
     }
@@ -26,10 +29,13 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: 360, margin: '80px auto', fontFamily: 'sans-serif' }}>
-      <h1>Connexion</h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <LanguageSwitcher />
+      </div>
+      <h1>{t('login.title')}</h1>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 12 }}>
-          <label>Nom d'utilisateur</label><br />
+          <label>{t('login.username')}</label><br />
           <input
             type="text"
             value={username}
@@ -39,7 +45,7 @@ export default function LoginPage() {
           />
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label>Mot de passe</label><br />
+          <label>{t('login.password')}</label><br />
           <input
             type="password"
             value={password}
@@ -50,7 +56,7 @@ export default function LoginPage() {
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit" disabled={submitting} style={{ padding: '8px 16px' }}>
-          {submitting ? 'Connexion...' : 'Se connecter'}
+          {submitting ? t('login.submitting') : t('login.submit')}
         </button>
       </form>
     </div>
