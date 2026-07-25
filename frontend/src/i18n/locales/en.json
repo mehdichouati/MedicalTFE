@@ -1,4 +1,10 @@
 {
+  "roles": {
+    "PATIENT": "Patient",
+    "MEDECIN": "General practitioner",
+    "KINE": "Physiotherapist",
+    "PSYCHOLOGUE": "Psychologist"
+  },
   "common": {
     "back_to_home": "Back to home",
     "back_to_dashboard": "Back to dashboard",
