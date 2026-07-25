@@ -45,6 +45,9 @@
     "triage_section": "Orientation assessments",
     "no_triage": "No assessments yet.",
     "documents_section": "Medical documents",
+    "doc_type_LAB_RESULT": "Lab result",
+    "doc_type_REPORT": "Medical report",
+    "doc_type_OTHER": "Other document",
     "no_documents": "No documents yet.",
     "deposited_by": "uploaded by",
     "on_date": "on",
@@ -55,7 +58,11 @@
     "CONFIRMED": "Confirmed",
     "CANCELLED": "Cancelled",
     "COMPLETED": "Completed",
-    "NO_SHOW": "No-show"
+    "NO_SHOW": "No-show",
+    "SUCCEEDED": "Paid",
+    "FAILED": "Failed",
+    "REFUNDED": "Refunded",
+    "PARTIALLY_REFUNDED": "Partially refunded"
   },
   "orientation": {
     "URGENCE": "Emergency — call for help / go to the emergency room",

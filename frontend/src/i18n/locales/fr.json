@@ -45,6 +45,9 @@
     "triage_section": "Évaluations d'orientation",
     "no_triage": "Aucune évaluation pour le moment.",
     "documents_section": "Documents médicaux",
+    "doc_type_LAB_RESULT": "Résultat de prise de sang",
+    "doc_type_REPORT": "Rapport médical",
+    "doc_type_OTHER": "Autre document",
     "no_documents": "Aucun document pour le moment.",
     "deposited_by": "déposé par",
     "on_date": "le",
@@ -55,7 +58,11 @@
     "CONFIRMED": "Confirmé",
     "CANCELLED": "Annulé",
     "COMPLETED": "Terminé",
-    "NO_SHOW": "Absence"
+    "NO_SHOW": "Absence",
+    "SUCCEEDED": "Payé",
+    "FAILED": "Échoué",
+    "REFUNDED": "Remboursé",
+    "PARTIALLY_REFUNDED": "Remboursé partiellement"
   },
   "orientation": {
     "URGENCE": "Urgence — appeler les secours / se rendre aux urgences",
