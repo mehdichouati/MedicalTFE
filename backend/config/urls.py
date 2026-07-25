@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/', include('triage.urls')),
     path('api/', include('payments.urls')),
     path('api/', include('dashboard.urls')),
+    path('api/', include('notifications.urls')),
 ]
 
 if settings.DEBUG:
