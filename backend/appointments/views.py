@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,8 +15,9 @@ from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
 from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
 
-from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument
-from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer, MedicalDocumentSerializer
+
+from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument, Review
+from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer, MedicalDocumentSerializer, ReviewSerializer
 
 SLOT_DURATION_MINUTES = 30
 
@@ -402,3 +404,68 @@ class MedicalDocumentViewSet(viewsets.ModelViewSet):
             raise ValidationError("Vous ne pouvez déposer un document que pour un patient que vous avez déjà suivi.")
 
         serializer.save(uploaded_by=user)
+class IsAdminForModeration(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if view.action in ('moderate',):
+            return bool(request.user and request.user.is_authenticated and request.user.role == 'ADMIN')
+        return bool(request.user and request.user.is_authenticated)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """F13 — Evaluation des consultations.
+
+    - Le patient cree un avis pour un RDV termine qui lui appartient
+      (un seul avis par RDV).
+    - L'admin peut approuver/rejeter (action 'moderate').
+    - Seuls les avis APPROVED sont visibles par les patients/professionnels
+      autres que leur auteur.
+    """
+
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAdminForModeration,)
+    http_method_names = ['get', 'post', 'patch', 'head']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'ADMIN':
+            return Review.objects.all()
+        if user.role == 'PATIENT':
+            # Le patient voit ses propres avis (tous statuts) + les avis
+            # approuves des autres (transparence publique limitee).
+            return Review.objects.filter(
+                Q(patient=user) | Q(moderation_status=Review.ModerationStatus.APPROVED)
+            )
+        # Professionnels : uniquement les avis approuves.
+        return Review.objects.filter(moderation_status=Review.ModerationStatus.APPROVED)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role != 'PATIENT':
+            raise ValidationError("Seul un patient peut déposer un avis.")
+
+        appointment = serializer.validated_data.get('appointment')
+        if appointment.patient_id != user.id:
+            raise ValidationError("Vous ne pouvez évaluer que vos propres rendez-vous.")
+        if appointment.status != Appointment.Status.COMPLETED:
+            raise ValidationError("Seul un rendez-vous terminé peut être évalué.")
+        if Review.objects.filter(appointment=appointment).exists():
+            raise ValidationError("Ce rendez-vous a déjà été évalué.")
+
+        serializer.save(patient=user)
+
+    @action(detail=True, methods=['patch'], url_path='moderate')
+    def moderate(self, request, pk=None):
+        review = self.get_object()
+        new_status = request.data.get('moderation_status')
+
+        if new_status not in (Review.ModerationStatus.APPROVED, Review.ModerationStatus.REJECTED):
+            return Response(
+                {'detail': "Le statut doit être 'APPROVED' ou 'REJECTED'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        review.moderation_status = new_status
+        review.moderated_by = request.user
+        review.moderated_at = timezone.now()
+        review.save(update_fields=['moderation_status', 'moderated_by', 'moderated_at'])
+        return Response(ReviewSerializer(review).data)

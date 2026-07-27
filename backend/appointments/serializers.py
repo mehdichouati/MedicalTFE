@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import serializers
-from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument
+from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument, Review
 
 PROFESSIONAL_ROLES = ('MEDECIN', 'KINE', 'PSYCHOLOGUE')
 
@@ -129,3 +129,35 @@ class MedicalDocumentSerializer(serializers.ModelSerializer):
             'document_type', 'document_type_display', 'title', 'file', 'uploaded_at',
         )
         read_only_fields = ('id', 'uploaded_by', 'uploaded_at')
+
+class ReviewSerializer(serializers.ModelSerializer):
+    patient_username = serializers.CharField(source='patient.username', read_only=True)
+    moderation_status_display = serializers.CharField(source='get_moderation_status_display', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = (
+            'id', 'appointment', 'patient', 'patient_username', 'rating', 'comment',
+            'is_anonymous', 'moderation_status', 'moderation_status_display',
+            'moderated_by', 'created_at', 'moderated_at',
+        )
+        read_only_fields = (
+            'id', 'patient', 'moderation_status', 'moderated_by', 'created_at', 'moderated_at',
+        )
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("La note doit être comprise entre 1 et 5.")
+        return value
+
+    def validate(self, attrs):
+        rating = attrs.get('rating')
+        comment = attrs.get('comment', '')
+
+        # F13 — commentaire obligatoire si la note est basse (<=3).
+        if rating is not None and rating <= 3 and not comment.strip():
+            raise serializers.ValidationError(
+                {'comment': "Un commentaire est requis pour une note de 3 ou moins."}
+            )
+
+        return attrs

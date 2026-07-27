@@ -119,3 +119,42 @@ class MedicalDocument(models.Model):
 
     def __str__(self):
         return f"{self.get_document_type_display()} — {self.patient} ({self.uploaded_at:%d/%m/%Y})"
+
+class Review(models.Model):
+    """F13 — Evaluation des consultations par le patient.
+
+    Un seul avis par rendez-vous termine. Le commentaire est obligatoire
+    si la note est basse (<=3), facultatif sinon. Anonymisation possible
+    (le nom du patient est alors masque dans tout affichage public).
+    Moderation obligatoire avant affichage (statut PENDING par defaut).
+    """
+
+    class ModerationStatus(models.TextChoices):
+        PENDING = 'PENDING', 'En attente de modération'
+        APPROVED = 'APPROVED', 'Approuvé'
+        REJECTED = 'REJECTED', 'Rejeté'
+
+    appointment = models.OneToOneField(
+        Appointment, on_delete=models.CASCADE, related_name='review',
+    )
+    patient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews_written',
+    )
+    rating = models.PositiveSmallIntegerField()  # 1 a 5
+    comment = models.TextField(blank=True)
+    is_anonymous = models.BooleanField(default=False)
+    moderation_status = models.CharField(
+        max_length=20, choices=ModerationStatus.choices, default=ModerationStatus.PENDING,
+    )
+    moderated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='reviews_moderated',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    moderated_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Avis {self.rating}/5 sur RDV #{self.appointment_id} — {self.get_moderation_status_display()}"
