@@ -3,6 +3,65 @@ import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 
+function ReviewForm({ appointmentId, onSubmitted }) {
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitting(true)
+    setError('')
+    try {
+      await apiClient.post('/reviews/', {
+        appointment: appointmentId,
+        rating,
+        comment,
+        is_anonymous: isAnonymous,
+      })
+      onSubmitted()
+    } catch (err) {
+      const detail = err.response?.data?.comment?.[0]
+        || err.response?.data?.appointment?.[0]
+        || err.response?.data?.detail
+        || 'Erreur lors de l\'envoi de l\'avis.'
+      setError(detail)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{ marginTop: 8, padding: 10, background: 'var(--color-info-bg)', borderRadius: 6 }}>
+      <div style={{ marginBottom: 8 }}>
+        <label>Note : </label>
+        <select value={rating} onChange={(e) => setRating(Number(e.target.value))} style={{ padding: 4 }}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <option key={n} value={n}>{n} / 5</option>
+          ))}
+        </select>
+      </div>
+      <textarea
+        placeholder={rating <= 3 ? 'Commentaire (obligatoire pour cette note)' : 'Commentaire (facultatif)'}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        rows={3}
+        style={{ width: '100%', padding: 6, boxSizing: 'border-box' }}
+      />
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 13 }}>
+        <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} />
+        Publier anonymement
+      </label>
+      {error && <p style={{ color: 'var(--color-urgence-text)', fontSize: 13, marginTop: 6 }}>{error}</p>}
+      <button type="submit" disabled={submitting} style={{ marginTop: 8, padding: '6px 14px' }}>
+        {submitting ? '...' : 'Envoyer l\'avis'}
+      </button>
+    </form>
+  )
+}
+
 const ORIENTATION_STYLES = {
   URGENCE: {
     background: 'var(--color-urgence-bg)',
@@ -40,6 +99,14 @@ export default function HistoryPage() {
   const [documents, setDocuments] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [reviews, setReviews] = useState([])
+  const [openReviewFor, setOpenReviewFor] = useState(null)
+
+  const loadReviews = () => {
+    apiClient.get('/reviews/')
+      .then(({ data }) => setReviews(Array.isArray(data) ? data : data.results))
+      .catch(() => {})
+  }
 
   useEffect(() => {
     Promise.all([
@@ -54,10 +121,14 @@ export default function HistoryPage() {
       })
       .catch(() => setError(t('history.load_error')))
       .finally(() => setLoading(false))
+    loadReviews()
   }, [t])
 
   const getPaymentForAppointment = (appointmentId) =>
     payments.find((p) => p.appointment === appointmentId)
+
+  const getReviewForAppointment = (appointmentId) =>
+    reviews.find((r) => r.appointment === appointmentId)
 
   async function downloadReceipt(appointmentId) {
     const response = await apiClient.get(`/payments/receipt/${appointmentId}/`, {
@@ -140,6 +211,32 @@ export default function HistoryPage() {
                 </button>
               </p>
             )}
+
+            {appt.status === 'COMPLETED' && (() => {
+              const review = getReviewForAppointment(appt.id)
+              if (review) {
+                return (
+                  <p style={{ marginTop: 8, fontSize: 13, color: 'var(--color-ok-text)' }}>
+                    Votre avis ({review.rating}/5) — {review.moderation_status_display}
+                  </p>
+                )
+              }
+              if (openReviewFor === appt.id) {
+                return (
+                  <ReviewForm
+                    appointmentId={appt.id}
+                    onSubmitted={() => { setOpenReviewFor(null); loadReviews() }}
+                  />
+                )
+              }
+              return (
+                <p style={{ marginTop: 8 }}>
+                  <button onClick={() => setOpenReviewFor(appt.id)} style={{ padding: '4px 12px', fontSize: 14 }}>
+                    Évaluer cette consultation
+                  </button>
+                </p>
+              )
+            })()}
           </div>
         )
       })}

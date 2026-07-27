@@ -50,6 +50,9 @@ class AdminDashboardView(APIView):
         total_professionals = User.objects.filter(role__in=['MEDECIN', 'KINE', 'PSYCHOLOGUE']).count()
         total_medical_houses = MedicalHouse.objects.count()
 
+        from appointments.models import Review
+        pending_reviews = Review.objects.filter(moderation_status=Review.ModerationStatus.PENDING).count()
+
         # --- Graphique : RDV par jour sur les 14 derniers jours ---
         daily_counts = []
         for i in range(14):
@@ -97,6 +100,7 @@ class AdminDashboardView(APIView):
                 'total_patients': total_patients,
                 'total_professionals': total_professionals,
                 'total_medical_houses': total_medical_houses,
+                'pending_reviews': pending_reviews,
             },
             'daily_chart': daily_counts,
             'by_medical_house': by_medical_house,

@@ -11,6 +11,7 @@ import ProfessionalAppointmentsPage from './pages/ProfessionalAppointmentsPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import AdminAppointmentsPage from './pages/AdminAppointmentsPage'
+import AdminReviewsPage from './pages/AdminReviewsPage'
 
 function App() {
   return (
@@ -87,6 +88,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminAppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reviews"
+            element={
+              <ProtectedRoute>
+                <AdminReviewsPage />
               </ProtectedRoute>
             }
           />

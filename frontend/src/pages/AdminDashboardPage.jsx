@@ -80,6 +80,7 @@ export default function AdminDashboardPage() {
           <StatCard label={t('admin_dashboard.patients')} value={summary.total_patients} accent="#5b8def" onClick={() => navigate('/admin/users?role=PATIENT')} />
           <StatCard label={t('admin_dashboard.professionals')} value={summary.total_professionals} accent="#5b8def" onClick={() => navigate('/admin/users')} />
           <StatCard label={t('admin_dashboard.medical_houses')} value={summary.total_medical_houses} accent="#5b8def" />
+          <StatCard label="Avis patients" value={summary.pending_reviews ?? '—'} accent="#f0a94e" onClick={() => navigate('/admin/reviews')} />
         </div>
 
         <div style={{ ...CARD_STYLE, marginBottom: 24 }}>
