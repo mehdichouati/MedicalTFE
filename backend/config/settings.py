@@ -175,4 +175,8 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'appointments.tasks.send_appointment_reminders',
         'schedule': 300.0,  # 300 secondes = 5 minutes
     },
+    'revoke-guardian-links-at-majority': {
+        'task': 'users.tasks.revoke_guardian_links_at_majority',
+        'schedule': 86400.0,  # 86400 secondes = 1 fois par jour
+    },
 }
