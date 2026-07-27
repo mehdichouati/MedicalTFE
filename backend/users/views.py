@@ -1,13 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, status, viewsets, filters
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import User, AuditLog
+from .models import User, AuditLog, LegalGuardianLink
 from .serializers import (
     RegisterSerializer, UserProfileSerializer, ChangePasswordSerializer,
     AdminUserSerializer, AdminUserCreateSerializer, AuditLogSerializer,
+    CreateDependentSerializer, DependentSerializer,
 )
 
 
@@ -18,6 +20,20 @@ class RegisterView(generics.CreateAPIView):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """F15 — Bloque la connexion autonome des comptes mineurs de moins de
+    16 ans : ils n'ont pas de connexion propre, seul le parent agit pour
+    eux via son propre compte."""
+
+    default_error_messages = {
+        'minor_under_16': "Ce compte est géré par un parent ou tuteur légal. Veuillez vous connecter avec son compte.",
+    }
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if self.user.is_minor_under_16:
+            self.fail('minor_under_16')
+        return data
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -112,3 +128,24 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AuditLog.objects.all()
     filter_backends = (filters.OrderingFilter,)
     ordering = ('-timestamp',)
+
+class DependentsView(generics.ListCreateAPIView):
+    """F15 — Liste et creation des comptes enfants rattaches au parent connecte."""
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateDependentSerializer
+        return DependentSerializer
+
+    def get_queryset(self):
+        links = LegalGuardianLink.objects.filter(guardian=self.request.user, revoked_at__isnull=True)
+        minor_ids = links.values_list('minor_id', flat=True)
+        return User.objects.filter(id__in=minor_ids)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        minor = serializer.save()
+        return Response(DependentSerializer(minor).data, status=status.HTTP_201_CREATED)
