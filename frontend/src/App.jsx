@@ -10,6 +10,7 @@ import HistoryPage from './pages/HistoryPage'
 import ProfilePage from './pages/ProfilePage'
 import PaymentPage from './pages/PaymentPage'
 import ProfessionalAppointmentsPage from './pages/ProfessionalAppointmentsPage'
+import BookAppointmentPage from './pages/BookAppointmentPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import AdminAppointmentsPage from './pages/AdminAppointmentsPage'
@@ -68,6 +69,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfessionalAppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/book"
+            element={
+              <ProtectedRoute>
+                <BookAppointmentPage />
               </ProtectedRoute>
             }
           />

@@ -4,7 +4,48 @@ import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
-const DOCUMENT_TYPES = ['LAB_RESULT', 'REPORT', 'OTHER']
+const DOCUMENT_TYPES = [
+  { value: 'LAB_RESULT', label: 'Résultat de prise de sang' },
+  { value: 'REPORT', label: 'Rapport médical' },
+  { value: 'OTHER', label: 'Autre document' },
+]
+
+const STATUS_STYLES = {
+  PENDING: { bg: '#fff8e8', color: '#8a6d00', label: 'En attente' },
+  CONFIRMED: { bg: '#eef5f8', color: '#0a5c78', label: 'Confirmé' },
+  CANCELLED: { bg: '#fdf2f2', color: '#b3261e', label: 'Annulé' },
+  COMPLETED: { bg: '#eef6f0', color: '#1f5c39', label: 'Terminé' },
+  NO_SHOW: { bg: '#fdf2f2', color: '#b3261e', label: 'Absence' },
+}
+
+const CARD_STYLE = {
+  background: '#fff',
+  borderRadius: 14,
+  padding: 20,
+  boxShadow: '0 2px 10px rgba(10,92,120,0.06)',
+  border: '1px solid #eef1f4',
+  marginBottom: 14,
+}
+
+const BTN_PRIMARY = {
+  padding: '8px 16px',
+  background: '#0a5c78',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 20,
+  fontSize: 13,
+  cursor: 'pointer',
+}
+
+const BTN_SECONDARY = {
+  padding: '8px 16px',
+  background: '#fff',
+  color: '#0a5c78',
+  border: '1.5px solid #0a5c78',
+  borderRadius: 20,
+  fontSize: 13,
+  cursor: 'pointer',
+}
 
 function formatDateTime(isoString, locale) {
   return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
@@ -14,7 +55,6 @@ function formatDateTime(isoString, locale) {
 }
 
 function UploadDocumentForm({ patientId, onUploaded }) {
-  const { t } = useTranslation()
   const [title, setTitle] = useState('')
   const [documentType, setDocumentType] = useState('LAB_RESULT')
   const [file, setFile] = useState(null)
@@ -44,7 +84,7 @@ function UploadDocumentForm({ patientId, onUploaded }) {
       const detail = err.response?.data?.detail
         || err.response?.data?.patient?.[0]
         || err.response?.data?.file?.[0]
-        || t('common.error_generic')
+        || "Erreur lors de l'envoi du document."
       setError(detail)
     } finally {
       setSubmitting(false)
@@ -52,33 +92,33 @@ function UploadDocumentForm({ patientId, onUploaded }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 10, padding: 10, background: 'var(--color-info-bg)', borderRadius: 6 }}>
-      <div style={{ marginBottom: 8 }}>
-        <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={{ marginRight: 8 }}>
-          {DOCUMENT_TYPES.map((value) => (
-            <option key={value} value={value}>{t(`history.doc_type_${value}`)}</option>
+    <form onSubmit={handleSubmit} style={{ marginTop: 12, padding: 14, background: '#eef5f8', borderRadius: 10 }}>
+      <div style={{ marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={{ padding: 6, borderRadius: 8, border: '1px solid #dbe2e8' }}>
+          {DOCUMENT_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
         <input
           type="text"
-          placeholder={t('professional_appointments.title')}
+          placeholder="Titre du document"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          style={{ padding: 4 }}
+          style={{ padding: 6, borderRadius: 8, border: '1px solid #dbe2e8', flex: 1 }}
         />
       </div>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button type="submit" disabled={submitting || !file || !title} style={{ marginLeft: 8, padding: '4px 12px' }}>
-        {submitting ? '...' : t('common.send')}
+      <button type="submit" disabled={submitting || !file || !title} style={{ ...BTN_PRIMARY, marginLeft: 8 }}>
+        {submitting ? 'Envoi...' : 'Déposer'}
       </button>
-      {success && <p style={{ color: 'var(--color-ok-text)', fontSize: 13, marginTop: 6 }}>{t('professional_appointments.document_uploaded')}</p>}
-      {error && <p style={{ color: 'var(--color-urgence-text)', fontSize: 13, marginTop: 6 }}>{error}</p>}
+      {success && <p style={{ color: '#1f5c39', fontSize: 13, marginTop: 6 }}>Document envoyé avec succès.</p>}
+      {error && <p style={{ color: '#b3261e', fontSize: 13, marginTop: 6 }}>{error}</p>}
     </form>
   )
 }
 
 export default function ProfessionalAppointmentsPage() {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
   const { user } = useAuth()
   const [appointments, setAppointments] = useState([])
   const [error, setError] = useState('')
@@ -90,13 +130,12 @@ export default function ProfessionalAppointmentsPage() {
     setLoading(true)
     apiClient.get('/appointments/')
       .then(({ data }) => setAppointments(Array.isArray(data) ? data : data.results))
-      .catch(() => setError(t('history.load_error')))
+      .catch(() => setError('Impossible de charger vos rendez-vous.'))
       .finally(() => setLoading(false))
   }
 
   useEffect(() => {
     loadAppointments()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAction = async (appointmentId, action) => {
@@ -105,82 +144,74 @@ export default function ProfessionalAppointmentsPage() {
       await apiClient.post(`/appointments/${appointmentId}/${action}/`)
       loadAppointments()
     } catch (err) {
-      setActionError(err.response?.data?.detail || t('common.error_generic'))
+      setActionError(err.response?.data?.detail || 'Une erreur est survenue.')
     }
   }
 
-  if (loading) {
-    return <p style={{ textAlign: 'center', marginTop: 80 }}>{t('common.loading')}</p>
-  }
-
-  if (error) {
-    return (
-      <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
-        <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>
-        <Link to="/app">{t('common.back_to_home')}</Link>
-      </div>
-    )
-  }
-
   return (
-    <div style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>{t('professional_appointments.title')}</h1>
-      <p><Link to="/app">{t('common.back_to_home')}</Link></p>
+    <div style={{ background: '#f7f9fb', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', color: '#1a1a2e' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
+        <h1 style={{ color: '#0a5c78', fontSize: 30, marginBottom: 4 }}>Mes rendez-vous</h1>
+        <p style={{ marginBottom: 24 }}>
+          <Link to="/app" style={{ color: '#0a5c78', fontSize: 14 }}>← Retour à l'accueil</Link>
+        </p>
 
-      {actionError && <p style={{ color: 'var(--color-urgence-text)' }}>{actionError}</p>}
+        {actionError && <p style={{ color: '#b3261e' }}>{actionError}</p>}
+        {error && <p style={{ color: '#b3261e' }}>{error}</p>}
 
-      {appointments.length === 0 && (
-        <p style={{ fontSize: 14 }}>{t('professional_appointments.no_appointments')}</p>
-      )}
+        {loading ? (
+          <p style={{ color: '#52606d' }}>Chargement...</p>
+        ) : (
+          <>
+            {appointments.length === 0 && <p style={{ color: '#52606d' }}>Aucun rendez-vous pour le moment.</p>}
+            {appointments.map((appt) => {
+              const statusStyle = STATUS_STYLES[appt.status] || {}
+              return (
+                <div key={appt.id} style={CARD_STYLE}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{formatDateTime(appt.start_datetime, i18n.language)}</p>
+                      <p style={{ margin: '6px 0 0', fontSize: 14, color: '#52606d' }}>
+                        Patient : {appt.patient_username}
+                        {appt.reason && ` — ${appt.reason}`}
+                      </p>
+                    </div>
+                    <span style={{ background: statusStyle.bg, color: statusStyle.color, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                      {statusStyle.label || appt.status}
+                    </span>
+                  </div>
 
-      {appointments.map((appt) => (
-        <div
-          key={appt.id}
-          style={{
-            border: '1px solid var(--color-border)',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 12,
-          }}
-        >
-          <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-text)' }}>
-            {formatDateTime(appt.start_datetime, i18n.language)}
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>
-            {t('professional_appointments.patient_label')} : {appt.patient_username}
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>
-            {t('history.status')} : {t(`status.${appt.status}`)}
-            {appt.reason && ` — ${appt.reason}`}
-          </p>
+                  {appt.status === 'PENDING' && (
+                    <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
+                      <button onClick={() => handleAction(appt.id, 'mark-completed')} style={BTN_PRIMARY}>
+                        Terminer la consultation
+                      </button>
+                      <button onClick={() => handleAction(appt.id, 'mark-no-show')} style={BTN_SECONDARY}>
+                        Signaler une absence
+                      </button>
+                    </div>
+                  )}
 
-          {appt.status === 'PENDING' && (
-            <div style={{ marginTop: 10, display: 'flex', gap: 12 }}>
-              <button onClick={() => handleAction(appt.id, 'mark-completed')} style={{ padding: '6px 14px' }}>
-                {t('professional_appointments.complete_button')}
-              </button>
-              <button onClick={() => handleAction(appt.id, 'mark-no-show')} style={{ padding: '6px 14px' }}>
-                {t('professional_appointments.no_show_button')}
-              </button>
-            </div>
-          )}
-
-          {appt.status === 'COMPLETED' && user?.role === 'MEDECIN' && (
-            <div style={{ marginTop: 10 }}>
-              {uploadFormFor === appt.id ? (
-                <UploadDocumentForm
-                  patientId={appt.patient}
-                  onUploaded={() => setUploadFormFor(null)}
-                />
-              ) : (
-                <button onClick={() => setUploadFormFor(appt.id)} style={{ padding: '6px 14px' }}>
-                  {t('professional_appointments.upload_document_button')}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+                  {appt.status === 'COMPLETED' && user?.role === 'MEDECIN' && (
+                    <div style={{ marginTop: 14 }}>
+                      {uploadFormFor === appt.id ? (
+                        <UploadDocumentForm
+                          patientId={appt.patient}
+                          onUploaded={() => setUploadFormFor(null)}
+                        />
+                      ) : (
+                        <button onClick={() => setUploadFormFor(appt.id)} style={BTN_SECONDARY}>
+                          Déposer un document médical
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </>
+        )}
+      </div>
     </div>
   )
 }
