@@ -8,6 +8,38 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation()
   const { user, setUser } = useAuth()
 
+  const [dependents, setDependents] = useState([])
+  const [showDependentForm, setShowDependentForm] = useState(false)
+  const [dependentForm, setDependentForm] = useState({
+    username: '', email: '', date_of_birth: '', attestation: false,
+  })
+  const [dependentError, setDependentError] = useState('')
+  const [dependentSaving, setDependentSaving] = useState(false)
+
+  const loadDependents = () => {
+    apiClient.get('/auth/dependents/')
+      .then(({ data }) => setDependents(Array.isArray(data) ? data : data.results))
+      .catch(() => {})
+  }
+
+  const handleDependentSubmit = async (e) => {
+    e.preventDefault()
+    setDependentError('')
+    setDependentSaving(true)
+    try {
+      await apiClient.post('/auth/dependents/', dependentForm)
+      setDependentForm({ username: '', email: '', date_of_birth: '', attestation: false })
+      setShowDependentForm(false)
+      loadDependents()
+    } catch (err) {
+      const data = err.response?.data
+      const firstError = data ? Object.values(data)[0] : null
+      setDependentError(Array.isArray(firstError) ? firstError[0] : firstError || 'Erreur lors de la création.')
+    } finally {
+      setDependentSaving(false)
+    }
+  }
+
   const [phoneNumber, setPhoneNumber] = useState('')
   const [language, setLanguage] = useState('fr')
   const [profileMessage, setProfileMessage] = useState('')
@@ -38,6 +70,7 @@ export default function ProfilePage() {
     apiClient.get('/notifications/preferences/')
       .then(({ data }) => setEmailEnabled(data.email_enabled))
       .catch(() => {})
+    loadDependents()
   }, [user])
 
   const handleNotifSubmit = async (e) => {
@@ -235,6 +268,75 @@ export default function ProfilePage() {
           {notifMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{notifMessage}</p>}
         </form>
       </section>
+
+      {user.role === 'PATIENT' && (
+        <section style={{ marginTop: 32 }}>
+          <h2>Mes enfants</h2>
+          {dependents.length === 0 && <p style={{ fontSize: 14 }}>Aucun enfant rattaché.</p>}
+          {dependents.map((dep) => (
+            <div key={dep.id} style={{ border: '1px solid var(--color-border)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>{dep.username}</p>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#666' }}>{dep.age} ans — {dep.email}</p>
+            </div>
+          ))}
+
+          {showDependentForm ? (
+            <form onSubmit={handleDependentSubmit} style={{ marginTop: 12, padding: 12, background: 'var(--color-info-bg)', borderRadius: 8 }}>
+              <div style={{ marginBottom: 10 }}>
+                <label>Nom d'utilisateur de l'enfant</label><br />
+                <input
+                  type="text"
+                  value={dependentForm.username}
+                  onChange={(e) => setDependentForm({ ...dependentForm, username: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: 8 }}
+                />
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <label>Email de l'enfant</label><br />
+                <input
+                  type="email"
+                  value={dependentForm.email}
+                  onChange={(e) => setDependentForm({ ...dependentForm, email: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: 8 }}
+                />
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <label>Date de naissance</label><br />
+                <input
+                  type="date"
+                  value={dependentForm.date_of_birth}
+                  onChange={(e) => setDependentForm({ ...dependentForm, date_of_birth: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: 8 }}
+                />
+              </div>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13 }}>
+                <input
+                  type="checkbox"
+                  checked={dependentForm.attestation}
+                  onChange={(e) => setDependentForm({ ...dependentForm, attestation: e.target.checked })}
+                />
+                Je certifie sur l'honneur être le représentant légal (parent ou tuteur) de ce mineur.
+              </label>
+              {dependentError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 13, marginTop: 8 }}>{dependentError}</p>}
+              <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+                <button type="submit" disabled={dependentSaving} style={{ padding: '6px 16px' }}>
+                  {dependentSaving ? '...' : 'Créer le compte'}
+                </button>
+                <button type="button" onClick={() => setShowDependentForm(false)} style={{ padding: '6px 16px' }}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button onClick={() => setShowDependentForm(true)} style={{ marginTop: 8, padding: '8px 16px' }}>
+              + Ajouter un enfant
+            </button>
+          )}
+        </section>
+      )}
     </div>
   )
 }
