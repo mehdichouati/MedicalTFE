@@ -117,7 +117,7 @@ export default function ProfessionalAppointmentsPage() {
     return (
       <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
         <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>
-        <Link to="/">{t('common.back_to_home')}</Link>
+        <Link to="/app">{t('common.back_to_home')}</Link>
       </div>
     )
   }
@@ -125,7 +125,7 @@ export default function ProfessionalAppointmentsPage() {
   return (
     <div style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
       <h1>{t('professional_appointments.title')}</h1>
-      <p><Link to="/">{t('common.back_to_home')}</Link></p>
+      <p><Link to="/app">{t('common.back_to_home')}</Link></p>
 
       {actionError && <p style={{ color: 'var(--color-urgence-text)' }}>{actionError}</p>}
 

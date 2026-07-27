@@ -129,7 +129,7 @@ export default function ProfilePage() {
   return (
     <div style={{ maxWidth: 480, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
       <h1>{t('profile.title')}</h1>
-      <p><Link to="/">{t('common.back_to_home')}</Link></p>
+      <p><Link to="/app">{t('common.back_to_home')}</Link></p>
 
       <section style={{ marginTop: 32 }}>
         <h2>{t('profile.photo_section')}</h2>

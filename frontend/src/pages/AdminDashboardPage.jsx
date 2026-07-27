@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
     return (
       <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
         <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>
-        <Link to="/">{t('common.back_to_home')}</Link>
+        <Link to="/app">{t('common.back_to_home')}</Link>
       </div>
     )
   }
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h1 style={{ color: '#fff', margin: 0 }}>{t('admin_dashboard.title')}</h1>
-          <Link to="/" style={{ color: '#8ab4f8' }}>{t('common.back_to_home')}</Link>
+          <Link to="/app" style={{ color: '#8ab4f8' }}>{t('common.back_to_home')}</Link>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>

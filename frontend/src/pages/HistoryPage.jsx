@@ -152,7 +152,7 @@ export default function HistoryPage() {
     return (
       <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
         <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>
-        <Link to="/">{t('common.back_to_home')}</Link>
+        <Link to="/app">{t('common.back_to_home')}</Link>
       </div>
     )
   }
@@ -160,7 +160,7 @@ export default function HistoryPage() {
   return (
     <div style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
       <h1>{t('history.title')}</h1>
-      <p><Link to="/">{t('common.back_to_home')}</Link></p>
+      <p><Link to="/app">{t('common.back_to_home')}</Link></p>
 
       <h2 style={{ marginTop: 32 }}>{t('history.appointments')}</h2>
       {history.appointments.length === 0 && (

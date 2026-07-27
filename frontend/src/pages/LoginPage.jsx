@@ -19,7 +19,7 @@ export default function LoginPage() {
     setSubmitting(true)
     try {
       await login(username, password)
-      navigate('/')
+      navigate('/app')
     } catch {
       setError(t('login.error'))
     } finally {

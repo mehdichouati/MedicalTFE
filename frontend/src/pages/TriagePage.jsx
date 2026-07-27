@@ -93,7 +93,7 @@ export default function TriagePage() {
           <button onClick={restart} style={{ padding: '8px 16px' }}>
             {t('triage.restart')}
           </button>
-          <Link to="/">{t('common.back_to_home')}</Link>
+          <Link to="/app">{t('common.back_to_home')}</Link>
         </div>
       </div>
     )
