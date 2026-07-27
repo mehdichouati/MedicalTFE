@@ -75,6 +75,11 @@ class Appointment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # F12 — Suivi des rappels deja envoyes, pour eviter les doublons lors
+    # des passages periodiques de la tache Celery.
+    reminder_24h_sent = models.BooleanField(default=False)
+    reminder_2h_sent = models.BooleanField(default=False)
+
     class Meta:
         ordering = ['start_datetime']
         indexes = [

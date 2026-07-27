@@ -113,3 +113,19 @@ def notify_payment_refunded(payment):
     return send_notification_email(
         payment.patient, Notification.NotificationType.PAYMENT_REFUNDED, subject, body,
     )
+
+
+def notify_appointment_reminder(appointment, hours_before):
+    subject = f"Rappel : rendez-vous dans {hours_before}h"
+    body = (
+        f"Bonjour {appointment.patient.get_full_name() or appointment.patient.username},\n\n"
+        f"Nous vous rappelons votre rendez-vous avec "
+        f"{appointment.professional.get_full_name() or appointment.professional.username} "
+        f"le {appointment.start_datetime.strftime('%d/%m/%Y a %H:%M')} "
+        f"a {appointment.medical_house.name}.\n\n"
+        f"Motif : {appointment.reason or 'Non precise'}\n\n"
+        f"Cordialement,\nMaison Medicale"
+    )
+    return send_notification_email(
+        appointment.patient, Notification.NotificationType.APPOINTMENT_REMINDER, subject, body,
+    )

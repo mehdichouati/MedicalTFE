@@ -168,3 +168,11 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# F12 — Planification : verifie les rappels a envoyer toutes les 5 minutes.
+CELERY_BEAT_SCHEDULE = {
+    'send-appointment-reminders': {
+        'task': 'appointments.tasks.send_appointment_reminders',
+        'schedule': 300.0,  # 300 secondes = 5 minutes
+    },
+}
