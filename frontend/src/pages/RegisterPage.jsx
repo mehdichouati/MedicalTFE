@@ -8,7 +8,7 @@ export default function RegisterPage() {
   const { login } = useAuth()
 
   const [form, setForm] = useState({
-    username: '', email: '', password: '', password2: '', phone_number: '',
+    username: '', email: '', password: '', password2: '', phone_number: '', date_of_birth: '',
   })
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -47,6 +47,13 @@ export default function RegisterPage() {
         <div style={{ marginBottom: 12 }}>
           <label>Téléphone</label><br />
           <input type="tel" value={form.phone_number} onChange={update('phone_number')} style={{ width: '100%', padding: 8 }} />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label>Date de naissance</label><br />
+          <input type="date" value={form.date_of_birth} onChange={update('date_of_birth')} required style={{ width: '100%', padding: 8 }} />
+          <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+            Les comptes des moins de 16 ans doivent être créés par un parent depuis son profil.
+          </p>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label>Mot de passe</label><br />
