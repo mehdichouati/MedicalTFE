@@ -2,6 +2,7 @@ import io
 
 import stripe
 from django.conf import settings
+from django.db.models import Q
 from django.http import FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from reportlab.lib.pagesizes import A4
@@ -13,11 +14,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from appointments.models import Appointment
-from notifications.services import notify_payment_succeeded, notify_payment_refunded
+from notifications.services import notify_payment_succeeded
+from users.models import LegalGuardianLink
 from .models import Payment
 from .serializers import PaymentSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def _is_guardian_of(guardian, patient_id):
+    return LegalGuardianLink.objects.filter(
+        guardian=guardian, minor_id=patient_id, revoked_at__isnull=True,
+    ).exists()
+
 
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     """F4 — Consultation des paiements (lecture seule : la creation passe
@@ -33,7 +42,11 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
             return Payment.objects.all()
         if user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
             return Payment.objects.filter(appointment__professional=user)
-        return Payment.objects.filter(patient=user)
+        # F15 — le parent voit aussi les paiements de ses enfants rattaches.
+        dependent_ids = LegalGuardianLink.objects.filter(
+            guardian=user, revoked_at__isnull=True,
+        ).values_list('minor_id', flat=True)
+        return Payment.objects.filter(Q(patient=user) | Q(patient_id__in=dependent_ids))
 
 
 class CreatePaymentIntentView(APIView):
@@ -60,9 +73,11 @@ class CreatePaymentIntentView(APIView):
         if appointment is None:
             return Response({'detail': 'Rendez-vous introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Seul le patient concerne (ou un admin) peut initier le paiement.
+        # F15 — le patient concerne, son parent (representant legal), ou un
+        # admin peuvent initier le paiement.
         if request.user.role == 'PATIENT' and appointment.patient_id != request.user.id:
-            return Response({'detail': "Vous ne pouvez pas payer ce rendez-vous."}, status=status.HTTP_403_FORBIDDEN)
+            if not _is_guardian_of(request.user, appointment.patient_id):
+                return Response({'detail': "Vous ne pouvez pas payer ce rendez-vous."}, status=status.HTTP_403_FORBIDDEN)
 
         payment, created = Payment.objects.get_or_create(
             appointment=appointment,
@@ -79,7 +94,6 @@ class CreatePaymentIntentView(APIView):
         # sinon en cree un nouveau cote Stripe.
         if payment.stripe_payment_intent_id:
             intent = stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
-
         else:
             intent = stripe.PaymentIntent.create(
                 amount=amount_cents,
@@ -94,7 +108,6 @@ class CreatePaymentIntentView(APIView):
                 # incoherence entre le formulaire affiche et la base.
                 idempotency_key=f'payment-intent-appointment-{appointment.id}',
             )
-       
             payment.stripe_payment_intent_id = intent.id
             payment.amount_cents = amount_cents
             payment.save(update_fields=['stripe_payment_intent_id', 'amount_cents'])
@@ -136,6 +149,7 @@ def stripe_webhook(request):
 
     return Response(status=status.HTTP_200_OK)
 
+
 class ReceiptPDFView(APIView):
     """F5 — Genere le document justificatif de paiement (PDF) pour un RDV.
 
@@ -161,9 +175,10 @@ class ReceiptPDFView(APIView):
 
         user = request.user
         is_owner_patient = user.role == 'PATIENT' and appointment.patient_id == user.id
+        is_guardian = user.role == 'PATIENT' and _is_guardian_of(user, appointment.patient_id)
         is_owner_professional = user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE') and appointment.professional_id == user.id
         is_admin = user.role == 'ADMIN'
-        if not (is_owner_patient or is_owner_professional or is_admin):
+        if not (is_owner_patient or is_guardian or is_owner_professional or is_admin):
             return Response({'detail': "Vous n'avez pas accès à ce document."}, status=status.HTTP_403_FORBIDDEN)
 
         if appointment.status != Appointment.Status.COMPLETED:
@@ -219,7 +234,6 @@ class ReceiptPDFView(APIView):
         p.drawString(20 * mm, y, "Prestation")
         y -= 6 * mm
         p.setFont('Helvetica', 10)
-
         from django.utils import timezone as django_timezone
         local_start = django_timezone.localtime(appointment.start_datetime)
         p.drawString(20 * mm, y, f"Date : {local_start.strftime('%d/%m/%Y à %H:%M')}")

@@ -10,10 +10,16 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models import User
+from users.models import User, LegalGuardianLink
 from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
 from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
+
+
+def _is_guardian_of(guardian, patient_id):
+    return LegalGuardianLink.objects.filter(
+        guardian=guardian, minor_id=patient_id, revoked_at__isnull=True,
+    ).exists()
 
 
 from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument, Review
@@ -124,7 +130,8 @@ class AbsenceViewSet(viewsets.ModelViewSet):
 
 
 class IsPatientOwnerProOrAdmin(permissions.BasePermission):
-    """Un patient ne voit/gère que ses propres RDV, un pro les siens, l'admin tout voit."""
+    """Un patient ne voit/gère que ses propres RDV (et ceux de ses enfants
+    rattaches, F15), un pro les siens, l'admin tout voit."""
 
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated)
@@ -133,7 +140,9 @@ class IsPatientOwnerProOrAdmin(permissions.BasePermission):
         user = request.user
         if user.role == 'ADMIN':
             return True
-        return obj.patient_id == user.id or obj.professional_id == user.id
+        if obj.patient_id == user.id or obj.professional_id == user.id:
+            return True
+        return _is_guardian_of(user, obj.patient_id)
 
 
 class AppointmentViewSet(viewsets.ModelViewSet):
@@ -152,15 +161,27 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Appointment.objects.all()
         if user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
             return Appointment.objects.filter(professional=user)
-        # Patient : uniquement ses propres rendez-vous.
-        return Appointment.objects.filter(patient=user)
+        # Patient : ses propres rendez-vous + ceux de ses enfants rattaches (F15).
+        dependent_ids = LegalGuardianLink.objects.filter(
+            guardian=user, revoked_at__isnull=True,
+        ).values_list('minor_id', flat=True)
+        return Appointment.objects.filter(Q(patient=user) | Q(patient_id__in=dependent_ids))
 
     def perform_create(self, serializer):
         user = self.request.user
-        # Un patient ne peut réserver que pour lui-même. Seul un admin peut
-        # créer un RDV pour un autre patient (ex. accueil téléphonique).
+        # Un patient peut reserver pour lui-meme ou pour un enfant rattache
+        # (F15). Seul un admin peut creer un RDV pour un autre patient
+        # quelconque (ex. accueil telephonique).
         if user.role == 'PATIENT':
-            appointment = serializer.save(patient=user)
+            target_patient = serializer.validated_data.get('patient')
+            if target_patient and target_patient.id != user.id:
+                if not _is_guardian_of(user, target_patient.id):
+                    raise ValidationError(
+                        "Vous ne pouvez réserver que pour vous-même ou pour un enfant rattaché à votre compte."
+                    )
+                appointment = serializer.save(patient=target_patient)
+            else:
+                appointment = serializer.save(patient=user)
         else:
             appointment = serializer.save()
         notify_appointment_confirmation(appointment)
@@ -312,7 +333,17 @@ class PatientHistoryView(APIView):
         patient_id = request.query_params.get('patient')
 
         if user.role == 'PATIENT':
-            patient = user
+            if patient_id and str(patient_id) != str(user.id):
+                if not _is_guardian_of(user, patient_id):
+                    return Response(
+                        {'detail': "Vous ne pouvez consulter que votre historique ou celui de vos enfants rattachés."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                patient = User.objects.filter(pk=patient_id).first()
+                if patient is None:
+                    return Response({'detail': 'Patient introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                patient = user
 
         elif user.role == 'ADMIN':
             if not patient_id:
