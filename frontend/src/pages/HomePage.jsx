@@ -52,7 +52,10 @@ export default function HomePage() {
             </>
           )}
           {PROFESSIONAL_ROLES.includes(user?.role) && (
-            <ActionCard to="/my-appointments" icon="🗓️" title={t('home.link_my_appointments')} subtitle="Gérez vos consultations" />
+            <>
+              <ActionCard to="/my-appointments" icon="🗓️" title={t('home.link_my_appointments')} subtitle="Gérez vos consultations" />
+              <ActionCard to="/my-patients" icon="📁" title="Consulter les dossiers" subtitle="Vos patients et leurs documents" />
+            </>
           )}
           {user?.role === 'ADMIN' && (
             <ActionCard to="/admin/dashboard" icon="📊" title={t('home.link_dashboard')} subtitle="Statistiques et gestion" />

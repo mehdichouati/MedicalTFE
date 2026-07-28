@@ -11,6 +11,8 @@ import ProfilePage from './pages/ProfilePage'
 import PaymentPage from './pages/PaymentPage'
 import ProfessionalAppointmentsPage from './pages/ProfessionalAppointmentsPage'
 import BookAppointmentPage from './pages/BookAppointmentPage'
+import ProfessionalPatientsPage from './pages/ProfessionalPatientsPage'
+import PatientDetailPage from './pages/PatientDetailPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import AdminAppointmentsPage from './pages/AdminAppointmentsPage'
@@ -80,6 +82,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/my-patients"
+            element={
+              <ProtectedRoute>
+                <ProfessionalPatientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient/:id"
+            element={
+              <ProtectedRoute>
+                <PatientDetailPage />
+              </ProtectedRoute>
+            }
+          />
+         
           <Route
             path="/admin/dashboard"
             element={
