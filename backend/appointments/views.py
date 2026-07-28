@@ -15,15 +15,11 @@ from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
 from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
 
-
-def _is_guardian_of(guardian, patient_id):
-    return LegalGuardianLink.objects.filter(
-        guardian=guardian, minor_id=patient_id, revoked_at__isnull=True,
-    ).exists()
-
-
 from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument, Review
-from .serializers import WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer, MedicalDocumentSerializer, ReviewSerializer
+from .serializers import (
+    WeeklyAvailabilitySerializer, AbsenceSerializer, AppointmentSerializer,
+    MedicalDocumentSerializer, ReviewSerializer,
+)
 
 SLOT_DURATION_MINUTES = 30
 
@@ -32,16 +28,14 @@ LATE_CANCELLATION_WINDOW = timedelta(hours=24)
 LATE_CANCELLATION_FEE_CENTS = 500  # 5 EUR
 
 
-def _apply_cancellation_policy(appointment):
-    """F4 — Applique la politique d'annulation/no-show a un rendez-vous.
+def _is_guardian_of(guardian, patient_id):
+    return LegalGuardianLink.objects.filter(
+        guardian=guardian, minor_id=patient_id, revoked_at__isnull=True,
+    ).exists()
 
-    - Annulation/no-show a plus de 24h du RDV : remboursement complet si
-      deja paye.
-    - Annulation/no-show a moins de 24h : remboursement partiel (montant
-      moins 5 EUR de penalite) si deja paye, ou dette de 5 EUR enregistree
-      si le RDV n'avait pas encore ete paye.
-    - Rien a faire si aucun paiement n'a jamais ete initie pour ce RDV.
-    """
+
+def _apply_cancellation_policy(appointment):
+    """F4 — Applique la politique d'annulation/no-show a un rendez-vous."""
     from payments.models import Payment
     from notifications.services import notify_payment_refunded
     import stripe
@@ -161,7 +155,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Appointment.objects.all()
         if user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
             return Appointment.objects.filter(professional=user)
-        # Patient : ses propres rendez-vous + ceux de ses enfants rattaches (F15).
         dependent_ids = LegalGuardianLink.objects.filter(
             guardian=user, revoked_at__isnull=True,
         ).values_list('minor_id', flat=True)
@@ -169,9 +162,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        # Un patient peut reserver pour lui-meme ou pour un enfant rattache
-        # (F15). Seul un admin peut creer un RDV pour un autre patient
-        # quelconque (ex. accueil telephonique).
         if user.role == 'PATIENT':
             target_patient = serializer.validated_data.get('patient')
             if target_patient and target_patient.id != user.id:
@@ -187,8 +177,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         notify_appointment_confirmation(appointment)
 
     def perform_update(self, serializer):
-        # Empêche un patient de "voler" un rendez-vous d'un autre patient
-        # en changeant le champ `patient` lors d'une modification.
         instance = self.get_object()
         user = self.request.user
         if user.role == 'PATIENT' and 'patient' in serializer.validated_data:
@@ -197,8 +185,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
-        # F2 : on n'efface pas un rendez-vous, on l'annule (traçabilité).
-        # F4 : applique la politique d'annulation (remboursement/dette).
         appointment = self.get_object()
         appointment.status = Appointment.Status.CANCELLED
         appointment.cancelled_at = timezone.now()
@@ -210,12 +196,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='mark-no-show')
     def mark_no_show(self, request, pk=None):
-        """F4 — Le professionnel (ou l'admin) marque une absence patient.
-
-        Applique la meme penalite que pour une annulation tardive : le
-        rendez-vous non honore est traite comme "moins de 24h", puisque
-        l'heure du RDV est deja passee au moment ou l'absence est constatee.
-        """
         appointment = self.get_object()
         if request.user.role not in ('MEDECIN', 'KINE', 'PSYCHOLOGUE', 'ADMIN'):
             return Response(
@@ -229,12 +209,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='mark-completed')
     def mark_completed(self, request, pk=None):
-        """F5 — Le professionnel marque la consultation comme terminee.
-
-        Condition prealable a la generation du recu/document justificatif
-        (F5) : aucun document n'est genere pour un RDV non honore par le
-        professionnel lui-meme.
-        """
         appointment = self.get_object()
         if request.user.role not in ('MEDECIN', 'KINE', 'PSYCHOLOGUE', 'ADMIN'):
             return Response(
@@ -252,10 +226,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
 
 class AvailableSlotsView(generics.GenericAPIView):
-    """F2 — Renvoie les créneaux libres d'un professionnel pour une date donnée.
-
-    GET /api/appointments/available-slots/?professional=<id>&medical_house=<id>&date=YYYY-MM-DD
-    """
+    """F2 — Renvoie les créneaux libres d'un professionnel pour une date donnée."""
 
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -315,16 +286,8 @@ class AvailableSlotsView(generics.GenericAPIView):
 
 
 class PatientHistoryView(APIView):
-    """F6 — Consultation de l'historique patient.
-
-    GET /api/patients/history/                 -> historique du patient connecte
-    GET /api/patients/history/?patient=<id>     -> historique d'un patient donne
-                                                    (professionnel ou admin uniquement)
-
-    Secret medical : un professionnel ne peut consulter l'historique que
-    d'un patient avec lequel il a au moins un rendez-vous. Un admin peut
-    tout consulter. Un patient ne voit que son propre historique.
-    """
+    """F6 — Consultation de l'historique patient (F15 : accessible aussi
+    au representant legal pour un enfant rattache)."""
 
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -388,16 +351,19 @@ class PatientHistoryView(APIView):
 
 
 class MedicalDocumentViewSet(viewsets.ModelViewSet):
-    """F5 — Documents medicaux (resultats, rapports).
+    """F5 — Documents medicaux (resultats, rapports, prescriptions, notes).
 
-    Reserve aux medecins pour l'upload. Visibilite : patient concerne +
-    medecins ayant un lien de soin avec ce patient. Kines/psychologues
-    n'ont pas acces (secret medical restreint au champ medical).
+    Regles d'acces par role :
+    - Medecin : voit et depose tous types de documents pour ses patients.
+    - Kine : voit et depose uniquement les documents de type
+      PRESCRIPTION_KINE, pour ses propres patients.
+    - Psychologue : voit et depose uniquement les documents de type
+      PSY_NOTE, et uniquement ceux qu'elle/il a lui-meme deposes.
     """
 
     serializer_class = MedicalDocumentSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    http_method_names = ['get', 'post', 'head']  # pas de modification/suppression
+    http_method_names = ['get', 'post', 'head']
 
     def get_queryset(self):
         user = self.request.user
@@ -411,8 +377,6 @@ class MedicalDocumentViewSet(viewsets.ModelViewSet):
         if user.role == 'MEDECIN':
             patient_id = self.request.query_params.get('patient')
             if not patient_id:
-                # Sans patient precise, un medecin voit les documents des
-                # patients avec lesquels il a un lien de soin.
                 patient_ids = Appointment.objects.filter(professional=user).values_list('patient_id', flat=True)
                 return MedicalDocument.objects.filter(patient_id__in=patient_ids)
 
@@ -421,20 +385,56 @@ class MedicalDocumentViewSet(viewsets.ModelViewSet):
                 return MedicalDocument.objects.none()
             return MedicalDocument.objects.filter(patient_id=patient_id)
 
-        # Kines/psychologues : pas d'acces aux documents medicaux.
+        if user.role == 'KINE':
+            patient_id = self.request.query_params.get('patient')
+            base_qs = MedicalDocument.objects.filter(document_type=MedicalDocument.DocumentType.PRESCRIPTION_KINE)
+            if not patient_id:
+                patient_ids = Appointment.objects.filter(professional=user).values_list('patient_id', flat=True)
+                return base_qs.filter(patient_id__in=patient_ids)
+
+            has_relation = Appointment.objects.filter(professional=user, patient_id=patient_id).exists()
+            if not has_relation:
+                return MedicalDocument.objects.none()
+            return base_qs.filter(patient_id=patient_id)
+
+        if user.role == 'PSYCHOLOGUE':
+            return MedicalDocument.objects.filter(
+                uploaded_by=user, document_type=MedicalDocument.DocumentType.PSY_NOTE,
+            )
+
         return MedicalDocument.objects.none()
 
     def perform_create(self, serializer):
         user = self.request.user
-        if user.role != 'MEDECIN':
-            raise ValidationError("Seul un médecin peut déposer un document médical.")
-
+        document_type = serializer.validated_data.get('document_type')
         patient = serializer.validated_data.get('patient')
-        has_relation = Appointment.objects.filter(professional=user, patient=patient).exists()
-        if not has_relation:
-            raise ValidationError("Vous ne pouvez déposer un document que pour un patient que vous avez déjà suivi.")
 
-        serializer.save(uploaded_by=user)
+        if user.role == 'MEDECIN':
+            has_relation = Appointment.objects.filter(professional=user, patient=patient).exists()
+            if not has_relation:
+                raise ValidationError("Vous ne pouvez déposer un document que pour un patient que vous avez déjà suivi.")
+            serializer.save(uploaded_by=user)
+
+        elif user.role == 'KINE':
+            if document_type != MedicalDocument.DocumentType.PRESCRIPTION_KINE:
+                raise ValidationError("Un kinésithérapeute ne peut déposer que des prescriptions pour kinésithérapeute.")
+            has_relation = Appointment.objects.filter(professional=user, patient=patient).exists()
+            if not has_relation:
+                raise ValidationError("Vous ne pouvez déposer un document que pour un patient que vous avez déjà suivi.")
+            serializer.save(uploaded_by=user)
+
+        elif user.role == 'PSYCHOLOGUE':
+            if document_type != MedicalDocument.DocumentType.PSY_NOTE:
+                raise ValidationError("Un psychologue ne peut déposer que des notes psychologiques.")
+            has_relation = Appointment.objects.filter(professional=user, patient=patient).exists()
+            if not has_relation:
+                raise ValidationError("Vous ne pouvez déposer un document que pour un patient que vous avez déjà suivi.")
+            serializer.save(uploaded_by=user)
+
+        else:
+            raise ValidationError("Vous n'êtes pas autorisé à déposer un document médical.")
+
+
 class IsAdminForModeration(permissions.BasePermission):
     def has_permission(self, request, view):
         if view.action in ('moderate',):
@@ -443,14 +443,7 @@ class IsAdminForModeration(permissions.BasePermission):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """F13 — Evaluation des consultations.
-
-    - Le patient cree un avis pour un RDV termine qui lui appartient
-      (un seul avis par RDV).
-    - L'admin peut approuver/rejeter (action 'moderate').
-    - Seuls les avis APPROVED sont visibles par les patients/professionnels
-      autres que leur auteur.
-    """
+    """F13 — Evaluation des consultations."""
 
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminForModeration,)
@@ -461,12 +454,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if user.role == 'ADMIN':
             return Review.objects.all()
         if user.role == 'PATIENT':
-            # Le patient voit ses propres avis (tous statuts) + les avis
-            # approuves des autres (transparence publique limitee).
             return Review.objects.filter(
                 Q(patient=user) | Q(moderation_status=Review.ModerationStatus.APPROVED)
             )
-        # Professionnels : uniquement les avis approuves.
         return Review.objects.filter(moderation_status=Review.ModerationStatus.APPROVED)
 
     def perform_create(self, serializer):
@@ -500,3 +490,26 @@ class ReviewViewSet(viewsets.ModelViewSet):
         review.moderated_at = timezone.now()
         review.save(update_fields=['moderation_status', 'moderated_by', 'moderated_at'])
         return Response(ReviewSerializer(review).data)
+
+
+class MyPatientsView(generics.ListAPIView):
+    """F5 — Liste des patients suivis par le professionnel connecte,
+    avec recherche et tri, pour la carte 'Consulter les dossiers'."""
+
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
+    search_fields = ('username', 'first_name', 'last_name', 'email')
+    ordering_fields = ('username', 'last_name', 'date_of_birth')
+    ordering = ('last_name', 'username')
+
+    def get_serializer_class(self):
+        from users.serializers import DependentSerializer
+        return DependentSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role not in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
+            return User.objects.none()
+
+        patient_ids = Appointment.objects.filter(professional=user).values_list('patient_id', flat=True).distinct()
+        return User.objects.filter(id__in=patient_ids, role='PATIENT')

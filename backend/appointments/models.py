@@ -101,6 +101,8 @@ class MedicalDocument(models.Model):
     class DocumentType(models.TextChoices):
         LAB_RESULT = 'LAB_RESULT', 'Résultat de prise de sang'
         REPORT = 'REPORT', 'Rapport médical'
+        PRESCRIPTION_KINE = 'PRESCRIPTION_KINE', 'Prescription pour kinésithérapeute'
+        PSY_NOTE = 'PSY_NOTE', 'Note psychologique'
         OTHER = 'OTHER', 'Autre document'
 
     patient = models.ForeignKey(
