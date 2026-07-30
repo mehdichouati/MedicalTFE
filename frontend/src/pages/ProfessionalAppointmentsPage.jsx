@@ -156,7 +156,7 @@ export default function ProfessionalAppointmentsPage() {
                     </span>
                   </div>
 
-                  {appt.status === 'PENDING' && (
+                  {appt.status === 'PENDING' && new Date(appt.start_datetime) <= new Date() && (
                     <div className={styles.actionsRow}>
                       <button onClick={() => handleAction(appt.id, 'mark-completed')} className={styles.btnPrimary}>
                         Terminer la consultation
@@ -165,6 +165,10 @@ export default function ProfessionalAppointmentsPage() {
                         Signaler une absence
                       </button>
                     </div>
+                  )}
+
+                  {appt.status === 'PENDING' && new Date(appt.start_datetime) > new Date() && (
+                    <p className={styles.loadingText}>Actions disponibles après l'heure du rendez-vous.</p>
                   )}
 
                   {appt.status === 'COMPLETED' && user?.role === 'MEDECIN' && (

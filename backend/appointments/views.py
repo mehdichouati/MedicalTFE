@@ -212,6 +212,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 {'detail': "Seul le professionnel concerné ou l'administrateur peut signaler une absence."},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        if appointment.start_datetime > timezone.now():
+            return Response(
+                {'detail': "Vous ne pouvez pas signaler une absence pour un rendez-vous qui n'a pas encore eu lieu."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         appointment.status = Appointment.Status.NO_SHOW
         appointment.save(update_fields=['status'])
         _apply_cancellation_policy(appointment, request.user)
@@ -229,6 +234,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Response(
                 {'detail': "Vous ne pouvez terminer que vos propres consultations."},
                 status=status.HTTP_403_FORBIDDEN,
+            )
+        if appointment.start_datetime > timezone.now():
+            return Response(
+                {'detail': "Vous ne pouvez pas terminer un rendez-vous qui n'a pas encore eu lieu."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         appointment.status = Appointment.Status.COMPLETED
         appointment.save(update_fields=['status'])

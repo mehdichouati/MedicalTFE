@@ -178,3 +178,241 @@
   font-size: 15px;
   cursor: not-allowed;
 }
+
+.calendarWrap {
+  border: 1px solid #dbe2e8;
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.calendarMonthLabel {
+  font-weight: 600;
+  color: #0a5c78;
+  text-transform: capitalize;
+  font-size: 13px;
+}
+
+.calendarNavBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #dbe2e8;
+  background: #fff;
+  color: #0a5c78;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.calendarNavBtn:disabled {
+  color: #c3ccd2;
+  cursor: not-allowed;
+  border-color: #eef1f4;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendarWeekday {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #52606d;
+  padding: 4px 0;
+}
+
+.calendarDayEmpty {
+  visibility: hidden;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background: #f7f9fb;
+  color: #1a1a2e;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+}
+
+.calendarDay:hover {
+  background: #eef5f8;
+}
+
+.calendarDayDisabled {
+  aspect-ratio: 1;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #c3ccd2;
+  cursor: not-allowed;
+  font-size: 11px;
+  padding: 0;
+}
+
+.calendarDaySelected {
+  aspect-ratio: 1;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background: #0a5c78;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+}
+
+.myAppointmentsSection {
+  max-width: 520px;
+  margin: 32px auto 0;
+}
+
+.myAppointmentsTitle {
+  color: #0a5c78;
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.appointmentCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef1f4;
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.06);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.appointmentInfo {
+  flex: 1;
+}
+
+.appointmentDate {
+  margin: 0;
+  font-weight: 600;
+  color: #1a1a2e;
+  text-transform: capitalize;
+  font-size: 14px;
+}
+
+.appointmentMeta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #52606d;
+}
+
+.appointmentActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #eef1f4;
+  color: #52606d;
+}
+
+.statusBadgePENDING {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #fdf1dc;
+  color: #92650a;
+}
+
+.statusBadgeCONFIRMED {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #eef5f8;
+  color: #0a5c78;
+}
+
+.statusBadgeCANCELLED {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #f4f4f4;
+  color: #8a8a8a;
+}
+
+.statusBadgeCOMPLETED {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #e6f4ea;
+  color: #1e7a34;
+}
+
+.statusBadgeNO_SHOW {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #fbe9e7;
+  color: #b3261e;
+}
+
+.cancelButton {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #b3261e;
+  background: #fff;
+  color: #b3261e;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cancelConfirmRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cancelConfirmText {
+  font-size: 12px;
+  color: #52606d;
+}
+
+.cancelConfirmBtn {
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: none;
+  background: #b3261e;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cancelAbortBtn {
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1px solid #dbe2e8;
+  background: #fff;
+  color: #52606d;
+  font-size: 12px;
+  cursor: pointer;
+}
