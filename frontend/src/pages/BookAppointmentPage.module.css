@@ -1,0 +1,180 @@
+.page {
+  background: #f7f9fb;
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #1a1a2e;
+}
+
+.successPage {
+  background: #f7f9fb;
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+}
+
+.successContainer {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.successCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 40px;
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.08);
+  border: 1px solid #eef1f4;
+}
+
+.successIcon {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+
+.successTitle {
+  color: #0a5c78;
+  font-size: 26px;
+  margin: 0;
+}
+
+.successText {
+  color: #52606d;
+  margin-top: 10px;
+}
+
+.successActions {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btnPrimary {
+  padding: 10px 22px;
+  background: #0a5c78;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btnSecondary {
+  padding: 10px 22px;
+  background: #fff;
+  color: #0a5c78;
+  border: 2px solid #0a5c78;
+  border-radius: 24px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.container {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.title {
+  color: #0a5c78;
+  font-size: 30px;
+  margin-bottom: 4px;
+}
+
+.backLinkRow {
+  margin-bottom: 24px;
+}
+
+.backLink {
+  color: #0a5c78;
+  font-size: 14px;
+}
+
+.formCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.08);
+  border: 1px solid #eef1f4;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a5c78;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #dbe2e8;
+  font-size: 15px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #52606d;
+}
+
+.slotsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slotButton {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #dbe2e8;
+  background: #fff;
+  color: #1a1a2e;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.slotButtonSelected {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 2px solid #0a5c78;
+  background: #eef5f8;
+  color: #0a5c78;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.errorText {
+  color: #b3261e;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 12px 0;
+  background: #0a5c78;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.submitButtonDisabled {
+  width: 100%;
+  padding: 12px 0;
+  background: #a9c3cd;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 15px;
+  cursor: not-allowed;
+}

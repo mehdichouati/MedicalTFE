@@ -1,0 +1,100 @@
+.container {
+  max-width: 480px;
+  margin: 40px auto;
+  font-family: system-ui, sans-serif;
+}
+
+.section {
+  margin-top: 32px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+}
+
+.submitButton {
+  padding: 8px 16px;
+}
+
+.successText {
+  color: var(--color-ok-text);
+  font-size: 14px;
+}
+
+.errorText {
+  color: var(--color-urgence-text);
+  font-size: 14px;
+}
+
+.sendButton {
+  margin-left: 12px;
+  padding: 6px 16px;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notifSaveButton {
+  margin-top: 12px;
+  padding: 8px 16px;
+}
+
+.dependentCard {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.dependentName {
+  margin: 0;
+  font-weight: 600;
+}
+
+.dependentMeta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.dependentForm {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--color-info-bg);
+  border-radius: 8px;
+}
+
+.attestationLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.dependentFormActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.addDependentButton {
+  margin-top: 8px;
+  padding: 8px 16px;
+}

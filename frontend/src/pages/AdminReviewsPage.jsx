@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import apiClient from '../api/client'
-
-const CARD_STYLE = {
-  background: '#1f2430',
-  borderRadius: 10,
-  padding: 16,
-  color: '#e4e7eb',
-}
+import styles from './AdminReviewsPage.module.css'
 
 const STATUS_FILTERS = ['PENDING', 'APPROVED', 'REJECTED']
 
@@ -50,56 +44,50 @@ export default function AdminReviewsPage() {
   const filteredReviews = reviews.filter((r) => r.moderation_status === statusFilter)
 
   return (
-    <div style={{ background: '#12151c', minHeight: '100vh', padding: '32px 24px' }}>
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h1 style={{ color: '#fff', margin: 0 }}>Modération des avis</h1>
-          <Link to="/admin/dashboard" style={{ color: '#8ab4f8' }}>Retour au tableau de bord</Link>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Modération des avis</h1>
+          <Link to="/admin/dashboard" className={styles.backLink}>Retour au tableau de bord</Link>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+        <div className={styles.filtersRow}>
           {STATUS_FILTERS.map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              style={{
-                padding: '6px 14px',
-                background: statusFilter === s ? '#5b8def' : '#1f2430',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-              }}
+              className={statusFilter === s ? styles.filterButtonActive : styles.filterButton}
             >
               {s === 'PENDING' ? 'En attente' : s === 'APPROVED' ? 'Approuvés' : 'Rejetés'}
             </button>
           ))}
         </div>
 
-        {error && <p style={{ color: '#f28b82' }}>{error}</p>}
-        {actionError && <p style={{ color: '#f28b82' }}>{actionError}</p>}
+        {error && <p className={styles.errorText}>{error}</p>}
+        {actionError && <p className={styles.errorText}>{actionError}</p>}
 
         {loading ? (
-          <p style={{ color: '#9aa3b2' }}>Chargement...</p>
+          <p className={styles.mutedText}>Chargement...</p>
         ) : (
           <>
-            {filteredReviews.length === 0 && <p style={{ color: '#9aa3b2' }}>Aucun avis dans cette catégorie.</p>}
+            {filteredReviews.length === 0 && <p className={styles.mutedText}>Aucun avis dans cette catégorie.</p>}
             {filteredReviews.map((review) => (
-              <div key={review.id} style={{ ...CARD_STYLE, marginBottom: 12 }}>
-                <p style={{ margin: 0, fontWeight: 600 }}>
-                  {review.rating} / 5 {review.is_anonymous && <span style={{ fontSize: 12, color: '#9aa3b2' }}>(anonyme)</span>}
+              <div key={review.id} className={styles.card}>
+                <p className={styles.rating}>
+                  {review.rating} / 5 {review.is_anonymous && <span className={styles.anonymousTag}>(anonyme)</span>}
                 </p>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#9aa3b2' }}>
+                <p className={styles.reviewMeta}>
                   {review.is_anonymous ? 'Patient anonyme' : review.patient_username} — {formatDateTime(review.created_at)}
                 </p>
                 {review.comment && (
-                  <p style={{ margin: '8px 0 0', fontSize: 14 }}>{review.comment}</p>
+                  <p className={styles.reviewComment}>{review.comment}</p>
                 )}
                 {statusFilter === 'PENDING' && (
-                  <div style={{ marginTop: 10, display: 'flex', gap: 10 }}>
-                    <button onClick={() => handleModerate(review.id, 'APPROVED')} style={{ padding: '4px 12px' }}>
+                  <div className={styles.moderationActions}>
+                    <button onClick={() => handleModerate(review.id, 'APPROVED')} className={styles.moderationButton}>
                       Approuver
                     </button>
-                    <button onClick={() => handleModerate(review.id, 'REJECTED')} style={{ padding: '4px 12px' }}>
+                    <button onClick={() => handleModerate(review.id, 'REJECTED')} className={styles.moderationButton}>
                       Rejeter
                     </button>
                   </div>

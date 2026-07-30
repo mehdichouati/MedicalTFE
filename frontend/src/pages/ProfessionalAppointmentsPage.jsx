@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import styles from './ProfessionalAppointmentsPage.module.css'
 
 const DOCUMENT_TYPES = [
   { value: 'LAB_RESULT', label: 'Résultat de prise de sang' },
@@ -11,40 +12,11 @@ const DOCUMENT_TYPES = [
 ]
 
 const STATUS_STYLES = {
-  PENDING: { bg: '#fff8e8', color: '#8a6d00', label: 'En attente' },
-  CONFIRMED: { bg: '#eef5f8', color: '#0a5c78', label: 'Confirmé' },
-  CANCELLED: { bg: '#fdf2f2', color: '#b3261e', label: 'Annulé' },
-  COMPLETED: { bg: '#eef6f0', color: '#1f5c39', label: 'Terminé' },
-  NO_SHOW: { bg: '#fdf2f2', color: '#b3261e', label: 'Absence' },
-}
-
-const CARD_STYLE = {
-  background: '#fff',
-  borderRadius: 14,
-  padding: 20,
-  boxShadow: '0 2px 10px rgba(10,92,120,0.06)',
-  border: '1px solid #eef1f4',
-  marginBottom: 14,
-}
-
-const BTN_PRIMARY = {
-  padding: '8px 16px',
-  background: '#0a5c78',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 20,
-  fontSize: 13,
-  cursor: 'pointer',
-}
-
-const BTN_SECONDARY = {
-  padding: '8px 16px',
-  background: '#fff',
-  color: '#0a5c78',
-  border: '1.5px solid #0a5c78',
-  borderRadius: 20,
-  fontSize: 13,
-  cursor: 'pointer',
+  PENDING: { background: '#fff8e8', color: '#8a6d00', label: 'En attente' },
+  CONFIRMED: { background: '#eef5f8', color: '#0a5c78', label: 'Confirmé' },
+  CANCELLED: { background: '#fdf2f2', color: '#b3261e', label: 'Annulé' },
+  COMPLETED: { background: '#eef6f0', color: '#1f5c39', label: 'Terminé' },
+  NO_SHOW: { background: '#fdf2f2', color: '#b3261e', label: 'Absence' },
 }
 
 function formatDateTime(isoString, locale) {
@@ -92,9 +64,9 @@ function UploadDocumentForm({ patientId, onUploaded }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 12, padding: 14, background: '#eef5f8', borderRadius: 10 }}>
-      <div style={{ marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={{ padding: 6, borderRadius: 8, border: '1px solid #dbe2e8' }}>
+    <form onSubmit={handleSubmit} className={styles.uploadForm}>
+      <div className={styles.uploadFormRow}>
+        <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} className={styles.select}>
           {DOCUMENT_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
@@ -104,15 +76,15 @@ function UploadDocumentForm({ patientId, onUploaded }) {
           placeholder="Titre du document"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          style={{ padding: 6, borderRadius: 8, border: '1px solid #dbe2e8', flex: 1 }}
+          className={styles.titleInput}
         />
       </div>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button type="submit" disabled={submitting || !file || !title} style={{ ...BTN_PRIMARY, marginLeft: 8 }}>
+      <button type="submit" disabled={submitting || !file || !title} className={styles.uploadButton}>
         {submitting ? 'Envoi...' : 'Déposer'}
       </button>
-      {success && <p style={{ color: '#1f5c39', fontSize: 13, marginTop: 6 }}>Document envoyé avec succès.</p>}
-      {error && <p style={{ color: '#b3261e', fontSize: 13, marginTop: 6 }}>{error}</p>}
+      {success && <p className={styles.uploadSuccessText}>Document envoyé avec succès.</p>}
+      {error && <p className={styles.uploadErrorText}>{error}</p>}
     </form>
   )
 }
@@ -149,58 +121,61 @@ export default function ProfessionalAppointmentsPage() {
   }
 
   return (
-    <div style={{ background: '#f7f9fb', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', color: '#1a1a2e' }}>
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ color: '#0a5c78', fontSize: 30, marginBottom: 4 }}>Mes rendez-vous</h1>
-        <p style={{ marginBottom: 24 }}>
-          <Link to="/app" style={{ color: '#0a5c78', fontSize: 14 }}>← Retour à l'accueil</Link>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Mes rendez-vous</h1>
+        <p className={styles.backLinkRow}>
+          <Link to="/app" className={styles.backLink}>← Retour à l'accueil</Link>
         </p>
 
-        {actionError && <p style={{ color: '#b3261e' }}>{actionError}</p>}
-        {error && <p style={{ color: '#b3261e' }}>{error}</p>}
+        {actionError && <p className={styles.errorText}>{actionError}</p>}
+        {error && <p className={styles.errorText}>{error}</p>}
 
         {loading ? (
-          <p style={{ color: '#52606d' }}>Chargement...</p>
+          <p className={styles.loadingText}>Chargement...</p>
         ) : (
           <>
-            {appointments.length === 0 && <p style={{ color: '#52606d' }}>Aucun rendez-vous pour le moment.</p>}
+            {appointments.length === 0 && <p className={styles.loadingText}>Aucun rendez-vous pour le moment.</p>}
             {appointments.map((appt) => {
               const statusStyle = STATUS_STYLES[appt.status] || {}
               return (
-                <div key={appt.id} style={CARD_STYLE}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div key={appt.id} className={styles.card}>
+                  <div className={styles.cardHeader}>
                     <div>
-                      <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{formatDateTime(appt.start_datetime, i18n.language)}</p>
-                      <p style={{ margin: '6px 0 0', fontSize: 14, color: '#52606d' }}>
+                      <p className={styles.appointmentDate}>{formatDateTime(appt.start_datetime, i18n.language)}</p>
+                      <p className={styles.appointmentMeta}>
                         Patient : {appt.patient_username}
                         {appt.reason && ` — ${appt.reason}`}
                       </p>
                     </div>
-                    <span style={{ background: statusStyle.bg, color: statusStyle.color, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                    <span
+                      className={styles.statusBadge}
+                      style={{ background: statusStyle.background, color: statusStyle.color }}
+                    >
                       {statusStyle.label || appt.status}
                     </span>
                   </div>
 
                   {appt.status === 'PENDING' && (
-                    <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
-                      <button onClick={() => handleAction(appt.id, 'mark-completed')} style={BTN_PRIMARY}>
+                    <div className={styles.actionsRow}>
+                      <button onClick={() => handleAction(appt.id, 'mark-completed')} className={styles.btnPrimary}>
                         Terminer la consultation
                       </button>
-                      <button onClick={() => handleAction(appt.id, 'mark-no-show')} style={BTN_SECONDARY}>
+                      <button onClick={() => handleAction(appt.id, 'mark-no-show')} className={styles.btnSecondary}>
                         Signaler une absence
                       </button>
                     </div>
                   )}
 
                   {appt.status === 'COMPLETED' && user?.role === 'MEDECIN' && (
-                    <div style={{ marginTop: 14 }}>
+                    <div className={styles.documentSection}>
                       {uploadFormFor === appt.id ? (
                         <UploadDocumentForm
                           patientId={appt.patient}
                           onUploaded={() => setUploadFormFor(null)}
                         />
                       ) : (
-                        <button onClick={() => setUploadFormFor(appt.id)} style={BTN_SECONDARY}>
+                        <button onClick={() => setUploadFormFor(appt.id)} className={styles.btnSecondary}>
                           Déposer un document médical
                         </button>
                       )}

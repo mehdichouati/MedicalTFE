@@ -2,65 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
-
-function ReviewForm({ appointmentId, onSubmitted }) {
-  const [rating, setRating] = useState(5)
-  const [comment, setComment] = useState('')
-  const [isAnonymous, setIsAnonymous] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setSubmitting(true)
-    setError('')
-    try {
-      await apiClient.post('/reviews/', {
-        appointment: appointmentId,
-        rating,
-        comment,
-        is_anonymous: isAnonymous,
-      })
-      onSubmitted()
-    } catch (err) {
-      const detail = err.response?.data?.comment?.[0]
-        || err.response?.data?.appointment?.[0]
-        || err.response?.data?.detail
-        || 'Erreur lors de l\'envoi de l\'avis.'
-      setError(detail)
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 8, padding: 10, background: 'var(--color-info-bg)', borderRadius: 6 }}>
-      <div style={{ marginBottom: 8 }}>
-        <label>Note : </label>
-        <select value={rating} onChange={(e) => setRating(Number(e.target.value))} style={{ padding: 4 }}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <option key={n} value={n}>{n} / 5</option>
-          ))}
-        </select>
-      </div>
-      <textarea
-        placeholder={rating <= 3 ? 'Commentaire (obligatoire pour cette note)' : 'Commentaire (facultatif)'}
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        rows={3}
-        style={{ width: '100%', padding: 6, boxSizing: 'border-box' }}
-      />
-      <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 13 }}>
-        <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} />
-        Publier anonymement
-      </label>
-      {error && <p style={{ color: 'var(--color-urgence-text)', fontSize: 13, marginTop: 6 }}>{error}</p>}
-      <button type="submit" disabled={submitting} style={{ marginTop: 8, padding: '6px 14px' }}>
-        {submitting ? '...' : 'Envoyer l\'avis'}
-      </button>
-    </form>
-  )
-}
+import styles from './HistoryPage.module.css'
 
 const ORIENTATION_STYLES = {
   URGENCE: {
@@ -92,15 +34,74 @@ function formatDateTime(isoString, locale) {
   })
 }
 
+function ReviewForm({ appointmentId, onSubmitted }) {
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitting(true)
+    setError('')
+    try {
+      await apiClient.post('/reviews/', {
+        appointment: appointmentId,
+        rating,
+        comment,
+        is_anonymous: isAnonymous,
+      })
+      onSubmitted()
+    } catch (err) {
+      const detail = err.response?.data?.comment?.[0]
+        || err.response?.data?.appointment?.[0]
+        || err.response?.data?.detail
+        || "Erreur lors de l'envoi de l'avis."
+      setError(detail)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={styles.reviewForm}>
+      <div className={styles.reviewFormRow}>
+        <label>Note : </label>
+        <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className={styles.reviewSelect}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <option key={n} value={n}>{n} / 5</option>
+          ))}
+        </select>
+      </div>
+      <textarea
+        placeholder={rating <= 3 ? 'Commentaire (obligatoire pour cette note)' : 'Commentaire (facultatif)'}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        rows={3}
+        className={styles.reviewTextarea}
+      />
+      <label className={styles.reviewCheckboxLabel}>
+        <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} />
+        Publier anonymement
+      </label>
+      {error && <p className={styles.reviewError}>{error}</p>}
+      <button type="submit" disabled={submitting} className={styles.reviewSubmitButton}>
+        {submitting ? '...' : "Envoyer l'avis"}
+      </button>
+    </form>
+  )
+}
+
 export default function HistoryPage() {
   const { t, i18n } = useTranslation()
   const [history, setHistory] = useState(null)
   const [payments, setPayments] = useState([])
   const [documents, setDocuments] = useState([])
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
   const [reviews, setReviews] = useState([])
   const [openReviewFor, setOpenReviewFor] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const loadReviews = () => {
     apiClient.get('/reviews/')
@@ -145,68 +146,57 @@ export default function HistoryPage() {
   }
 
   if (loading) {
-    return <p style={{ textAlign: 'center', marginTop: 80 }}>{t('common.loading')}</p>
+    return <p className={styles.loadingCenter}>{t('common.loading')}</p>
   }
 
   if (error) {
     return (
-      <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
-        <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>
+      <div className={styles.errorPage}>
+        <p className={styles.errorText}>{error}</p>
         <Link to="/app">{t('common.back_to_home')}</Link>
       </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
+    <div className={styles.container}>
       <h1>{t('history.title')}</h1>
       <p><Link to="/app">{t('common.back_to_home')}</Link></p>
 
-      <h2 style={{ marginTop: 32 }}>{t('history.appointments')}</h2>
+      <h2 className={styles.sectionTitle}>{t('history.appointments')}</h2>
       {history.appointments.length === 0 && (
-        <p style={{ fontSize: 14 }}>{t('history.no_appointments')}</p>
+        <p className={styles.emptyText}>{t('history.no_appointments')}</p>
       )}
       {history.appointments.map((appt) => {
         const payment = getPaymentForAppointment(appt.id)
         const canPay = appt.status !== 'CANCELLED' && (!payment || ['PENDING', 'FAILED'].includes(payment.status))
 
         return (
-          <div
-            key={appt.id}
-            style={{
-              border: '1px solid var(--color-border)',
-              borderRadius: 8,
-              padding: 16,
-              marginBottom: 12,
-            }}
-          >
-            <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-text)' }}>
+          <div key={appt.id} className={styles.card}>
+            <p className={styles.cardDate}>
               {formatDateTime(appt.start_datetime, i18n.language)}
             </p>
-            <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+            <p className={styles.cardMeta}>
               {appt.professional_username} ({appt.professional_role}) — {appt.medical_house_name}
             </p>
-            <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+            <p className={styles.cardMeta}>
               {t('history.status')} : {t(`status.${appt.status}`)}
               {appt.reason && ` — ${appt.reason}`}
             </p>
             {payment && (
-              <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+              <p className={styles.cardMeta}>
                 {t('history.payment')} : {t(`status.${payment.status}`, payment.status_display)} ({payment.amount_eur} €)
                 {payment.refunded_amount_cents > 0 && ` — ${t('history.refunded')} : ${(payment.refunded_amount_cents / 100).toFixed(2)} €`}
               </p>
             )}
             {canPay && (
-              <p style={{ marginTop: 8 }}>
+              <p className={styles.actionRow}>
                 <Link to={`/pay/${appt.id}`}>{t('history.pay_button')}</Link>
               </p>
             )}
             {appt.status === 'COMPLETED' && payment && ['SUCCEEDED', 'PARTIALLY_REFUNDED', 'REFUNDED'].includes(payment.status) && (
-              <p style={{ marginTop: 8 }}>
-                <button
-                  onClick={() => downloadReceipt(appt.id)}
-                  style={{ padding: '4px 12px', fontSize: 14 }}
-                >
+              <p className={styles.actionRow}>
+                <button onClick={() => downloadReceipt(appt.id)} className={styles.downloadButton}>
                   {t('history.download_receipt')}
                 </button>
               </p>
@@ -216,7 +206,7 @@ export default function HistoryPage() {
               const review = getReviewForAppointment(appt.id)
               if (review) {
                 return (
-                  <p style={{ marginTop: 8, fontSize: 13, color: 'var(--color-ok-text)' }}>
+                  <p className={styles.reviewStatus}>
                     Votre avis ({review.rating}/5) — {review.moderation_status_display}
                   </p>
                 )
@@ -230,8 +220,8 @@ export default function HistoryPage() {
                 )
               }
               return (
-                <p style={{ marginTop: 8 }}>
-                  <button onClick={() => setOpenReviewFor(appt.id)} style={{ padding: '4px 12px', fontSize: 14 }}>
+                <p className={styles.actionRow}>
+                  <button onClick={() => setOpenReviewFor(appt.id)} className={styles.reviewOpenButton}>
                     Évaluer cette consultation
                   </button>
                 </p>
@@ -241,48 +231,35 @@ export default function HistoryPage() {
         )
       })}
 
-      <h2 style={{ marginTop: 32 }}>{t('history.triage_section')}</h2>
+      <h2 className={styles.sectionTitle}>{t('history.triage_section')}</h2>
       {history.triage_assessments.length === 0 && (
-        <p style={{ fontSize: 14 }}>{t('history.no_triage')}</p>
+        <p className={styles.emptyText}>{t('history.no_triage')}</p>
       )}
       {history.triage_assessments.map((assessment) => {
         const style = ORIENTATION_STYLES[assessment.orientation] || {}
         return (
-          <div
-            key={assessment.id}
-            style={{ ...style, borderRadius: 8, padding: 16, marginBottom: 12 }}
-          >
-            <p style={{ margin: 0, fontWeight: 600, color: 'inherit' }}>
+          <div key={assessment.id} className={styles.orientationCard} style={style}>
+            <p className={styles.orientationTitle}>
               {t(`orientation.${assessment.orientation}`)}
             </p>
-            <p style={{ margin: '4px 0 0', fontSize: 14, color: 'inherit', opacity: 0.85 }}>
+            <p className={styles.orientationDate}>
               {formatDateTime(assessment.created_at, i18n.language)}
             </p>
           </div>
         )
       })}
 
-      <h2 style={{ marginTop: 32 }}>{t('history.documents_section')}</h2>
+      <h2 className={styles.sectionTitle}>{t('history.documents_section')}</h2>
       {documents.length === 0 && (
-        <p style={{ fontSize: 14 }}>{t('history.no_documents')}</p>
+        <p className={styles.emptyText}>{t('history.no_documents')}</p>
       )}
       {documents.map((doc) => (
-        <div
-          key={doc.id}
-          style={{
-            border: '1px solid var(--color-border)',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 12,
-          }}
-        >
-          <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-text)' }}>
-            {doc.title}
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>
+        <div key={doc.id} className={styles.card}>
+          <p className={styles.docTitle}>{doc.title}</p>
+          <p className={styles.docMeta}>
             {t(`history.doc_type_${doc.document_type}`)} — {t('history.deposited_by')} {doc.uploaded_by_username} {t('history.on_date')} {formatDateTime(doc.uploaded_at, i18n.language)}
           </p>
-          <p style={{ marginTop: 6 }}>
+          <p className={styles.docLinkRow}>
             <a href={doc.file} target="_blank" rel="noreferrer">{t('common.download')}</a>
           </p>
         </div>

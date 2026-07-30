@@ -1,0 +1,65 @@
+.container {
+  max-width: 480px;
+  margin: 60px auto;
+  font-family: system-ui, sans-serif;
+}
+
+.resultBox {
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.resultTitle {
+  margin: 0;
+  color: inherit;
+}
+
+.urgencyMessage {
+  margin-top: 16px;
+  font-weight: 600;
+  color: var(--color-urgence-text);
+}
+
+.disclaimer {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.actionsRow {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.restartButton {
+  padding: 8px 16px;
+}
+
+.questionProgress {
+  font-size: 14px;
+}
+
+.questionText {
+  font-size: 18px;
+  margin: 24px 0;
+  color: var(--color-text);
+}
+
+.errorText {
+  color: var(--color-urgence-text);
+}
+
+.answersRow {
+  display: flex;
+  gap: 12px;
+}
+
+.answerButton {
+  padding: 10px 24px;
+}
+
+.loadingText {
+  margin-top: 16px;
+}

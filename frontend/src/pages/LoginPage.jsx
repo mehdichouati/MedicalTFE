@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -28,34 +29,34 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: '80px auto', fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+    <div className={styles.container}>
+      <div className={styles.langSwitcherRow}>
         <LanguageSwitcher />
       </div>
       <h1>{t('login.title')}</h1>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
+        <div className={styles.field}>
           <label>{t('login.username')}</label><br />
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            style={{ width: '100%', padding: 8 }}
+            className={styles.input}
           />
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <div className={styles.field}>
           <label>{t('login.password')}</label><br />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ width: '100%', padding: 8 }}
+            className={styles.input}
           />
         </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={submitting} style={{ padding: '8px 16px' }}>
+        {error && <p className={styles.error}>{error}</p>}
+        <button type="submit" disabled={submitting} className={styles.submitButton}>
           {submitting ? t('login.submitting') : t('login.submit')}
         </button>
       </form>

@@ -1,0 +1,139 @@
+.errorPage {
+  max-width: 500px;
+  margin: 60px auto;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+}
+
+.errorText {
+  color: #b3261e;
+}
+
+.backLink {
+  color: #0a5c78;
+}
+
+.page {
+  background: #f7f9fb;
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #1a1a2e;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.title {
+  color: #0a5c78;
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.backLinkRow {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  color: #0a5c78;
+  font-size: 18px;
+}
+
+.sectionTitleSpaced {
+  color: #0a5c78;
+  font-size: 18px;
+  margin-top: 28px;
+}
+
+.emptyText {
+  color: #52606d;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.06);
+  border: 1px solid #eef1f4;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-weight: 700;
+}
+
+.cardMeta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #52606d;
+}
+
+.docLink {
+  color: #0a5c78;
+  font-size: 13px;
+}
+
+.docLinkRow {
+  margin-top: 6px;
+}
+
+.uploadForm {
+  margin-top: 12px;
+  padding: 14px;
+  background: #eef5f8;
+  border-radius: 10px;
+}
+
+.uploadFormRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.select {
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #dbe2e8;
+}
+
+.titleInput {
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #dbe2e8;
+  flex: 1;
+}
+
+.uploadButton {
+  margin-left: 8px;
+  padding: 6px 14px;
+  background: #0a5c78;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+}
+
+.successText {
+  color: #1f5c39;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.uploadErrorText {
+  color: #b3261e;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.addDocButton {
+  margin-top: 12px;
+  padding: 8px 18px;
+  background: #fff;
+  color: #0a5c78;
+  border: 1.5px solid #0a5c78;
+  border-radius: 20px;
+  cursor: pointer;
+}

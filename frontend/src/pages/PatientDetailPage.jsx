@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import styles from './PatientDetailPage.module.css'
 
 const DOC_TYPE_LABELS = {
   LAB_RESULT: 'Résultat de prise de sang',
@@ -15,15 +16,6 @@ const DOCUMENT_TYPES_BY_ROLE = {
   MEDECIN: Object.keys(DOC_TYPE_LABELS),
   KINE: ['PRESCRIPTION_KINE'],
   PSYCHOLOGUE: ['PSY_NOTE'],
-}
-
-const CARD_STYLE = {
-  background: '#fff',
-  borderRadius: 14,
-  padding: 18,
-  boxShadow: '0 2px 10px rgba(10,92,120,0.06)',
-  border: '1px solid #eef1f4',
-  marginBottom: 12,
 }
 
 function formatDateTime(isoString) {
@@ -67,9 +59,9 @@ function UploadForm({ patientId, role, onUploaded }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 12, padding: 14, background: '#eef5f8', borderRadius: 10 }}>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-        <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={{ padding: 6, borderRadius: 8, border: '1px solid #dbe2e8' }}>
+    <form onSubmit={handleSubmit} className={styles.uploadForm}>
+      <div className={styles.uploadFormRow}>
+        <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} className={styles.select}>
           {availableTypes.map((t) => (
             <option key={t} value={t}>{DOC_TYPE_LABELS[t]}</option>
           ))}
@@ -79,15 +71,15 @@ function UploadForm({ patientId, role, onUploaded }) {
           placeholder="Titre du document"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          style={{ padding: 6, borderRadius: 8, border: '1px solid #dbe2e8', flex: 1 }}
+          className={styles.titleInput}
         />
       </div>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button type="submit" disabled={submitting || !file || !title} style={{ marginLeft: 8, padding: '6px 14px', background: '#0a5c78', color: '#fff', border: 'none', borderRadius: 16 }}>
+      <button type="submit" disabled={submitting || !file || !title} className={styles.uploadButton}>
         {submitting ? 'Envoi...' : 'Déposer'}
       </button>
-      {success && <p style={{ color: '#1f5c39', fontSize: 13, marginTop: 6 }}>Document envoyé.</p>}
-      {error && <p style={{ color: '#b3261e', fontSize: 13, marginTop: 6 }}>{error}</p>}
+      {success && <p className={styles.successText}>Document envoyé.</p>}
+      {error && <p className={styles.uploadErrorText}>{error}</p>}
     </form>
   )
 }
@@ -116,44 +108,44 @@ export default function PatientDetailPage() {
 
   if (error) {
     return (
-      <div style={{ maxWidth: 500, margin: '60px auto', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
-        <p style={{ color: '#b3261e' }}>{error}</p>
-        <Link to="/my-patients" style={{ color: '#0a5c78' }}>← Retour à la liste</Link>
+      <div className={styles.errorPage}>
+        <p className={styles.errorText}>{error}</p>
+        <Link to="/my-patients" className={styles.backLink}>← Retour à la liste</Link>
       </div>
     )
   }
 
   return (
-    <div style={{ background: '#f7f9fb', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', color: '#1a1a2e' }}>
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ color: '#0a5c78', fontSize: 28, marginBottom: 4 }}>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>
           Dossier de {history?.patient_username || '...'}
         </h1>
-        <p style={{ marginBottom: 24 }}>
-          <Link to="/my-patients" style={{ color: '#0a5c78', fontSize: 14 }}>← Retour à la liste</Link>
+        <p className={styles.backLinkRow}>
+          <Link to="/my-patients" className={styles.backLink}>← Retour à la liste</Link>
         </p>
 
-        <h2 style={{ color: '#0a5c78', fontSize: 18 }}>Rendez-vous</h2>
-        {history?.appointments?.length === 0 && <p style={{ color: '#52606d' }}>Aucun rendez-vous.</p>}
+        <h2 className={styles.sectionTitle}>Rendez-vous</h2>
+        {history?.appointments?.length === 0 && <p className={styles.emptyText}>Aucun rendez-vous.</p>}
         {history?.appointments?.map((appt) => (
-          <div key={appt.id} style={CARD_STYLE}>
-            <p style={{ margin: 0, fontWeight: 700 }}>{formatDateTime(appt.start_datetime)}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#52606d' }}>
+          <div key={appt.id} className={styles.card}>
+            <p className={styles.cardTitle}>{formatDateTime(appt.start_datetime)}</p>
+            <p className={styles.cardMeta}>
               {appt.status} {appt.reason && `— ${appt.reason}`}
             </p>
           </div>
         ))}
 
-        <h2 style={{ color: '#0a5c78', fontSize: 18, marginTop: 28 }}>Documents</h2>
-        {documents.length === 0 && <p style={{ color: '#52606d' }}>Aucun document accessible.</p>}
+        <h2 className={styles.sectionTitleSpaced}>Documents</h2>
+        {documents.length === 0 && <p className={styles.emptyText}>Aucun document accessible.</p>}
         {documents.map((doc) => (
-          <div key={doc.id} style={CARD_STYLE}>
-            <p style={{ margin: 0, fontWeight: 700 }}>{doc.title}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#52606d' }}>
+          <div key={doc.id} className={styles.card}>
+            <p className={styles.cardTitle}>{doc.title}</p>
+            <p className={styles.cardMeta}>
               {DOC_TYPE_LABELS[doc.document_type] || doc.document_type} — {doc.uploaded_by_username} — {formatDateTime(doc.uploaded_at)}
             </p>
-            <p style={{ marginTop: 6 }}>
-              <a href={doc.file} target="_blank" rel="noreferrer" style={{ color: '#0a5c78', fontSize: 13 }}>Télécharger</a>
+            <p className={styles.docLinkRow}>
+              <a href={doc.file} target="_blank" rel="noreferrer" className={styles.docLink}>Télécharger</a>
             </p>
           </div>
         ))}
@@ -161,10 +153,7 @@ export default function PatientDetailPage() {
         {showUpload ? (
           <UploadForm patientId={id} role={user?.role} onUploaded={() => { setShowUpload(false); loadData() }} />
         ) : (
-          <button
-            onClick={() => setShowUpload(true)}
-            style={{ marginTop: 12, padding: '8px 18px', background: '#fff', color: '#0a5c78', border: '1.5px solid #0a5c78', borderRadius: 20, cursor: 'pointer' }}
-          >
+          <button onClick={() => setShowUpload(true)} className={styles.addDocButton}>
             + Déposer un document
           </button>
         )}

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import styles from './ProfilePage.module.css'
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
@@ -160,101 +161,97 @@ export default function ProfilePage() {
   if (!user) return null
 
   return (
-    <div style={{ maxWidth: 480, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
+    <div className={styles.container}>
       <h1>{t('profile.title')}</h1>
       <p><Link to="/app">{t('common.back_to_home')}</Link></p>
 
-      <section style={{ marginTop: 32 }}>
+      <section className={styles.section}>
         <h2>{t('profile.photo_section')}</h2>
         {user.profile_photo && (
-          <img
-            src={user.profile_photo}
-            alt={t('profile.photo_section')}
-            style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', display: 'block', marginBottom: 12 }}
-          />
+          <img src={user.profile_photo} alt={t('profile.photo_section')} className={styles.avatar} />
         )}
         <form onSubmit={handlePhotoSubmit}>
           <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])} />
-          <button type="submit" disabled={savingPhoto || !photoFile} style={{ marginLeft: 12, padding: '6px 16px' }}>
+          <button type="submit" disabled={savingPhoto || !photoFile} className={styles.sendButton}>
             {savingPhoto ? '...' : t('common.send')}
           </button>
-          {photoMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{photoMessage}</p>}
-          {photoError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{photoError}</p>}
+          {photoMessage && <p className={styles.successText}>{photoMessage}</p>}
+          {photoError && <p className={styles.errorText}>{photoError}</p>}
         </form>
       </section>
 
-      <section style={{ marginTop: 32 }}>
+      <section className={styles.section}>
         <h2>{t('profile.info_section')}</h2>
         <form onSubmit={handleProfileSubmit}>
-          <div style={{ marginBottom: 12 }}>
+          <div className={styles.field}>
             <label>{t('profile.phone')}</label><br />
             <input
               type="tel"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
+              className={styles.input}
             />
           </div>
-          <div style={{ marginBottom: 12 }}>
+          <div className={styles.field}>
             <label>{t('profile.language')}</label><br />
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: 8 }}>
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} className={styles.input}>
               <option value="fr">Français</option>
               <option value="en">English</option>
             </select>
           </div>
-          <button type="submit" disabled={savingProfile} style={{ padding: '8px 16px' }}>
+          <button type="submit" disabled={savingProfile} className={styles.submitButton}>
             {savingProfile ? '...' : t('common.save')}
           </button>
-          {profileMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{profileMessage}</p>}
-          {profileError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{profileError}</p>}
+          {profileMessage && <p className={styles.successText}>{profileMessage}</p>}
+          {profileError && <p className={styles.errorText}>{profileError}</p>}
         </form>
       </section>
 
-      <section style={{ marginTop: 32 }}>
+      <section className={styles.section}>
         <h2>{t('profile.password_section')}</h2>
         <form onSubmit={handlePasswordSubmit}>
-          <div style={{ marginBottom: 12 }}>
+          <div className={styles.field}>
             <label>{t('profile.old_password')}</label><br />
             <input
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               required
-              style={{ width: '100%', padding: 8 }}
+              className={styles.input}
             />
           </div>
-          <div style={{ marginBottom: 12 }}>
+          <div className={styles.field}>
             <label>{t('profile.new_password')}</label><br />
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              style={{ width: '100%', padding: 8 }}
+              className={styles.input}
             />
           </div>
-          <div style={{ marginBottom: 12 }}>
+          <div className={styles.field}>
             <label>{t('profile.confirm_password')}</label><br />
             <input
               type="password"
               value={newPassword2}
               onChange={(e) => setNewPassword2(e.target.value)}
               required
-              style={{ width: '100%', padding: 8 }}
+              className={styles.input}
             />
           </div>
-          <button type="submit" disabled={savingPassword} style={{ padding: '8px 16px' }}>
+          <button type="submit" disabled={savingPassword} className={styles.submitButton}>
             {savingPassword ? '...' : t('common.confirm')}
           </button>
-          {passwordMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{passwordMessage}</p>}
-          {passwordError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 14 }}>{passwordError}</p>}
+          {passwordMessage && <p className={styles.successText}>{passwordMessage}</p>}
+          {passwordError && <p className={styles.errorText}>{passwordError}</p>}
         </form>
       </section>
 
-      <section style={{ marginTop: 32 }}>
+      <section className={styles.section}>
         <h2>{t('profile.notifications_section', 'Notifications')}</h2>
         <form onSubmit={handleNotifSubmit}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label className={styles.checkboxRow}>
             <input
               type="checkbox"
               checked={emailEnabled}
@@ -262,57 +259,57 @@ export default function ProfilePage() {
             />
             {t('profile.email_notifications', 'Recevoir les notifications par email')}
           </label>
-          <button type="submit" disabled={savingNotif} style={{ marginTop: 12, padding: '8px 16px' }}>
+          <button type="submit" disabled={savingNotif} className={styles.notifSaveButton}>
             {savingNotif ? '...' : t('common.save')}
           </button>
-          {notifMessage && <p style={{ color: 'var(--color-ok-text)', fontSize: 14 }}>{notifMessage}</p>}
+          {notifMessage && <p className={styles.successText}>{notifMessage}</p>}
         </form>
       </section>
 
       {user.role === 'PATIENT' && (
-        <section style={{ marginTop: 32 }}>
+        <section className={styles.section}>
           <h2>Mes enfants</h2>
-          {dependents.length === 0 && <p style={{ fontSize: 14 }}>Aucun enfant rattaché.</p>}
+          {dependents.length === 0 && <p>Aucun enfant rattaché.</p>}
           {dependents.map((dep) => (
-            <div key={dep.id} style={{ border: '1px solid var(--color-border)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <p style={{ margin: 0, fontWeight: 600 }}>{dep.username}</p>
-              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#666' }}>{dep.age} ans — {dep.email}</p>
+            <div key={dep.id} className={styles.dependentCard}>
+              <p className={styles.dependentName}>{dep.username}</p>
+              <p className={styles.dependentMeta}>{dep.age} ans — {dep.email}</p>
             </div>
           ))}
 
           {showDependentForm ? (
-            <form onSubmit={handleDependentSubmit} style={{ marginTop: 12, padding: 12, background: 'var(--color-info-bg)', borderRadius: 8 }}>
-              <div style={{ marginBottom: 10 }}>
+            <form onSubmit={handleDependentSubmit} className={styles.dependentForm}>
+              <div className={styles.field}>
                 <label>Nom d'utilisateur de l'enfant</label><br />
                 <input
                   type="text"
                   value={dependentForm.username}
                   onChange={(e) => setDependentForm({ ...dependentForm, username: e.target.value })}
                   required
-                  style={{ width: '100%', padding: 8 }}
+                  className={styles.input}
                 />
               </div>
-              <div style={{ marginBottom: 10 }}>
+              <div className={styles.field}>
                 <label>Email de l'enfant</label><br />
                 <input
                   type="email"
                   value={dependentForm.email}
                   onChange={(e) => setDependentForm({ ...dependentForm, email: e.target.value })}
                   required
-                  style={{ width: '100%', padding: 8 }}
+                  className={styles.input}
                 />
               </div>
-              <div style={{ marginBottom: 10 }}>
+              <div className={styles.field}>
                 <label>Date de naissance</label><br />
                 <input
                   type="date"
                   value={dependentForm.date_of_birth}
                   onChange={(e) => setDependentForm({ ...dependentForm, date_of_birth: e.target.value })}
                   required
-                  style={{ width: '100%', padding: 8 }}
+                  className={styles.input}
                 />
               </div>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13 }}>
+              <label className={styles.attestationLabel}>
                 <input
                   type="checkbox"
                   checked={dependentForm.attestation}
@@ -320,18 +317,18 @@ export default function ProfilePage() {
                 />
                 Je certifie sur l'honneur être le représentant légal (parent ou tuteur) de ce mineur.
               </label>
-              {dependentError && <p style={{ color: 'var(--color-urgence-text)', fontSize: 13, marginTop: 8 }}>{dependentError}</p>}
-              <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
-                <button type="submit" disabled={dependentSaving} style={{ padding: '6px 16px' }}>
+              {dependentError && <p className={styles.errorText}>{dependentError}</p>}
+              <div className={styles.dependentFormActions}>
+                <button type="submit" disabled={dependentSaving} className={styles.submitButton}>
                   {dependentSaving ? '...' : 'Créer le compte'}
                 </button>
-                <button type="button" onClick={() => setShowDependentForm(false)} style={{ padding: '6px 16px' }}>
+                <button type="button" onClick={() => setShowDependentForm(false)} className={styles.submitButton}>
                   Annuler
                 </button>
               </div>
             </form>
           ) : (
-            <button onClick={() => setShowDependentForm(true)} style={{ marginTop: 8, padding: '8px 16px' }}>
+            <button onClick={() => setShowDependentForm(true)} className={styles.addDependentButton}>
               + Ajouter un enfant
             </button>
           )}

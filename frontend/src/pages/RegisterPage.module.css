@@ -1,0 +1,33 @@
+.container {
+  max-width: 380px;
+  margin: 60px auto;
+  font-family: system-ui, sans-serif;
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.error {
+  color: red;
+}
+
+.submitButton {
+  padding: 8px 16px;
+}
+
+.loginLink {
+  margin-top: 16px;
+  font-size: 14px;
+}

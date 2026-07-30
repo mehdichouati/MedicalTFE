@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import apiClient from '../api/client'
+import styles from './AdminDashboardPage.module.css'
 
-const CARD_STYLE = {
+const cardBase = {
   background: '#1f2430',
   borderRadius: 10,
   padding: 20,
@@ -15,17 +16,13 @@ function StatCard({ label, value, accent, onClick }) {
   return (
     <div
       onClick={onClick}
-      style={{
-        ...CARD_STYLE,
-        borderTop: `3px solid ${accent}`,
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.1s ease',
-      }}
+      className={onClick ? styles.statCard : styles.statCardStatic}
+      style={{ ...cardBase, borderTop: `3px solid ${accent}` }}
       onMouseEnter={(e) => onClick && (e.currentTarget.style.transform = 'translateY(-2px)')}
       onMouseLeave={(e) => onClick && (e.currentTarget.style.transform = 'translateY(0)')}
     >
-      <p style={{ margin: 0, fontSize: 13, color: '#9aa3b2' }}>{label}</p>
-      <p style={{ margin: '6px 0 0', fontSize: 28, fontWeight: 700 }}>{value}</p>
+      <p className={styles.statLabel}>{label}</p>
+      <p className={styles.statValue}>{value}</p>
     </div>
   )
 }
@@ -49,29 +46,29 @@ export default function AdminDashboardPage() {
 
   if (error) {
     return (
-      <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
-        <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>
-        <Link to="/app">{t('common.back_to_home')}</Link>
+      <div className={styles.page}>
+        <p className={styles.errorText}>{error}</p>
+        <Link to="/app" className={styles.backLink}>{t('common.back_to_home')}</Link>
       </div>
     )
   }
 
   if (!data) {
-    return <p style={{ textAlign: 'center', marginTop: 80 }}>{t('common.loading')}</p>
+    return <p className={styles.loadingCenter}>{t('common.loading')}</p>
   }
 
   const { summary, daily_chart, by_medical_house, by_professional } = data
   const chartData = daily_chart.map((d) => ({ ...d, label: formatDateShort(d.date, i18n.language) }))
 
   return (
-    <div style={{ background: '#12151c', minHeight: '100vh', padding: '32px 24px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h1 style={{ color: '#fff', margin: 0 }}>{t('admin_dashboard.title')}</h1>
-          <Link to="/app" style={{ color: '#8ab4f8' }}>{t('common.back_to_home')}</Link>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>{t('admin_dashboard.title')}</h1>
+          <Link to="/app" className={styles.backLink}>{t('common.back_to_home')}</Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div className={styles.cardGrid}>
           <StatCard label={t('admin_dashboard.appointments_today')} value={summary.appointments_today} accent="#5b8def" onClick={() => navigate('/admin/appointments')} />
           <StatCard label={t('admin_dashboard.pending')} value={summary.pending_appointments} accent="#f0a94e" onClick={() => navigate('/admin/appointments?status=PENDING')} />
           <StatCard label={t('admin_dashboard.completed')} value={summary.completed_appointments} accent="#4caf7d" onClick={() => navigate('/admin/appointments?status=COMPLETED')} />
@@ -83,8 +80,8 @@ export default function AdminDashboardPage() {
           <StatCard label="Avis patients" value={summary.pending_reviews ?? '—'} accent="#f0a94e" onClick={() => navigate('/admin/reviews')} />
         </div>
 
-        <div style={{ ...CARD_STYLE, marginBottom: 24 }}>
-          <h2 style={{ marginTop: 0, fontSize: 16, color: '#e4e7eb' }}>{t('admin_dashboard.chart_title')}</h2>
+        <div className={`${styles.card} ${styles.chartCard}`}>
+          <h2 className={styles.chartTitle}>{t('admin_dashboard.chart_title')}</h2>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2e3440" />
@@ -99,25 +96,25 @@ export default function AdminDashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          <div style={CARD_STYLE}>
-            <h2 style={{ marginTop: 0, fontSize: 16, color: '#e4e7eb' }}>{t('admin_dashboard.by_house')}</h2>
+        <div className={styles.twoColumnGrid}>
+          <div className={styles.card}>
+            <h2 className={styles.listSectionTitle}>{t('admin_dashboard.by_house')}</h2>
             {by_medical_house.map((house) => (
-              <div key={house.id} style={{ padding: '10px 0', borderBottom: '1px solid #2e3440' }}>
-                <p style={{ margin: 0, fontWeight: 600 }}>{house.name}</p>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#9aa3b2' }}>
+              <div key={house.id} className={styles.listRow}>
+                <p className={styles.listRowName}>{house.name}</p>
+                <p className={styles.listRowMeta}>
                   {house.total_appointments} — {house.completed} {t('admin_dashboard.completed').toLowerCase()}
                 </p>
               </div>
             ))}
           </div>
 
-          <div style={CARD_STYLE}>
-            <h2 style={{ marginTop: 0, fontSize: 16, color: '#e4e7eb' }}>{t('admin_dashboard.top_professionals')}</h2>
+          <div className={styles.card}>
+            <h2 className={styles.listSectionTitle}>{t('admin_dashboard.top_professionals')}</h2>
             {by_professional.map((pro, i) => (
-              <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #2e3440' }}>
-                <p style={{ margin: 0, fontWeight: 600 }}>{pro.professional__username}</p>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#9aa3b2' }}>
+              <div key={i} className={styles.listRow}>
+                <p className={styles.listRowName}>{pro.professional__username}</p>
+                <p className={styles.listRowMeta}>
                   {pro.professional__role} — {pro.total}
                 </p>
               </div>

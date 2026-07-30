@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
+import styles from './TriagePage.module.css'
 
 const QUESTION_KEYS = [
   { key: 'signe_gravite_immediat', labelKey: 'q1' },
@@ -76,21 +77,21 @@ export default function TriagePage() {
   if (result) {
     const style = ORIENTATION_STYLES[result.orientation] || {}
     return (
-      <div style={{ maxWidth: 480, margin: '60px auto', fontFamily: 'system-ui, sans-serif' }}>
+      <div className={styles.container}>
         <h1>{t('triage.result_title')}</h1>
-        <div style={{ ...style, padding: 20, borderRadius: 8, marginTop: 16 }}>
-          <h2 style={{ margin: 0, color: 'inherit' }}>{t(`orientation.${result.orientation}`)}</h2>
+        <div className={styles.resultBox} style={style}>
+          <h2 className={styles.resultTitle}>{t(`orientation.${result.orientation}`)}</h2>
         </div>
         {result.orientation === 'URGENCE' && (
-          <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--color-urgence-text)' }}>
+          <p className={styles.urgencyMessage}>
             {t('triage.urgency_message')}
           </p>
         )}
-        <p style={{ marginTop: 16, fontSize: 14 }}>
+        <p className={styles.disclaimer}>
           {t('triage.disclaimer')}
         </p>
-        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button onClick={restart} style={{ padding: '8px 16px' }}>
+        <div className={styles.actionsRow}>
+          <button onClick={restart} className={styles.restartButton}>
             {t('triage.restart')}
           </button>
           <Link to="/app">{t('common.back_to_home')}</Link>
@@ -100,31 +101,31 @@ export default function TriagePage() {
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: '60px auto', fontFamily: 'system-ui, sans-serif' }}>
+    <div className={styles.container}>
       <h1>{t('triage.title')}</h1>
-      <p style={{ fontSize: 14 }}>
+      <p className={styles.questionProgress}>
         {t('triage.question_of', { current: stepIndex + 1, total: questions.length })}
       </p>
-      <p style={{ fontSize: 18, margin: '24px 0', color: 'var(--color-text)' }}>{currentQuestion.label}</p>
-      {error && <p style={{ color: 'var(--color-urgence-text)' }}>{error}</p>}
-      <div style={{ display: 'flex', gap: 12 }}>
+      <p className={styles.questionText}>{currentQuestion.label}</p>
+      {error && <p className={styles.errorText}>{error}</p>}
+      <div className={styles.answersRow}>
         <button
           type="submit"
           onClick={() => handleAnswer(true)}
           disabled={submitting}
-          style={{ padding: '10px 24px' }}
+          className={styles.answerButton}
         >
           {t('common.yes')}
         </button>
         <button
           onClick={() => handleAnswer(false)}
           disabled={submitting}
-          style={{ padding: '10px 24px' }}
+          className={styles.answerButton}
         >
           {t('common.no')}
         </button>
       </div>
-      {submitting && <p style={{ marginTop: 16 }}>{t('common.loading')}</p>}
+      {submitting && <p className={styles.loadingText}>{t('common.loading')}</p>}
     </div>
   )
 }

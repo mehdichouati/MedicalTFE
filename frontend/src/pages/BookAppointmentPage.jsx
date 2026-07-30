@@ -2,37 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import styles from './BookAppointmentPage.module.css'
 
 const ROLE_LABELS = {
   MEDECIN: 'Médecin généraliste',
   KINE: 'Kinésithérapeute',
   PSYCHOLOGUE: 'Psychologue',
-}
-
-const INPUT_STYLE = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 10,
-  border: '1px solid #dbe2e8',
-  fontSize: 15,
-  boxSizing: 'border-box',
-  fontFamily: 'inherit',
-}
-
-const LABEL_STYLE = {
-  fontSize: 13,
-  fontWeight: 600,
-  color: '#0a5c78',
-  display: 'block',
-  marginBottom: 6,
-}
-
-const CARD_STYLE = {
-  background: '#fff',
-  borderRadius: 14,
-  padding: 24,
-  boxShadow: '0 2px 10px rgba(10,92,120,0.08)',
-  border: '1px solid #eef1f4',
 }
 
 function formatSlotTime(isoString) {
@@ -108,23 +83,18 @@ export default function BookAppointmentPage() {
 
   if (success) {
     return (
-      <div style={{ background: '#f7f9fb', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ ...CARD_STYLE, padding: 40 }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>✅</div>
-            <h1 style={{ color: '#0a5c78', fontSize: 26, margin: 0 }}>Rendez-vous confirmé</h1>
-            <p style={{ color: '#52606d', marginTop: 10 }}>Votre rendez-vous a bien été enregistré.</p>
-            <div style={{ marginTop: 28, display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button
-                onClick={() => navigate(`/pay/${success.id}`)}
-                style={{ padding: '10px 22px', background: '#0a5c78', color: '#fff', border: 'none', borderRadius: 24, fontSize: 14, cursor: 'pointer' }}
-              >
+      <div className={styles.successPage}>
+        <div className={styles.successContainer}>
+          <div className={styles.successCard}>
+            <div className={styles.successIcon}>✅</div>
+            <h1 className={styles.successTitle}>Rendez-vous confirmé</h1>
+            <p className={styles.successText}>Votre rendez-vous a bien été enregistré.</p>
+            <div className={styles.successActions}>
+              <button onClick={() => navigate(`/pay/${success.id}`)} className={styles.btnPrimary}>
                 Payer maintenant
               </button>
               <Link to="/history">
-                <button style={{ padding: '10px 22px', background: '#fff', color: '#0a5c78', border: '2px solid #0a5c78', borderRadius: 24, fontSize: 14, cursor: 'pointer' }}>
-                  Voir mon historique
-                </button>
+                <button className={styles.btnSecondary}>Voir mon historique</button>
               </Link>
             </div>
           </div>
@@ -134,18 +104,18 @@ export default function BookAppointmentPage() {
   }
 
   return (
-    <div style={{ background: '#f7f9fb', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', color: '#1a1a2e' }}>
-      <div style={{ maxWidth: 520, margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ color: '#0a5c78', fontSize: 30, marginBottom: 4 }}>Prendre rendez-vous</h1>
-        <p style={{ marginBottom: 24 }}>
-          <Link to="/app" style={{ color: '#0a5c78', fontSize: 14 }}>← Retour à l'accueil</Link>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Prendre rendez-vous</h1>
+        <p className={styles.backLinkRow}>
+          <Link to="/app" className={styles.backLink}>← Retour à l'accueil</Link>
         </p>
 
-        <form onSubmit={handleSubmit} style={CARD_STYLE}>
+        <form onSubmit={handleSubmit} className={styles.formCard}>
           {dependents.length > 0 && (
-            <div style={{ marginBottom: 18 }}>
-              <label style={LABEL_STYLE}>Pour qui ?</label>
-              <select value={bookingFor} onChange={(e) => setBookingFor(e.target.value)} style={INPUT_STYLE}>
+            <div className={styles.field}>
+              <label className={styles.fieldLabel}>Pour qui ?</label>
+              <select value={bookingFor} onChange={(e) => setBookingFor(e.target.value)} className={styles.input}>
                 <option value="self">Moi-même ({user?.username})</option>
                 {dependents.map((dep) => (
                   <option key={dep.id} value={dep.id}>{dep.username} ({dep.age} ans)</option>
@@ -154,9 +124,9 @@ export default function BookAppointmentPage() {
             </div>
           )}
 
-          <div style={{ marginBottom: 18 }}>
-            <label style={LABEL_STYLE}>Professionnel</label>
-            <select value={professionalId} onChange={(e) => setProfessionalId(e.target.value)} required style={INPUT_STYLE}>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Professionnel</label>
+            <select value={professionalId} onChange={(e) => setProfessionalId(e.target.value)} required className={styles.input}>
               <option value="">Sélectionner un professionnel</option>
               {professionals.map((p) => (
                 <option key={p.id} value={p.id}>{p.full_name} — {ROLE_LABELS[p.role]}</option>
@@ -164,21 +134,21 @@ export default function BookAppointmentPage() {
             </select>
           </div>
 
-          <div style={{ marginBottom: 18 }}>
-            <label style={LABEL_STYLE}>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={INPUT_STYLE} />
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={styles.input} />
           </div>
 
-          {loadingSlots && <p style={{ fontSize: 14, color: '#52606d' }}>Chargement des créneaux...</p>}
+          {loadingSlots && <p className={styles.loadingText}>Chargement des créneaux...</p>}
 
           {!loadingSlots && professionalId && date && slots.length === 0 && (
-            <p style={{ fontSize: 14, color: '#52606d' }}>Aucun créneau disponible à cette date.</p>
+            <p className={styles.loadingText}>Aucun créneau disponible à cette date.</p>
           )}
 
           {slots.length > 0 && (
-            <div style={{ marginBottom: 18 }}>
-              <label style={LABEL_STYLE}>Créneau</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div className={styles.field}>
+              <label className={styles.fieldLabel}>Créneau</label>
+              <div className={styles.slotsWrap}>
                 {slots.map((slot) => {
                   const isSelected = selectedSlot?.start === slot.start
                   return (
@@ -186,15 +156,7 @@ export default function BookAppointmentPage() {
                       type="button"
                       key={slot.start}
                       onClick={() => setSelectedSlot(slot)}
-                      style={{
-                        padding: '8px 14px',
-                        borderRadius: 20,
-                        border: isSelected ? '2px solid #0a5c78' : '1px solid #dbe2e8',
-                        background: isSelected ? '#eef5f8' : '#fff',
-                        color: isSelected ? '#0a5c78' : '#1a1a2e',
-                        fontWeight: isSelected ? 700 : 400,
-                        cursor: 'pointer',
-                      }}
+                      className={isSelected ? styles.slotButtonSelected : styles.slotButton}
                     >
                       {formatSlotTime(slot.start)}
                     </button>
@@ -204,26 +166,17 @@ export default function BookAppointmentPage() {
             </div>
           )}
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={LABEL_STYLE}>Motif (facultatif)</label>
-            <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} style={INPUT_STYLE} />
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Motif (facultatif)</label>
+            <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} className={styles.input} />
           </div>
 
-          {error && <p style={{ color: '#b3261e', fontSize: 14, marginBottom: 12 }}>{error}</p>}
+          {error && <p className={styles.errorText}>{error}</p>}
 
           <button
             type="submit"
             disabled={!selectedSlot || submitting}
-            style={{
-              width: '100%',
-              padding: '12px 0',
-              background: !selectedSlot || submitting ? '#a9c3cd' : '#0a5c78',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 24,
-              fontSize: 15,
-              cursor: !selectedSlot || submitting ? 'not-allowed' : 'pointer',
-            }}
+            className={!selectedSlot || submitting ? styles.submitButtonDisabled : styles.submitButton}
           >
             {submitting ? 'Réservation...' : 'Confirmer le rendez-vous'}
           </button>

@@ -1,0 +1,110 @@
+.page {
+  background: #12151c;
+  min-height: 100vh;
+  padding: 32px 24px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: #fff;
+  margin: 0;
+}
+
+.backLink {
+  color: #8ab4f8;
+}
+
+.card {
+  background: #1f2430;
+  border-radius: 10px;
+  padding: 20px;
+  color: #e4e7eb;
+}
+
+.statCard {
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.statCardStatic {
+  cursor: default;
+  transition: transform 0.1s ease;
+}
+
+.statLabel {
+  margin: 0;
+  font-size: 13px;
+  color: #9aa3b2;
+}
+
+.statValue {
+  margin: 6px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chartCard {
+  margin-bottom: 24px;
+}
+
+.chartTitle {
+  margin-top: 0;
+  font-size: 16px;
+  color: #e4e7eb;
+}
+
+.twoColumnGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.listSectionTitle {
+  margin-top: 0;
+  font-size: 16px;
+  color: #e4e7eb;
+}
+
+.listRow {
+  padding: 10px 0;
+  border-bottom: 1px solid #2e3440;
+}
+
+.listRowName {
+  margin: 0;
+  font-weight: 600;
+}
+
+.listRowMeta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #9aa3b2;
+}
+
+.loadingCenter {
+  text-align: center;
+  margin-top: 80px;
+  color: #e4e7eb;
+}
+
+.errorText {
+  color: #f28b82;
+}

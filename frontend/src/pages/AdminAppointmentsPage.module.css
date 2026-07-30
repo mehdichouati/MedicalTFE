@@ -1,0 +1,76 @@
+.page {
+  background: #12151c;
+  min-height: 100vh;
+  padding: 32px 24px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: #fff;
+  margin: 0;
+}
+
+.backLink {
+  color: #8ab4f8;
+}
+
+.filtersRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.selectInput {
+  padding: 8px;
+}
+
+.errorText {
+  color: #f28b82;
+}
+
+.mutedText {
+  color: #9aa3b2;
+}
+
+.card {
+  background: #1f2430;
+  border-radius: 10px;
+  padding: 16px;
+  color: #e4e7eb;
+  margin-bottom: 10px;
+}
+
+.appointmentDate {
+  margin: 0;
+  font-weight: 600;
+}
+
+.appointmentMeta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #9aa3b2;
+}
+
+.pagination {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #e4e7eb;
+}
+
+.paginationButton {
+  padding: 4px 12px;
+}

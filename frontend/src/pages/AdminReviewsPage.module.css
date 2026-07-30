@@ -1,0 +1,97 @@
+.page {
+  background: #12151c;
+  min-height: 100vh;
+  padding: 32px 24px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: #fff;
+  margin: 0;
+}
+
+.backLink {
+  color: #8ab4f8;
+}
+
+.filtersRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.filterButton {
+  padding: 6px 14px;
+  background: #1f2430;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filterButtonActive {
+  padding: 6px 14px;
+  background: #5b8def;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.errorText {
+  color: #f28b82;
+}
+
+.mutedText {
+  color: #9aa3b2;
+}
+
+.card {
+  background: #1f2430;
+  border-radius: 10px;
+  padding: 16px;
+  color: #e4e7eb;
+  margin-bottom: 12px;
+}
+
+.rating {
+  margin: 0;
+  font-weight: 600;
+}
+
+.anonymousTag {
+  font-size: 12px;
+  color: #9aa3b2;
+}
+
+.reviewMeta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #9aa3b2;
+}
+
+.reviewComment {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+.moderationActions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.moderationButton {
+  padding: 4px 12px;
+}

@@ -1,0 +1,140 @@
+.loadingCenter {
+  text-align: center;
+  margin-top: 80px;
+}
+
+.errorPage {
+  max-width: 600px;
+  margin: 60px auto;
+  text-align: center;
+}
+
+.errorText {
+  color: var(--color-urgence-text);
+}
+
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  font-family: system-ui, sans-serif;
+}
+
+.sectionTitle {
+  margin-top: 32px;
+}
+
+.emptyText {
+  font-size: 14px;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.cardDate {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cardMeta {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.actionRow {
+  margin-top: 8px;
+}
+
+.downloadButton {
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+.orientationCard {
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.orientationTitle {
+  margin: 0;
+  font-weight: 600;
+  color: inherit;
+}
+
+.orientationDate {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.docTitle {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.docMeta {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.docLinkRow {
+  margin-top: 6px;
+}
+
+.reviewStatus {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-ok-text);
+}
+
+.reviewForm {
+  margin-top: 8px;
+  padding: 10px;
+  background: var(--color-info-bg);
+  border-radius: 6px;
+}
+
+.reviewFormRow {
+  margin-bottom: 8px;
+}
+
+.reviewSelect {
+  margin-right: 8px;
+}
+
+.reviewTextarea {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.reviewCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.reviewError {
+  color: var(--color-urgence-text);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.reviewSubmitButton {
+  margin-top: 8px;
+  padding: 6px 14px;
+}
+
+.reviewOpenButton {
+  padding: 4px 12px;
+  font-size: 14px;
+}
