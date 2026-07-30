@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models import User, LegalGuardianLink
+from users.models import User, LegalGuardianLink, AuditLog
 from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
 from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
@@ -34,7 +34,7 @@ def _is_guardian_of(guardian, patient_id):
     ).exists()
 
 
-def _apply_cancellation_policy(appointment):
+def _apply_cancellation_policy(appointment, actor):
     """F4 — Applique la politique d'annulation/no-show a un rendez-vous."""
     from payments.models import Payment
     from notifications.services import notify_payment_refunded
@@ -61,12 +61,22 @@ def _apply_cancellation_policy(appointment):
             )
             payment.save(update_fields=['refunded_amount_cents', 'status'])
             notify_payment_refunded(payment)
+            AuditLog.objects.create(
+                actor=actor,
+                action=AuditLog.Action.PAYMENT_REFUNDED,
+                target_description=f"Paiement #{payment.id} — {payment.refunded_amount_cents / 100:.2f} EUR remboursés — {payment.patient}",
+            )
         else:
             stripe.Refund.create(payment_intent=payment.stripe_payment_intent_id)
             payment.refunded_amount_cents = payment.amount_cents
             payment.status = Payment.Status.REFUNDED
             payment.save(update_fields=['refunded_amount_cents', 'status'])
             notify_payment_refunded(payment)
+            AuditLog.objects.create(
+                actor=actor,
+                action=AuditLog.Action.PAYMENT_REFUNDED,
+                target_description=f"Paiement #{payment.id} — {payment.refunded_amount_cents / 100:.2f} EUR remboursés — {payment.patient}",
+            )
     else:
         if is_late:
             payment.late_cancellation_fee_due_cents = LATE_CANCELLATION_FEE_CENTS
@@ -190,7 +200,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.cancelled_at = timezone.now()
         appointment.cancelled_by = request.user
         appointment.save(update_fields=['status', 'cancelled_at', 'cancelled_by'])
-        _apply_cancellation_policy(appointment)
+        _apply_cancellation_policy(appointment, request.user)
         notify_appointment_cancellation(appointment)
         return Response(AppointmentSerializer(appointment).data, status=status.HTTP_200_OK)
 
@@ -204,7 +214,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             )
         appointment.status = Appointment.Status.NO_SHOW
         appointment.save(update_fields=['status'])
-        _apply_cancellation_policy(appointment)
+        _apply_cancellation_policy(appointment, request.user)
         return Response(AppointmentSerializer(appointment).data)
 
     @action(detail=True, methods=['post'], url_path='mark-completed')

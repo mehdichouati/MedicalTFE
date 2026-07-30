@@ -1,5 +1,7 @@
 import io
 
+from users.models import LegalGuardianLink, AuditLog
+
 import stripe
 from django.conf import settings
 from django.db.models import Q
@@ -142,10 +144,23 @@ def stripe_webhook(request):
             payment.status = Payment.Status.SUCCEEDED
             payment.save(update_fields=['status'])
             notify_payment_succeeded(payment)
+            AuditLog.objects.create(
+                actor=None,  # confirmé par Stripe (webhook), aucun utilisateur authentifié
+                action=AuditLog.Action.PAYMENT_SUCCEEDED,
+                target_description=f"Paiement #{payment.id} de {payment.amount_cents / 100:.2f} EUR — {payment.patient}",
+            )
 
     elif event['type'] == 'payment_intent.payment_failed':
         intent = event['data']['object']
-        Payment.objects.filter(stripe_payment_intent_id=intent['id']).update(status=Payment.Status.FAILED)
+        payment = Payment.objects.filter(stripe_payment_intent_id=intent['id']).first()
+        if payment:
+            payment.status = Payment.Status.FAILED
+            payment.save(update_fields=['status'])
+            AuditLog.objects.create(
+                actor=None,
+                action=AuditLog.Action.PAYMENT_FAILED,
+                target_description=f"Paiement #{payment.id} de {payment.amount_cents / 100:.2f} EUR — {payment.patient}",
+            )
 
     return Response(status=status.HTTP_200_OK)
 

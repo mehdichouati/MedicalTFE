@@ -88,7 +88,10 @@ class AuditLog(models.Model):
         USER_UPDATED = 'USER_UPDATED', 'Compte modifié'
         USER_ACTIVATED = 'USER_ACTIVATED', 'Compte activé'
         USER_DEACTIVATED = 'USER_DEACTIVATED', 'Compte désactivé'
-
+        PAYMENT_SUCCEEDED = 'PAYMENT_SUCCEEDED', 'Paiement confirmé'
+        PAYMENT_FAILED = 'PAYMENT_FAILED', 'Paiement échoué'
+        PAYMENT_REFUNDED = 'PAYMENT_REFUNDED', 'Paiement remboursé'
+        
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='audit_actions',
     )
