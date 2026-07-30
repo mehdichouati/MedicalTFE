@@ -19,11 +19,36 @@ const STATUS_STYLES = {
   NO_SHOW: { background: '#fdf2f2', color: '#b3261e', label: 'Absence' },
 }
 
+const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+
 function formatDateTime(isoString, locale) {
   return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
+}
+
+function toLocalISODate(dateObj) {
+  return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`
+}
+
+function toISODate(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+function buildMonthGrid(year, month) {
+  const firstDay = new Date(year, month, 1)
+  const startWeekday = (firstDay.getDay() + 6) % 7
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const cells = []
+  for (let i = 0; i < startWeekday; i++) cells.push(null)
+  for (let day = 1; day <= daysInMonth; day++) cells.push(day)
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  const weeks = []
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
+  return weeks
 }
 
 function UploadDocumentForm({ patientId, onUploaded }) {
@@ -98,6 +123,12 @@ export default function ProfessionalAppointmentsPage() {
   const [actionError, setActionError] = useState('')
   const [uploadFormFor, setUploadFormFor] = useState(null)
 
+  const now = new Date()
+  const todayISO = toLocalISODate(now)
+
+  const [calendarMonth, setCalendarMonth] = useState({ year: now.getFullYear(), month: now.getMonth() })
+  const [selectedDate, setSelectedDate] = useState(todayISO)
+
   const loadAppointments = () => {
     setLoading(true)
     apiClient.get('/appointments/')
@@ -120,6 +151,33 @@ export default function ProfessionalAppointmentsPage() {
     }
   }
 
+  const goPrevMonth = () => {
+    setCalendarMonth(({ year, month }) =>
+      month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 })
+  }
+  const goNextMonth = () => {
+    setCalendarMonth(({ year, month }) =>
+      month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 })
+  }
+  const goToday = () => {
+    setCalendarMonth({ year: now.getFullYear(), month: now.getMonth() })
+    setSelectedDate(todayISO)
+  }
+
+  const appointmentDatesSet = new Set(
+    appointments.map((appt) => toLocalISODate(new Date(appt.start_datetime)))
+  )
+
+  const dayAppointments = appointments
+    .filter((appt) => toLocalISODate(new Date(appt.start_datetime)) === selectedDate)
+    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
+
+  const monthLabel = new Date(calendarMonth.year, calendarMonth.month, 1)
+    .toLocaleDateString('fr-BE', { month: 'long', year: 'numeric' })
+  const weeks = buildMonthGrid(calendarMonth.year, calendarMonth.month)
+  const selectedDateLabel = new Date(selectedDate + 'T00:00:00')
+    .toLocaleDateString('fr-BE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -131,12 +189,47 @@ export default function ProfessionalAppointmentsPage() {
         {actionError && <p className={styles.errorText}>{actionError}</p>}
         {error && <p className={styles.errorText}>{error}</p>}
 
+        <div className={styles.calendarWrap}>
+          <div className={styles.calendarHeader}>
+            <button type="button" onClick={goPrevMonth} className={styles.calendarNavBtn}>‹</button>
+            <span className={styles.calendarMonthLabel}>{monthLabel}</span>
+            <button type="button" onClick={goNextMonth} className={styles.calendarNavBtn}>›</button>
+          </div>
+          <div className={styles.calendarGrid}>
+            {WEEKDAY_LABELS.map((wd, i) => (
+              <div key={i} className={styles.calendarWeekday}>{wd}</div>
+            ))}
+            {weeks.flat().map((day, i) => {
+              if (day === null) return <div key={i} className={styles.calendarDayEmpty} />
+              const iso = toISODate(calendarMonth.year, calendarMonth.month, day)
+              const isSelected = iso === selectedDate
+              const hasAppointments = appointmentDatesSet.has(iso)
+              return (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => setSelectedDate(iso)}
+                  className={isSelected ? styles.calendarDaySelected : styles.calendarDay}
+                >
+                  {day}
+                  {hasAppointments && !isSelected && <span className={styles.calendarDayDot} />}
+                </button>
+              )
+            })}
+          </div>
+          <button type="button" onClick={goToday} className={styles.todayButton}>Aujourd'hui</button>
+        </div>
+
+        <h2 className={styles.selectedDateTitle}>{selectedDateLabel}</h2>
+
         {loading ? (
           <p className={styles.loadingText}>Chargement...</p>
         ) : (
           <>
-            {appointments.length === 0 && <p className={styles.loadingText}>Aucun rendez-vous pour le moment.</p>}
-            {appointments.map((appt) => {
+            {dayAppointments.length === 0 && (
+              <p className={styles.loadingText}>Aucun rendez-vous ce jour-là.</p>
+            )}
+            {dayAppointments.map((appt) => {
               const statusStyle = STATUS_STYLES[appt.status] || {}
               return (
                 <div key={appt.id} className={styles.card}>
