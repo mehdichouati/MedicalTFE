@@ -266,6 +266,18 @@ export default function ProfilePage() {
         </form>
       </section>
 
+      <section className={styles.section}>
+        <h2>{t('profile.dpo_section')}</h2>
+        <div className={styles.dpoBox}>
+          <p>{t('profile.dpo_intro')}</p>
+          <p>
+            <strong>{t('profile.dpo_email_label')} : </strong>
+            <a href="mailto:dpo@maisonmedicale.be">dpo@maisonmedicale.be</a>
+          </p>
+          <p className={styles.dpoLegalNote}>{t('profile.dpo_legal_note')}</p>
+        </div>
+      </section>
+
       {user.role === 'PATIENT' && (
         <section className={styles.section}>
           <h2>Mes enfants</h2>

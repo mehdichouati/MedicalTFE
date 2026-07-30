@@ -89,7 +89,11 @@
     "photo_updated": "Photo mise à jour.",
     "profile_updated": "Profil mis à jour.",
     "password_updated": "Mot de passe modifié avec succès.",
-    "password_mismatch": "Les deux nouveaux mots de passe ne correspondent pas."
+    "password_mismatch": "Les deux nouveaux mots de passe ne correspondent pas.",
+    "dpo_section": "Confidentialité et protection des données",
+    "dpo_intro": "Conformément au RGPD, vous pouvez contacter notre Délégué à la Protection des Données (DPO) pour toute question relative au traitement de vos données de santé, ou pour exercer vos droits d'accès, de rectification ou d'effacement.",
+    "dpo_email_label": "Contact DPO",
+    "dpo_legal_note": "Traitement fondé sur le contrat de soins et, le cas échéant, votre consentement explicite (art. 9 RGPD)."
   },
   "triage": {
     "title": "Aide à l'orientation",

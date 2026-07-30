@@ -89,7 +89,11 @@
     "photo_updated": "Photo updated.",
     "profile_updated": "Profile updated.",
     "password_updated": "Password changed successfully.",
-    "password_mismatch": "The two new passwords do not match."
+    "password_mismatch": "The two new passwords do not match.",
+    "dpo_section": "Privacy and data protection",
+    "dpo_intro": "In accordance with the GDPR, you can contact our Data Protection Officer (DPO) with any question regarding the processing of your health data, or to exercise your rights of access, rectification or erasure.",
+    "dpo_email_label": "DPO contact",
+    "dpo_legal_note": "Processing based on the care contract and, where applicable, your explicit consent (GDPR art. 9)."
   },
   "triage": {
     "title": "Orientation assistant",
