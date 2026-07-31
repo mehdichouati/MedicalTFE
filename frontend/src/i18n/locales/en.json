@@ -28,7 +28,8 @@
     "password": "Password",
     "submit": "Log in",
     "submitting": "Logging in...",
-    "error": "Incorrect credentials."
+    "error": "Incorrect credentials.",
+    "error_throttled": "Too many login attempts. Please try again in a few moments."
   },
   "home": {
     "title": "Medical Practice",

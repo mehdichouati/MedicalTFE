@@ -1,6 +1,20 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from medical_houses.models import MedicalHouse
+
+# N1 — Types de fichiers autorises pour les documents medicaux, et taille
+# maximale, pour eviter le depot de fichiers dangereux (executables, etc.)
+# sur une plateforme manipulant des donnees de sante.
+MEDICAL_DOCUMENT_MAX_SIZE_MB = 10
+
+
+def validate_medical_document_size(file):
+    if file.size > MEDICAL_DOCUMENT_MAX_SIZE_MB * 1024 * 1024:
+        raise ValidationError(
+            f"Le fichier dépasse la taille maximale autorisée ({MEDICAL_DOCUMENT_MAX_SIZE_MB} Mo)."
+        )
 
 
 class WeeklyAvailability(models.Model):
@@ -113,7 +127,13 @@ class MedicalDocument(models.Model):
     )
     document_type = models.CharField(max_length=20, choices=DocumentType.choices, default=DocumentType.OTHER)
     title = models.CharField(max_length=255)
-    file = models.FileField(upload_to='medical_documents/')
+    file = models.FileField(
+        upload_to='medical_documents/',
+        validators=[
+            FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx']),
+            validate_medical_document_size,
+        ],
+    )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

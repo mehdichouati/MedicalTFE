@@ -28,7 +28,8 @@
     "password": "Mot de passe",
     "submit": "Se connecter",
     "submitting": "Connexion...",
-    "error": "Identifiants incorrects."
+    "error": "Identifiants incorrects.",
+    "error_throttled": "Trop de tentatives de connexion. Veuillez réessayer dans quelques instants."
   },
   "home": {
     "title": "Maison Médicale",

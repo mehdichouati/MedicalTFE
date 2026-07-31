@@ -21,8 +21,12 @@ export default function LoginPage() {
     try {
       await login(username, password)
       navigate('/app')
-    } catch {
-      setError(t('login.error'))
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setError(t('login.error_throttled'))
+      } else {
+        setError(t('login.error'))
+      }
     } finally {
       setSubmitting(false)
     }
