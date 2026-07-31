@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'django_celery_beat',
+    'drf_spectacular',
 
     'users',
     'medical_houses',
@@ -108,6 +109,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
@@ -117,6 +119,17 @@ REST_FRAMEWORK = {
         'user': '120/minute',
         'login': '5/minute',
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API — Plateforme de Gestion pour Maisons Médicales',
+    'DESCRIPTION': (
+        "Documentation de l'API REST du TFE (F1 à F15, N1 à N5) : "
+        "authentification, rendez-vous, paiements, notifications, triage, "
+        "documents médicaux et tableau de bord administratif."
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 SIMPLE_JWT = {
