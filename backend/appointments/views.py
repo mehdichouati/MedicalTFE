@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models import User, LegalGuardianLink, AuditLog
+from medical_houses.models import MedicalHouseStaff
 from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
 from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
@@ -32,6 +33,17 @@ def _is_guardian_of(guardian, patient_id):
     return LegalGuardianLink.objects.filter(
         guardian=guardian, minor_id=patient_id, revoked_at__isnull=True,
     ).exists()
+
+
+def _secretary_house_ids(secretary):
+    return MedicalHouseStaff.objects.filter(professional=secretary).values_list('medical_house_id', flat=True)
+
+
+def _secretary_can_manage(secretary, professional):
+    """F3/F2 — Une secretaire ne gere que les professionnels de SA maison
+    medicale (principe de minimisation des donnees, art. 5.1.c RGPD)."""
+    house_ids = _secretary_house_ids(secretary)
+    return MedicalHouseStaff.objects.filter(professional=professional, medical_house_id__in=house_ids).exists()
 
 
 def _apply_cancellation_policy(appointment, actor):
@@ -135,7 +147,8 @@ class AbsenceViewSet(viewsets.ModelViewSet):
 
 class IsPatientOwnerProOrAdmin(permissions.BasePermission):
     """Un patient ne voit/gère que ses propres RDV (et ceux de ses enfants
-    rattaches, F15), un pro les siens, l'admin tout voit."""
+    rattaches, F15), un pro les siens, l'admin tout voit, une secretaire
+    gere ceux des professionnels de sa maison medicale."""
 
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated)
@@ -144,6 +157,8 @@ class IsPatientOwnerProOrAdmin(permissions.BasePermission):
         user = request.user
         if user.role == 'ADMIN':
             return True
+        if user.role == 'SECRETAIRE':
+            return _secretary_can_manage(user, obj.professional)
         if obj.patient_id == user.id or obj.professional_id == user.id:
             return True
         return _is_guardian_of(user, obj.patient_id)
@@ -171,6 +186,12 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             if status_in:
                 qs = qs.filter(status__in=status_in.split(','))
             return qs
+        if user.role == 'SECRETAIRE':
+            house_ids = _secretary_house_ids(user)
+            professional_ids = MedicalHouseStaff.objects.filter(
+                medical_house_id__in=house_ids,
+            ).values_list('professional_id', flat=True)
+            return Appointment.objects.filter(professional_id__in=professional_ids)
         if user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
             return Appointment.objects.filter(professional=user)
         dependent_ids = LegalGuardianLink.objects.filter(
@@ -190,6 +211,18 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 appointment = serializer.save(patient=target_patient)
             else:
                 appointment = serializer.save(patient=user)
+        elif user.role == 'SECRETAIRE':
+            professional = serializer.validated_data.get('professional')
+            if not professional or not _secretary_can_manage(user, professional):
+                raise ValidationError(
+                    "Vous ne pouvez planifier un rendez-vous que pour un professionnel de votre maison médicale."
+                )
+            appointment = serializer.save()
+            AuditLog.objects.create(
+                actor=user,
+                action=AuditLog.Action.APPOINTMENT_CREATED_BY_STAFF,
+                target_description=f"RDV #{appointment.id} — {appointment.patient} avec {appointment.professional} le {appointment.start_datetime}",
+            )
         else:
             appointment = serializer.save()
         notify_appointment_confirmation(appointment)
@@ -210,6 +243,12 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.save(update_fields=['status', 'cancelled_at', 'cancelled_by'])
         _apply_cancellation_policy(appointment, request.user)
         notify_appointment_cancellation(appointment)
+        if request.user.role == 'SECRETAIRE':
+            AuditLog.objects.create(
+                actor=request.user,
+                action=AuditLog.Action.APPOINTMENT_CANCELLED_BY_STAFF,
+                target_description=f"RDV #{appointment.id} — {appointment.patient} avec {appointment.professional} le {appointment.start_datetime}",
+            )
         return Response(AppointmentSerializer(appointment).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='mark-no-show')
@@ -541,3 +580,29 @@ class MyPatientsView(generics.ListAPIView):
 
         patient_ids = Appointment.objects.filter(professional=user).values_list('patient_id', flat=True).distinct()
         return User.objects.filter(id__in=patient_ids, role='PATIENT')
+
+
+class PatientLookupView(APIView):
+    """Secretariat/Admin — recherche d'un patient par nom d'utilisateur EXACT,
+    pour planifier un rendez-vous en son nom. Volontairement limite a une
+    correspondance exacte (pas de recherche/liste libre) : la secretaire ne
+    doit pas pouvoir parcourir la base des patients, seulement retrouver un
+    patient qu'elle a deja au telephone (minimisation des donnees, art.
+    5.1.c RGPD)."""
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        if request.user.role not in ('SECRETAIRE', 'ADMIN'):
+            return Response({'detail': "Accès non autorisé."}, status=status.HTTP_403_FORBIDDEN)
+        username = request.query_params.get('username', '').strip()
+        if not username:
+            return Response({'detail': "Paramètre 'username' requis."}, status=status.HTTP_400_BAD_REQUEST)
+        patient = User.objects.filter(username=username, role='PATIENT').first()
+        if patient is None:
+            return Response({'detail': 'Patient introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            'id': patient.id,
+            'username': patient.username,
+            'full_name': patient.get_full_name() or patient.username,
+        })

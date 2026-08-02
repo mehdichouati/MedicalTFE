@@ -3,7 +3,9 @@
     "PATIENT": "Patient",
     "MEDECIN": "General practitioner",
     "KINE": "Physiotherapist",
-    "PSYCHOLOGUE": "Psychologist"
+    "PSYCHOLOGUE": "Psychologist",
+    "ADMIN": "Administrator",
+    "SECRETAIRE": "Secretary"
   },
   "common": {
     "back_to_home": "Back to home",
@@ -60,6 +62,8 @@
     "link_my_appointments_subtitle": "Manage your consultations",
     "link_planning": "My schedule",
     "link_planning_subtitle": "Hours and time off",
+    "link_secretary": "Manage appointments",
+    "link_secretary_subtitle": "Professionals' schedules",
     "link_my_patients": "View patient records",
     "link_my_patients_subtitle": "Your patients and their documents",
     "link_dashboard": "Dashboard",
@@ -244,6 +248,28 @@
     "weekday_4": "Friday",
     "weekday_5": "Saturday",
     "weekday_6": "Sunday"
+  },
+  "secretary": {
+    "title": "Appointment management",
+    "load_error": "Unable to load appointments.",
+    "professional_label": "Professional",
+    "today_button": "Today",
+    "no_appointments_today": "No appointments on this day.",
+    "cancel_button": "Cancel",
+    "confirm_cancel_question": "Confirm?",
+    "cancel_error": "Error while cancelling the appointment.",
+    "new_appointment_title": "New appointment",
+    "patient_username_placeholder": "Patient's username",
+    "lookup_button": "Search",
+    "lookup_error": "Patient not found.",
+    "patient_found": "Patient found: {{name}}",
+    "loading_slots": "Loading available slots...",
+    "no_slots": "No slots available for this date.",
+    "slot_label": "Time slot",
+    "reason_label": "Reason (optional)",
+    "creating": "Creating...",
+    "create_button": "Create appointment",
+    "create_error": "Error while creating the appointment."
   },
   "patient_detail": {
     "title": "{{username}}'s record",

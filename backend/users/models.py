@@ -10,6 +10,7 @@ class User(AbstractUser):
         KINE = 'KINE', 'Kinésithérapeute'
         PSYCHOLOGUE = 'PSYCHOLOGUE', 'Psychologue'
         ADMIN = 'ADMIN', 'Administrateur'
+        SECRETAIRE = 'SECRETAIRE', 'Secrétaire'
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.PATIENT)
     email = models.EmailField(unique=True)
@@ -96,6 +97,8 @@ class AuditLog(models.Model):
         PAYMENT_SUCCEEDED = 'PAYMENT_SUCCEEDED', 'Paiement confirmé'
         PAYMENT_FAILED = 'PAYMENT_FAILED', 'Paiement échoué'
         PAYMENT_REFUNDED = 'PAYMENT_REFUNDED', 'Paiement remboursé'
+        APPOINTMENT_CREATED_BY_STAFF = 'APPOINTMENT_CREATED_BY_STAFF', 'Rendez-vous créé par le secrétariat'
+        APPOINTMENT_CANCELLED_BY_STAFF = 'APPOINTMENT_CANCELLED_BY_STAFF', 'Rendez-vous annulé par le secrétariat'
         
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='audit_actions',

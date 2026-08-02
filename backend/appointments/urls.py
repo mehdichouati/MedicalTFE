@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     WeeklyAvailabilityViewSet, AbsenceViewSet, AppointmentViewSet,
     AvailableSlotsView, PatientHistoryView, MedicalDocumentViewSet,
-    ReviewViewSet, MyPatientsView,
+    ReviewViewSet, MyPatientsView, PatientLookupView,
 )
 
 router = DefaultRouter()
@@ -17,4 +17,5 @@ urlpatterns = [
     path('appointments/available-slots/', AvailableSlotsView.as_view(), name='available-slots'),
     path('patients/history/', PatientHistoryView.as_view(), name='patient-history'),
     path('my-patients/', MyPatientsView.as_view(), name='my-patients'),
+    path('patients/lookup/', PatientLookupView.as_view(), name='patient-lookup'),
 ] + router.urls

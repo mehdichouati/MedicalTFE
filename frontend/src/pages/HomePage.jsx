@@ -51,6 +51,9 @@ export default function HomePage() {
           {user?.role === 'ADMIN' && (
             <ActionCard to="/admin/dashboard" icon="📊" title={t('home.link_dashboard')} subtitle={t('home.link_dashboard_subtitle')} />
           )}
+          {user?.role === 'SECRETAIRE' && (
+            <ActionCard to="/secretary" icon="🗂️" title={t('home.link_secretary')} subtitle={t('home.link_secretary_subtitle')} />
+          )}
           <ActionCard to="/profile" icon="👤" title={t('home.link_profile')} subtitle={t('home.link_profile_subtitle')} />
         </div>
 

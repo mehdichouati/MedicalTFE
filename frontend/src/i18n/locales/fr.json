@@ -3,7 +3,9 @@
     "PATIENT": "Patient",
     "MEDECIN": "Médecin généraliste",
     "KINE": "Kinésithérapeute",
-    "PSYCHOLOGUE": "Psychologue"
+    "PSYCHOLOGUE": "Psychologue",
+    "ADMIN": "Administrateur",
+    "SECRETAIRE": "Secrétaire"
   },
   "common": {
     "back_to_home": "Retour à l'accueil",
@@ -60,6 +62,8 @@
     "link_my_appointments_subtitle": "Gérez vos consultations",
     "link_planning": "Mon planning",
     "link_planning_subtitle": "Horaires et absences",
+    "link_secretary": "Gérer les rendez-vous",
+    "link_secretary_subtitle": "Agendas des professionnels",
     "link_my_patients": "Consulter les dossiers",
     "link_my_patients_subtitle": "Vos patients et leurs documents",
     "link_dashboard": "Tableau de bord",
@@ -244,6 +248,28 @@
     "weekday_4": "Vendredi",
     "weekday_5": "Samedi",
     "weekday_6": "Dimanche"
+  },
+  "secretary": {
+    "title": "Gestion des rendez-vous",
+    "load_error": "Impossible de charger les rendez-vous.",
+    "professional_label": "Professionnel",
+    "today_button": "Aujourd'hui",
+    "no_appointments_today": "Aucun rendez-vous ce jour-là.",
+    "cancel_button": "Annuler",
+    "confirm_cancel_question": "Confirmer ?",
+    "cancel_error": "Erreur lors de l'annulation.",
+    "new_appointment_title": "Nouveau rendez-vous",
+    "patient_username_placeholder": "Nom d'utilisateur du patient",
+    "lookup_button": "Rechercher",
+    "lookup_error": "Patient introuvable.",
+    "patient_found": "Patient trouvé : {{name}}",
+    "loading_slots": "Chargement des créneaux...",
+    "no_slots": "Aucun créneau disponible à cette date.",
+    "slot_label": "Créneau",
+    "reason_label": "Motif (facultatif)",
+    "creating": "Création...",
+    "create_button": "Créer le rendez-vous",
+    "create_error": "Erreur lors de la création du rendez-vous."
   },
   "patient_detail": {
     "title": "Dossier de {{username}}",
