@@ -35,6 +35,7 @@ function formatDateTime(isoString, locale) {
 }
 
 function ReviewForm({ appointmentId, onSubmitted }) {
+  const { t } = useTranslation()
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
   const [isAnonymous, setIsAnonymous] = useState(false)
@@ -57,7 +58,7 @@ function ReviewForm({ appointmentId, onSubmitted }) {
       const detail = err.response?.data?.comment?.[0]
         || err.response?.data?.appointment?.[0]
         || err.response?.data?.detail
-        || "Erreur lors de l'envoi de l'avis."
+        || t('review_form.error_generic')
       setError(detail)
     } finally {
       setSubmitting(false)
@@ -67,7 +68,7 @@ function ReviewForm({ appointmentId, onSubmitted }) {
   return (
     <form onSubmit={handleSubmit} className={styles.reviewForm}>
       <div className={styles.reviewFormRow}>
-        <label>Note : </label>
+        <label>{t('review_form.rating_label')}</label>
         <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className={styles.reviewSelect}>
           {[1, 2, 3, 4, 5].map((n) => (
             <option key={n} value={n}>{n} / 5</option>
@@ -75,7 +76,7 @@ function ReviewForm({ appointmentId, onSubmitted }) {
         </select>
       </div>
       <textarea
-        placeholder={rating <= 3 ? 'Commentaire (obligatoire pour cette note)' : 'Commentaire (facultatif)'}
+        placeholder={rating <= 3 ? t('review_form.comment_required_placeholder') : t('review_form.comment_optional_placeholder')}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={3}
@@ -83,11 +84,11 @@ function ReviewForm({ appointmentId, onSubmitted }) {
       />
       <label className={styles.reviewCheckboxLabel}>
         <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} />
-        Publier anonymement
+        {t('review_form.publish_anonymous')}
       </label>
       {error && <p className={styles.reviewError}>{error}</p>}
       <button type="submit" disabled={submitting} className={styles.reviewSubmitButton}>
-        {submitting ? '...' : "Envoyer l'avis"}
+        {submitting ? '...' : t('review_form.submit')}
       </button>
     </form>
   )
@@ -178,7 +179,7 @@ export default function HistoryPage() {
                 {formatDateTime(appt.start_datetime, i18n.language)}
               </p>
               <p className={styles.cardMeta}>
-                {appt.professional_username} ({appt.professional_role}) — {appt.medical_house_name}
+                {appt.professional_username} ({t(`roles.${appt.professional_role}`, appt.professional_role)}) — {appt.medical_house_name}
               </p>
               <p className={styles.cardMeta}>
                 {t('history.status')} : {t(`status.${appt.status}`)}
@@ -208,7 +209,7 @@ export default function HistoryPage() {
                 if (review) {
                   return (
                     <p className={styles.reviewStatus}>
-                      Votre avis ({review.rating}/5) — {review.moderation_status_display}
+                      {t('review_form.your_review', { rating: review.rating, status: review.moderation_status_display })}
                     </p>
                   )
                 }
@@ -223,7 +224,7 @@ export default function HistoryPage() {
                 return (
                   <p className={styles.actionRow}>
                     <button onClick={() => setOpenReviewFor(appt.id)} className={styles.reviewOpenButton}>
-                      Évaluer cette consultation
+                      {t('review_form.evaluate_button')}
                     </button>
                   </p>
                 )

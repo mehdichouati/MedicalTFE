@@ -86,6 +86,16 @@
     "load_error": "Impossible de charger l'historique.",
     "scroll_hint": "Faites défiler pour voir plus..."
   },
+  "review_form": {
+    "rating_label": "Note :",
+    "comment_required_placeholder": "Commentaire (obligatoire pour cette note)",
+    "comment_optional_placeholder": "Commentaire (facultatif)",
+    "publish_anonymous": "Publier anonymement",
+    "submit": "Envoyer l'avis",
+    "error_generic": "Erreur lors de l'envoi de l'avis.",
+    "your_review": "Votre avis ({{rating}}/5) — {{status}}",
+    "evaluate_button": "Évaluer cette consultation"
+  },
   "status": {
     "PENDING": "En attente",
     "CONFIRMED": "Confirmé",

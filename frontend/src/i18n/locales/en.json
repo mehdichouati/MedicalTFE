@@ -86,6 +86,16 @@
     "load_error": "Unable to load history.",
     "scroll_hint": "Scroll to see more..."
   },
+  "review_form": {
+    "rating_label": "Rating:",
+    "comment_required_placeholder": "Comment (required for this rating)",
+    "comment_optional_placeholder": "Comment (optional)",
+    "publish_anonymous": "Publish anonymously",
+    "submit": "Submit review",
+    "error_generic": "Error while submitting the review.",
+    "your_review": "Your review ({{rating}}/5) — {{status}}",
+    "evaluate_button": "Rate this consultation"
+  },
   "status": {
     "PENDING": "Pending",
     "CONFIRMED": "Confirmed",
