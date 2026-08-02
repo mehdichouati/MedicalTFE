@@ -18,14 +18,22 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True)
     date_of_birth = serializers.DateField(required=True)
+    # F1 — Consentement explicite au traitement des donnees de sante
+    # (art. 9 RGPD), obligatoire pour finaliser l'inscription.
+    health_data_consent = serializers.BooleanField(write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password2', 'role', 'phone_number', 'date_of_birth')
+        fields = ('username', 'email', 'password', 'password2', 'role', 'phone_number', 'date_of_birth', 'health_data_consent')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Les deux mots de passe ne correspondent pas."})
+
+        if not attrs.get('health_data_consent'):
+            raise serializers.ValidationError({
+                'health_data_consent': "Le consentement au traitement de vos données de santé est requis pour créer un compte."
+            })
 
         age = _calculate_age(attrs['date_of_birth'])
         if age < 16:
@@ -37,7 +45,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        from django.utils import timezone
+
         validated_data.pop('password2')
+        validated_data.pop('health_data_consent')
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -45,6 +56,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone_number=validated_data.get('phone_number', ''),
             date_of_birth=validated_data['date_of_birth'],
             password=validated_data['password'],
+            health_data_consent_given=True,
+            health_data_consent_at=timezone.now(),
         )
         return user
 

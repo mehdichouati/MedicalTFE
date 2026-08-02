@@ -11,7 +11,7 @@ export default function RegisterPage() {
   const { login } = useAuth()
 
   const [form, setForm] = useState({
-    username: '', email: '', password: '', password2: '', date_of_birth: '',
+    username: '', email: '', password: '', password2: '', date_of_birth: '', health_data_consent: false,
   })
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -62,6 +62,19 @@ export default function RegisterPage() {
           <label>{t('register.confirm_password')}</label><br />
           <input type="password" value={form.password2} onChange={update('password2')} required className={styles.input} />
         </div>
+        <div className={styles.field}>
+          <label className={styles.consentLabel}>
+            <input
+              type="checkbox"
+              checked={form.health_data_consent}
+              onChange={(e) => setForm({ ...form, health_data_consent: e.target.checked })}
+              required
+            />
+            {t('register.health_data_consent_label')}
+          </label>
+          <p className={styles.hint}>{t('register.health_data_consent_note')}</p>
+        </div>
+
         {error && <p className={styles.error}>{error}</p>}
         <button type="submit" disabled={submitting} className={styles.submitButton}>
           {submitting ? t('register.submitting') : t('register.submit')}

@@ -43,7 +43,9 @@
     "submit": "Create my account",
     "already_account": "Already have an account?",
     "login_link": "Log in",
-    "error_generic": "Error while creating the account."
+    "error_generic": "Error while creating the account.",
+    "health_data_consent_label": "I agree that my health data will be processed as part of my medical care.",
+    "health_data_consent_note": "Legal basis: performance of the care contract and/or explicit consent (GDPR art. 9). You can withdraw this consent at any time by contacting our DPO from your profile."
   },
   "home": {
     "title": "Medical Practice",

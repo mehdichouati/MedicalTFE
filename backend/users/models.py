@@ -20,6 +20,11 @@ class User(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # F1 — Preuve du consentement explicite au traitement des donnees de
+    # sante (art. 9 RGPD), recueilli a l'inscription.
+    health_data_consent_given = models.BooleanField(default=False)
+    health_data_consent_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.username} ({self.role})"
 

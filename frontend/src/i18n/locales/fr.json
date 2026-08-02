@@ -43,7 +43,9 @@
     "submit": "Créer mon compte",
     "already_account": "Déjà un compte ?",
     "login_link": "Se connecter",
-    "error_generic": "Erreur lors de la création du compte."
+    "error_generic": "Erreur lors de la création du compte.",
+    "health_data_consent_label": "J'accepte que mes données de santé soient traitées dans le cadre de mon suivi médical.",
+    "health_data_consent_note": "Base légale : exécution du contrat de soins et/ou consentement explicite (art. 9 RGPD). Vous pouvez retirer ce consentement à tout moment en contactant notre DPO depuis votre profil."
   },
   "home": {
     "title": "Maison Médicale",
