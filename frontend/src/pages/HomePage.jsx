@@ -44,6 +44,7 @@ export default function HomePage() {
           {PROFESSIONAL_ROLES.includes(user?.role) && (
             <>
               <ActionCard to="/my-appointments" icon="🗓️" title={t('home.link_my_appointments')} subtitle={t('home.link_my_appointments_subtitle')} />
+              <ActionCard to="/planning" icon="🕐" title={t('home.link_planning')} subtitle={t('home.link_planning_subtitle')} />
               <ActionCard to="/my-patients" icon="📁" title={t('home.link_my_patients')} subtitle={t('home.link_my_patients_subtitle')} />
             </>
           )}

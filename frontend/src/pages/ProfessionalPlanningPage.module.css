@@ -1,0 +1,152 @@
+.page {
+  background: #f7f9fb;
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #1a1a2e;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.title {
+  color: #0a5c78;
+  font-size: 30px;
+  margin-bottom: 4px;
+}
+
+.backLinkRow {
+  margin-bottom: 24px;
+}
+
+.backLink {
+  color: #0a5c78;
+  font-size: 14px;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  color: #0a5c78;
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.loadingText {
+  color: #52606d;
+  font-size: 14px;
+}
+
+.errorText {
+  color: #b3261e;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef1f4;
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.06);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardText {
+  margin: 0;
+  font-size: 14px;
+}
+
+.deleteButton {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #b3261e;
+  background: #fff;
+  color: #b3261e;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #52606d;
+  flex-shrink: 0;
+}
+
+.confirmBtn {
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: none;
+  background: #b3261e;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.abortBtn {
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1px solid #dbe2e8;
+  background: #fff;
+  color: #52606d;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.form {
+  margin-top: 16px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid #eef1f4;
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.08);
+}
+
+.formRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.field {
+  margin-bottom: 14px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #dbe2e8;
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.submitButton {
+  padding: 10px 20px;
+  background: #0a5c78;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.submitButton:disabled {
+  background: #a9c3cd;
+  cursor: not-allowed;
+}
