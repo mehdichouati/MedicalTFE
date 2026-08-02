@@ -50,7 +50,7 @@ export default function ProfilePage() {
     } catch (err) {
       const data = err.response?.data
       const firstError = data ? Object.values(data)[0] : null
-      setDependentError(Array.isArray(firstError) ? firstError[0] : firstError || 'Erreur lors de la création.')
+      setDependentError(Array.isArray(firstError) ? firstError[0] : firstError || t('dependents.error_generic'))
     } finally {
       setDependentSaving(false)
     }
@@ -332,22 +332,22 @@ export default function ProfilePage() {
 
       {user.role === 'PATIENT' && (
         <CollapsibleSection
-          title="Mes enfants"
+          title={t('dependents.section_title')}
           isOpen={!!openSections.dependents}
           onToggle={() => toggleSection('dependents')}
         >
-          {dependents.length === 0 && <p>Aucun enfant rattaché.</p>}
+          {dependents.length === 0 && <p>{t('dependents.no_dependents')}</p>}
           {dependents.map((dep) => (
             <div key={dep.id} className={styles.dependentCard}>
               <p className={styles.dependentName}>{dep.username}</p>
-              <p className={styles.dependentMeta}>{dep.age} ans — {dep.email}</p>
+              <p className={styles.dependentMeta}>{t('dependents.age_years', { age: dep.age })} — {dep.email}</p>
             </div>
           ))}
 
           {showDependentForm ? (
             <form onSubmit={handleDependentSubmit} className={styles.dependentForm}>
               <div className={styles.field}>
-                <label>Nom d'utilisateur de l'enfant</label><br />
+                <label>{t('dependents.username_label')}</label><br />
                 <input
                   type="text"
                   value={dependentForm.username}
@@ -357,7 +357,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div className={styles.field}>
-                <label>Email de l'enfant</label><br />
+                <label>{t('dependents.email_label')}</label><br />
                 <input
                   type="email"
                   value={dependentForm.email}
@@ -367,7 +367,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div className={styles.field}>
-                <label>Date de naissance</label><br />
+                <label>{t('dependents.date_of_birth_label')}</label><br />
                 <input
                   type="date"
                   value={dependentForm.date_of_birth}
@@ -382,21 +382,21 @@ export default function ProfilePage() {
                   checked={dependentForm.attestation}
                   onChange={(e) => setDependentForm({ ...dependentForm, attestation: e.target.checked })}
                 />
-                Je certifie sur l'honneur être le représentant légal (parent ou tuteur) de ce mineur.
+                {t('dependents.attestation_label')}
               </label>
               {dependentError && <p className={styles.errorText}>{dependentError}</p>}
               <div className={styles.dependentFormActions}>
                 <button type="submit" disabled={dependentSaving} className={styles.submitButton}>
-                  {dependentSaving ? '...' : 'Créer le compte'}
+                  {dependentSaving ? '...' : t('dependents.create_button')}
                 </button>
                 <button type="button" onClick={() => setShowDependentForm(false)} className={styles.submitButton}>
-                  Annuler
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>
           ) : (
             <button onClick={() => setShowDependentForm(true)} className={styles.addDependentButton}>
-              + Ajouter un enfant
+              {t('dependents.add_button')}
             </button>
           )}
         </CollapsibleSection>

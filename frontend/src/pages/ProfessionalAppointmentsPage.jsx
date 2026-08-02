@@ -5,21 +5,16 @@ import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './ProfessionalAppointmentsPage.module.css'
 
-const DOCUMENT_TYPES = [
-  { value: 'LAB_RESULT', label: 'Résultat de prise de sang' },
-  { value: 'REPORT', label: 'Rapport médical' },
-  { value: 'OTHER', label: 'Autre document' },
-]
-
-const STATUS_STYLES = {
-  PENDING: { background: '#fff8e8', color: '#8a6d00', label: 'En attente' },
-  CONFIRMED: { background: '#eef5f8', color: '#0a5c78', label: 'Confirmé' },
-  CANCELLED: { background: '#fdf2f2', color: '#b3261e', label: 'Annulé' },
-  COMPLETED: { background: '#eef6f0', color: '#1f5c39', label: 'Terminé' },
-  NO_SHOW: { background: '#fdf2f2', color: '#b3261e', label: 'Absence' },
+const STATUS_COLORS = {
+  PENDING: { background: '#fff8e8', color: '#8a6d00' },
+  CONFIRMED: { background: '#eef5f8', color: '#0a5c78' },
+  CANCELLED: { background: '#fdf2f2', color: '#b3261e' },
+  COMPLETED: { background: '#eef6f0', color: '#1f5c39' },
+  NO_SHOW: { background: '#fdf2f2', color: '#b3261e' },
 }
 
-const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const WEEKDAY_LABELS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 function formatDateTime(isoString, locale) {
   return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
@@ -52,12 +47,19 @@ function buildMonthGrid(year, month) {
 }
 
 function UploadDocumentForm({ patientId, onUploaded }) {
+  const { t } = useTranslation()
   const [title, setTitle] = useState('')
   const [documentType, setDocumentType] = useState('LAB_RESULT')
   const [file, setFile] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+
+  const DOCUMENT_TYPES = [
+    { value: 'LAB_RESULT', label: t('history.doc_type_LAB_RESULT') },
+    { value: 'REPORT', label: t('history.doc_type_REPORT') },
+    { value: 'OTHER', label: t('history.doc_type_OTHER') },
+  ]
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -81,7 +83,7 @@ function UploadDocumentForm({ patientId, onUploaded }) {
       const detail = err.response?.data?.detail
         || err.response?.data?.patient?.[0]
         || err.response?.data?.file?.[0]
-        || "Erreur lors de l'envoi du document."
+        || t('professional_appointments.upload_error_generic')
       setError(detail)
     } finally {
       setSubmitting(false)
@@ -92,13 +94,13 @@ function UploadDocumentForm({ patientId, onUploaded }) {
     <form onSubmit={handleSubmit} className={styles.uploadForm}>
       <div className={styles.uploadFormRow}>
         <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} className={styles.select}>
-          {DOCUMENT_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>{t.label}</option>
+          {DOCUMENT_TYPES.map((dt) => (
+            <option key={dt.value} value={dt.value}>{dt.label}</option>
           ))}
         </select>
         <input
           type="text"
-          placeholder="Titre du document"
+          placeholder={t('professional_appointments.upload_title_placeholder')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={styles.titleInput}
@@ -106,16 +108,17 @@ function UploadDocumentForm({ patientId, onUploaded }) {
       </div>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
       <button type="submit" disabled={submitting || !file || !title} className={styles.uploadButton}>
-        {submitting ? 'Envoi...' : 'Déposer'}
+        {submitting ? t('professional_appointments.upload_submitting') : t('professional_appointments.upload_submit')}
       </button>
-      {success && <p className={styles.uploadSuccessText}>Document envoyé avec succès.</p>}
+      {success && <p className={styles.uploadSuccessText}>{t('professional_appointments.document_uploaded')}</p>}
       {error && <p className={styles.uploadErrorText}>{error}</p>}
     </form>
   )
 }
 
 export default function ProfessionalAppointmentsPage() {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isEnglish = i18n.language?.startsWith('en')
   const { user } = useAuth()
   const [appointments, setAppointments] = useState([])
   const [error, setError] = useState('')
@@ -133,7 +136,7 @@ export default function ProfessionalAppointmentsPage() {
     setLoading(true)
     apiClient.get('/appointments/')
       .then(({ data }) => setAppointments(Array.isArray(data) ? data : data.results))
-      .catch(() => setError('Impossible de charger vos rendez-vous.'))
+      .catch(() => setError(t('professional_appointments.load_error')))
       .finally(() => setLoading(false))
   }
 
@@ -147,7 +150,7 @@ export default function ProfessionalAppointmentsPage() {
       await apiClient.post(`/appointments/${appointmentId}/${action}/`)
       loadAppointments()
     } catch (err) {
-      setActionError(err.response?.data?.detail || 'Une erreur est survenue.')
+      setActionError(err.response?.data?.detail || t('common.error_generic'))
     }
   }
 
@@ -173,17 +176,18 @@ export default function ProfessionalAppointmentsPage() {
     .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
 
   const monthLabel = new Date(calendarMonth.year, calendarMonth.month, 1)
-    .toLocaleDateString('fr-BE', { month: 'long', year: 'numeric' })
+    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { month: 'long', year: 'numeric' })
   const weeks = buildMonthGrid(calendarMonth.year, calendarMonth.month)
+  const weekdayLabels = isEnglish ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_FR
   const selectedDateLabel = new Date(selectedDate + 'T00:00:00')
-    .toLocaleDateString('fr-BE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>Mes rendez-vous</h1>
+        <h1 className={styles.title}>{t('professional_appointments.title')}</h1>
         <p className={styles.backLinkRow}>
-          <Link to="/app" className={styles.backLink}>← Retour à l'accueil</Link>
+          <Link to="/app" className={styles.backLink}>← {t('common.back_to_home')}</Link>
         </p>
 
         {actionError && <p className={styles.errorText}>{actionError}</p>}
@@ -196,7 +200,7 @@ export default function ProfessionalAppointmentsPage() {
             <button type="button" onClick={goNextMonth} className={styles.calendarNavBtn}>›</button>
           </div>
           <div className={styles.calendarGrid}>
-            {WEEKDAY_LABELS.map((wd, i) => (
+            {weekdayLabels.map((wd, i) => (
               <div key={i} className={styles.calendarWeekday}>{wd}</div>
             ))}
             {weeks.flat().map((day, i) => {
@@ -217,51 +221,51 @@ export default function ProfessionalAppointmentsPage() {
               )
             })}
           </div>
-          <button type="button" onClick={goToday} className={styles.todayButton}>Aujourd'hui</button>
+          <button type="button" onClick={goToday} className={styles.todayButton}>{t('professional_appointments.today_button')}</button>
         </div>
 
         <h2 className={styles.selectedDateTitle}>{selectedDateLabel}</h2>
 
         {loading ? (
-          <p className={styles.loadingText}>Chargement...</p>
+          <p className={styles.loadingText}>{t('common.loading')}</p>
         ) : (
           <>
             {dayAppointments.length === 0 && (
-              <p className={styles.loadingText}>Aucun rendez-vous ce jour-là.</p>
+              <p className={styles.loadingText}>{t('professional_appointments.no_appointments_today')}</p>
             )}
             {dayAppointments.map((appt) => {
-              const statusStyle = STATUS_STYLES[appt.status] || {}
+              const statusColor = STATUS_COLORS[appt.status] || {}
               return (
                 <div key={appt.id} className={styles.card}>
                   <div className={styles.cardHeader}>
                     <div>
                       <p className={styles.appointmentDate}>{formatDateTime(appt.start_datetime, i18n.language)}</p>
                       <p className={styles.appointmentMeta}>
-                        Patient : {appt.patient_username}
+                        {t('professional_appointments.patient_label')} : {appt.patient_username}
                         {appt.reason && ` — ${appt.reason}`}
                       </p>
                     </div>
                     <span
                       className={styles.statusBadge}
-                      style={{ background: statusStyle.background, color: statusStyle.color }}
+                      style={{ background: statusColor.background, color: statusColor.color }}
                     >
-                      {statusStyle.label || appt.status}
+                      {t(`status.${appt.status}`, appt.status)}
                     </span>
                   </div>
 
                   {appt.status === 'PENDING' && new Date(appt.start_datetime) <= new Date() && (
                     <div className={styles.actionsRow}>
                       <button onClick={() => handleAction(appt.id, 'mark-completed')} className={styles.btnPrimary}>
-                        Terminer la consultation
+                        {t('professional_appointments.complete_button')}
                       </button>
                       <button onClick={() => handleAction(appt.id, 'mark-no-show')} className={styles.btnSecondary}>
-                        Signaler une absence
+                        {t('professional_appointments.no_show_button')}
                       </button>
                     </div>
                   )}
 
                   {appt.status === 'PENDING' && new Date(appt.start_datetime) > new Date() && (
-                    <p className={styles.loadingText}>Actions disponibles après l'heure du rendez-vous.</p>
+                    <p className={styles.loadingText}>{t('professional_appointments.actions_available_after')}</p>
                   )}
 
                   {appt.status === 'COMPLETED' && user?.role === 'MEDECIN' && (
@@ -273,7 +277,7 @@ export default function ProfessionalAppointmentsPage() {
                         />
                       ) : (
                         <button onClick={() => setUploadFormFor(appt.id)} className={styles.btnSecondary}>
-                          Déposer un document médical
+                          {t('professional_appointments.upload_document_button')}
                         </button>
                       )}
                     </div>

@@ -31,14 +31,37 @@
     "error": "Identifiants incorrects.",
     "error_throttled": "Trop de tentatives de connexion. Veuillez réessayer dans quelques instants."
   },
+  "register": {
+    "title": "Créer un compte",
+    "username": "Nom d'utilisateur",
+    "email": "Email",
+    "date_of_birth": "Date de naissance",
+    "minor_hint": "Les comptes des moins de 16 ans doivent être créés par un parent depuis son profil.",
+    "password": "Mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "submitting": "Création...",
+    "submit": "Créer mon compte",
+    "already_account": "Déjà un compte ?",
+    "login_link": "Se connecter",
+    "error_generic": "Erreur lors de la création du compte."
+  },
   "home": {
     "title": "Maison Médicale",
     "connected_as": "Connecté en tant que",
+    "link_book": "Prendre rendez-vous",
+    "link_book_subtitle": "Réservez une consultation",
     "link_triage": "Aide à l'orientation",
+    "link_triage_subtitle": "Trouvez la bonne orientation",
     "link_history": "Mon historique",
+    "link_history_subtitle": "RDV, documents, paiements",
     "link_my_appointments": "Mes rendez-vous",
+    "link_my_appointments_subtitle": "Gérez vos consultations",
+    "link_my_patients": "Consulter les dossiers",
+    "link_my_patients_subtitle": "Vos patients et leurs documents",
     "link_dashboard": "Tableau de bord",
-    "link_profile": "Mon profil"
+    "link_dashboard_subtitle": "Statistiques et gestion",
+    "link_profile": "Mon profil",
+    "link_profile_subtitle": "Vos informations, préférences"
   },
   "history": {
     "title": "Mon historique",
@@ -55,10 +78,13 @@
     "doc_type_LAB_RESULT": "Résultat de prise de sang",
     "doc_type_REPORT": "Rapport médical",
     "doc_type_OTHER": "Autre document",
+    "doc_type_PRESCRIPTION_KINE": "Prescription pour kinésithérapeute",
+    "doc_type_PSY_NOTE": "Note psychologique",
     "no_documents": "Aucun document pour le moment.",
     "deposited_by": "déposé par",
     "on_date": "le",
-    "load_error": "Impossible de charger l'historique."
+    "load_error": "Impossible de charger l'historique.",
+    "scroll_hint": "Faites défiler pour voir plus..."
   },
   "status": {
     "PENDING": "En attente",
@@ -100,6 +126,47 @@
     "email": "Adresse email",
     "email_verification_reset": "Attention : changer votre adresse email nécessitera une nouvelle vérification."
   },
+  "dependents": {
+    "section_title": "Mes enfants",
+    "no_dependents": "Aucun enfant rattaché.",
+    "age_years": "{{age}} ans",
+    "username_label": "Nom d'utilisateur de l'enfant",
+    "email_label": "Email de l'enfant",
+    "date_of_birth_label": "Date de naissance",
+    "attestation_label": "Je certifie sur l'honneur être le représentant légal (parent ou tuteur) de ce mineur.",
+    "create_button": "Créer le compte",
+    "add_button": "+ Ajouter un enfant",
+    "error_generic": "Erreur lors de la création."
+  },
+  "book_appointment": {
+    "title": "Prendre rendez-vous",
+    "success_title": "Rendez-vous confirmé",
+    "success_text": "Votre rendez-vous a bien été enregistré.",
+    "pay_now": "Payer maintenant",
+    "view_history": "Voir mon historique",
+    "for_whom_label": "Pour qui ?",
+    "myself_option": "Moi-même ({{username}})",
+    "professional_label": "Professionnel",
+    "select_professional": "Sélectionner un professionnel",
+    "date_label": "Date",
+    "loading_slots": "Chargement des créneaux...",
+    "no_slots": "Aucun créneau disponible à cette date.",
+    "slot_label": "Créneau",
+    "reason_label": "Motif (facultatif)",
+    "submitting": "Réservation...",
+    "submit": "Confirmer le rendez-vous",
+    "error_slots": "Impossible de charger les créneaux.",
+    "error_booking": "Erreur lors de la réservation.",
+    "my_appointments_title": "Mes rendez-vous",
+    "loading": "Chargement...",
+    "no_appointments": "Vous n'avez aucun rendez-vous pour le moment.",
+    "reason_prefix": "Motif : {{reason}}",
+    "cancel_button": "Annuler",
+    "confirm_cancel_question": "Confirmer ?",
+    "yes": "Oui",
+    "no": "Non",
+    "error_cancel": "Erreur lors de l'annulation."
+  },
   "triage": {
     "title": "Aide à l'orientation",
     "q1": "Ressentez-vous un signe de gravité immédiate ? (difficulté à respirer, douleur thoracique, perte de connaissance, saignement important)",
@@ -127,7 +194,40 @@
     "complete_button": "Terminer la consultation",
     "no_show_button": "Signaler une absence",
     "upload_document_button": "Déposer un document médical",
-    "document_uploaded": "Document envoyé avec succès."
+    "document_uploaded": "Document envoyé avec succès.",
+    "today_button": "Aujourd'hui",
+    "load_error": "Impossible de charger vos rendez-vous.",
+    "no_appointments_today": "Aucun rendez-vous ce jour-là.",
+    "actions_available_after": "Actions disponibles après l'heure du rendez-vous.",
+    "upload_title_placeholder": "Titre du document",
+    "upload_submitting": "Envoi...",
+    "upload_submit": "Déposer",
+    "upload_error_generic": "Erreur lors de l'envoi du document."
+  },
+  "patient_detail": {
+    "title": "Dossier de {{username}}",
+    "back_link": "← Retour à la liste",
+    "load_error": "Impossible de charger le dossier de ce patient.",
+    "appointments_section": "Rendez-vous",
+    "no_appointments": "Aucun rendez-vous.",
+    "documents_section": "Documents",
+    "no_documents": "Aucun document accessible.",
+    "download": "Télécharger",
+    "add_document_button": "+ Déposer un document",
+    "upload_title_placeholder": "Titre du document",
+    "upload_submitting": "Envoi...",
+    "upload_submit": "Déposer",
+    "upload_success": "Document envoyé.",
+    "upload_error_generic": "Erreur lors de l'envoi."
+  },
+  "professional_patients": {
+    "title": "Dossiers patients",
+    "search_placeholder": "Rechercher un patient (nom, email...)",
+    "sort_name_asc": "Trier : Nom (A-Z)",
+    "sort_name_desc": "Trier : Nom (Z-A)",
+    "sort_username_asc": "Trier : Utilisateur (A-Z)",
+    "load_error": "Impossible de charger la liste des patients.",
+    "no_patients": "Aucun patient trouvé."
   },
   "admin_dashboard": {
     "title": "Tableau de bord administrateur",
@@ -141,11 +241,13 @@
     "medical_houses": "Maisons médicales",
     "chart_title": "Activité des 14 derniers jours",
     "by_house": "Par maison médicale",
-    "top_professionals": "Top professionnels"
+    "top_professionals": "Top professionnels",
+    "reviews": "Avis patients"
   },
   "admin_users": {
     "title": "Utilisateurs",
     "search_placeholder": "Rechercher nom, prénom, email...",
+    "email_placeholder": "Email",
     "all_roles": "Tous les rôles",
     "all_statuses": "Tous les statuts",
     "active": "Actifs",
@@ -168,6 +270,20 @@
     "sort_newest": "Trier : Plus récent",
     "sort_oldest": "Trier : Plus ancien",
     "no_appointments": "Aucun rendez-vous trouvé."
+  },
+  "admin_reviews": {
+    "title": "Modération des avis",
+    "load_error": "Impossible de charger les avis.",
+    "moderate_error": "Erreur lors de la modération.",
+    "filter_pending": "En attente",
+    "filter_approved": "Approuvés",
+    "filter_rejected": "Rejetés",
+    "loading": "Chargement...",
+    "empty": "Aucun avis dans cette catégorie.",
+    "anonymous_tag": "(anonyme)",
+    "anonymous_patient": "Patient anonyme",
+    "approve_button": "Approuver",
+    "reject_button": "Rejeter"
   },
   "showcase": {
     "default_house_name": "Maison Médicale",

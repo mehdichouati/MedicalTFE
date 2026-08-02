@@ -1,31 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './PatientDetailPage.module.css'
 
-const DOC_TYPE_LABELS = {
-  LAB_RESULT: 'Résultat de prise de sang',
-  REPORT: 'Rapport médical',
-  PRESCRIPTION_KINE: 'Prescription pour kinésithérapeute',
-  PSY_NOTE: 'Note psychologique',
-  OTHER: 'Autre document',
-}
-
 const DOCUMENT_TYPES_BY_ROLE = {
-  MEDECIN: Object.keys(DOC_TYPE_LABELS),
+  MEDECIN: ['LAB_RESULT', 'REPORT', 'PRESCRIPTION_KINE', 'PSY_NOTE', 'OTHER'],
   KINE: ['PRESCRIPTION_KINE'],
   PSYCHOLOGUE: ['PSY_NOTE'],
 }
 
-function formatDateTime(isoString) {
-  return new Date(isoString).toLocaleString('fr-BE', {
+function formatDateTime(isoString, locale) {
+  return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
 }
 
 function UploadForm({ patientId, role, onUploaded }) {
+  const { t } = useTranslation()
   const availableTypes = DOCUMENT_TYPES_BY_ROLE[role] || []
   const [title, setTitle] = useState('')
   const [documentType, setDocumentType] = useState(availableTypes[0] || 'OTHER')
@@ -52,7 +46,7 @@ function UploadForm({ patientId, role, onUploaded }) {
       setSuccess(true)
       setTimeout(onUploaded, 1200)
     } catch (err) {
-      setError(err.response?.data?.detail || "Erreur lors de l'envoi.")
+      setError(err.response?.data?.detail || t('patient_detail.upload_error_generic'))
     } finally {
       setSubmitting(false)
     }
@@ -62,13 +56,13 @@ function UploadForm({ patientId, role, onUploaded }) {
     <form onSubmit={handleSubmit} className={styles.uploadForm}>
       <div className={styles.uploadFormRow}>
         <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} className={styles.select}>
-          {availableTypes.map((t) => (
-            <option key={t} value={t}>{DOC_TYPE_LABELS[t]}</option>
+          {availableTypes.map((docType) => (
+            <option key={docType} value={docType}>{t(`history.doc_type_${docType}`, docType)}</option>
           ))}
         </select>
         <input
           type="text"
-          placeholder="Titre du document"
+          placeholder={t('patient_detail.upload_title_placeholder')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={styles.titleInput}
@@ -76,15 +70,16 @@ function UploadForm({ patientId, role, onUploaded }) {
       </div>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
       <button type="submit" disabled={submitting || !file || !title} className={styles.uploadButton}>
-        {submitting ? 'Envoi...' : 'Déposer'}
+        {submitting ? t('patient_detail.upload_submitting') : t('patient_detail.upload_submit')}
       </button>
-      {success && <p className={styles.successText}>Document envoyé.</p>}
+      {success && <p className={styles.successText}>{t('patient_detail.upload_success')}</p>}
       {error && <p className={styles.uploadErrorText}>{error}</p>}
     </form>
   )
 }
 
 export default function PatientDetailPage() {
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const { user } = useAuth()
   const [history, setHistory] = useState(null)
@@ -95,7 +90,7 @@ export default function PatientDetailPage() {
   const loadData = () => {
     apiClient.get('/patients/history/', { params: { patient: id } })
       .then(({ data }) => setHistory(data))
-      .catch(() => setError("Impossible de charger le dossier de ce patient."))
+      .catch(() => setError(t('patient_detail.load_error')))
     apiClient.get('/medical-documents/', { params: { patient: id } })
       .then(({ data }) => setDocuments(Array.isArray(data) ? data : data.results))
       .catch(() => {})
@@ -110,7 +105,7 @@ export default function PatientDetailPage() {
     return (
       <div className={styles.errorPage}>
         <p className={styles.errorText}>{error}</p>
-        <Link to="/my-patients" className={styles.backLink}>← Retour à la liste</Link>
+        <Link to="/my-patients" className={styles.backLink}>{t('patient_detail.back_link')}</Link>
       </div>
     )
   }
@@ -119,33 +114,33 @@ export default function PatientDetailPage() {
     <div className={styles.page}>
       <div className={styles.container}>
         <h1 className={styles.title}>
-          Dossier de {history?.patient_username || '...'}
+          {t('patient_detail.title', { username: history?.patient_username || '...' })}
         </h1>
         <p className={styles.backLinkRow}>
-          <Link to="/my-patients" className={styles.backLink}>← Retour à la liste</Link>
+          <Link to="/my-patients" className={styles.backLink}>{t('patient_detail.back_link')}</Link>
         </p>
 
-        <h2 className={styles.sectionTitle}>Rendez-vous</h2>
-        {history?.appointments?.length === 0 && <p className={styles.emptyText}>Aucun rendez-vous.</p>}
+        <h2 className={styles.sectionTitle}>{t('patient_detail.appointments_section')}</h2>
+        {history?.appointments?.length === 0 && <p className={styles.emptyText}>{t('patient_detail.no_appointments')}</p>}
         {history?.appointments?.map((appt) => (
           <div key={appt.id} className={styles.card}>
-            <p className={styles.cardTitle}>{formatDateTime(appt.start_datetime)}</p>
+            <p className={styles.cardTitle}>{formatDateTime(appt.start_datetime, i18n.language)}</p>
             <p className={styles.cardMeta}>
-              {appt.status} {appt.reason && `— ${appt.reason}`}
+              {t(`status.${appt.status}`, appt.status)} {appt.reason && `— ${appt.reason}`}
             </p>
           </div>
         ))}
 
-        <h2 className={styles.sectionTitleSpaced}>Documents</h2>
-        {documents.length === 0 && <p className={styles.emptyText}>Aucun document accessible.</p>}
+        <h2 className={styles.sectionTitleSpaced}>{t('patient_detail.documents_section')}</h2>
+        {documents.length === 0 && <p className={styles.emptyText}>{t('patient_detail.no_documents')}</p>}
         {documents.map((doc) => (
           <div key={doc.id} className={styles.card}>
             <p className={styles.cardTitle}>{doc.title}</p>
             <p className={styles.cardMeta}>
-              {DOC_TYPE_LABELS[doc.document_type] || doc.document_type} — {doc.uploaded_by_username} — {formatDateTime(doc.uploaded_at)}
+              {t(`history.doc_type_${doc.document_type}`, doc.document_type)} — {doc.uploaded_by_username} — {formatDateTime(doc.uploaded_at, i18n.language)}
             </p>
             <p className={styles.docLinkRow}>
-              <a href={doc.file} target="_blank" rel="noreferrer" className={styles.docLink}>Télécharger</a>
+              <a href={doc.file} target="_blank" rel="noreferrer" className={styles.docLink}>{t('patient_detail.download')}</a>
             </p>
           </div>
         ))}
@@ -154,7 +149,7 @@ export default function PatientDetailPage() {
           <UploadForm patientId={id} role={user?.role} onUploaded={() => { setShowUpload(false); loadData() }} />
         ) : (
           <button onClick={() => setShowUpload(true)} className={styles.addDocButton}>
-            + Déposer un document
+            {t('patient_detail.add_document_button')}
           </button>
         )}
       </div>

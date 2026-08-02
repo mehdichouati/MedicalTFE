@@ -47,7 +47,7 @@ function CreateUserForm({ defaultRole, onCreated, onCancel }) {
       <h3 className={styles.createFormTitle}>{t('admin_users.create_button')}</h3>
       <div className={styles.createFormGrid}>
         <input placeholder={t('login.username')} value={form.username} onChange={update('username')} required className={styles.formInput} />
-        <input placeholder="Email" type="email" value={form.email} onChange={update('email')} required className={styles.formInput} />
+        <input placeholder={t('admin_users.email_placeholder')} type="email" value={form.email} onChange={update('email')} required className={styles.formInput} />
         <input placeholder={t('profile.info_section')} value={form.first_name} onChange={update('first_name')} className={styles.formInput} />
         <input placeholder={t('professional_appointments.patient_label')} value={form.last_name} onChange={update('last_name')} className={styles.formInput} />
         <input placeholder={t('profile.phone')} value={form.phone_number} onChange={update('phone_number')} className={styles.formInput} />

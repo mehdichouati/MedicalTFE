@@ -36,21 +36,21 @@ export default function HomePage() {
         <div className={styles.cardGrid}>
           {user?.role === 'PATIENT' && (
             <>
-              <ActionCard to="/book" icon="📅" title="Prendre rendez-vous" subtitle="Réservez une consultation" />
-              <ActionCard to="/triage" icon="🩺" title={t('home.link_triage')} subtitle="Trouvez la bonne orientation" />
-              <ActionCard to="/history" icon="📋" title={t('home.link_history')} subtitle="RDV, documents, paiements" />
+              <ActionCard to="/book" icon="📅" title={t('home.link_book')} subtitle={t('home.link_book_subtitle')} />
+              <ActionCard to="/triage" icon="🩺" title={t('home.link_triage')} subtitle={t('home.link_triage_subtitle')} />
+              <ActionCard to="/history" icon="📋" title={t('home.link_history')} subtitle={t('home.link_history_subtitle')} />
             </>
           )}
           {PROFESSIONAL_ROLES.includes(user?.role) && (
             <>
-              <ActionCard to="/my-appointments" icon="🗓️" title={t('home.link_my_appointments')} subtitle="Gérez vos consultations" />
-              <ActionCard to="/my-patients" icon="📁" title="Consulter les dossiers" subtitle="Vos patients et leurs documents" />
+              <ActionCard to="/my-appointments" icon="🗓️" title={t('home.link_my_appointments')} subtitle={t('home.link_my_appointments_subtitle')} />
+              <ActionCard to="/my-patients" icon="📁" title={t('home.link_my_patients')} subtitle={t('home.link_my_patients_subtitle')} />
             </>
           )}
           {user?.role === 'ADMIN' && (
-            <ActionCard to="/admin/dashboard" icon="📊" title={t('home.link_dashboard')} subtitle="Statistiques et gestion" />
+            <ActionCard to="/admin/dashboard" icon="📊" title={t('home.link_dashboard')} subtitle={t('home.link_dashboard_subtitle')} />
           )}
-          <ActionCard to="/profile" icon="👤" title={t('home.link_profile')} subtitle="Vos informations, préférences" />
+          <ActionCard to="/profile" icon="👤" title={t('home.link_profile')} subtitle={t('home.link_profile_subtitle')} />
         </div>
 
         <button onClick={logout} className={styles.logoutButton}>

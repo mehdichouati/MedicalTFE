@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './RegisterPage.module.css'
 
 export default function RegisterPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { login } = useAuth()
 
@@ -27,7 +29,7 @@ export default function RegisterPage() {
     } catch (err) {
       const data = err.response?.data
       const firstError = data ? Object.values(data)[0] : null
-      setError(Array.isArray(firstError) ? firstError[0] : firstError || 'Erreur lors de la création du compte.')
+      setError(Array.isArray(firstError) ? firstError[0] : firstError || t('register.error_generic'))
     } finally {
       setSubmitting(false)
     }
@@ -35,38 +37,38 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.container}>
-      <h1>Créer un compte</h1>
+      <h1>{t('register.title')}</h1>
       <form onSubmit={handleSubmit}>
         <div className={styles.field}>
-          <label>Nom d'utilisateur</label><br />
+          <label>{t('register.username')}</label><br />
           <input type="text" value={form.username} onChange={update('username')} required className={styles.input} />
         </div>
         <div className={styles.field}>
-          <label>Email</label><br />
+          <label>{t('register.email')}</label><br />
           <input type="email" value={form.email} onChange={update('email')} required className={styles.input} />
         </div>
         <div className={styles.field}>
-          <label>Date de naissance</label><br />
+          <label>{t('register.date_of_birth')}</label><br />
           <input type="date" value={form.date_of_birth} onChange={update('date_of_birth')} required className={styles.input} />
           <p className={styles.hint}>
-            Les comptes des moins de 16 ans doivent être créés par un parent depuis son profil.
+            {t('register.minor_hint')}
           </p>
         </div>
         <div className={styles.field}>
-          <label>Mot de passe</label><br />
+          <label>{t('register.password')}</label><br />
           <input type="password" value={form.password} onChange={update('password')} required className={styles.input} />
         </div>
         <div className={styles.field}>
-          <label>Confirmer le mot de passe</label><br />
+          <label>{t('register.confirm_password')}</label><br />
           <input type="password" value={form.password2} onChange={update('password2')} required className={styles.input} />
         </div>
         {error && <p className={styles.error}>{error}</p>}
         <button type="submit" disabled={submitting} className={styles.submitButton}>
-          {submitting ? 'Création...' : 'Créer mon compte'}
+          {submitting ? t('register.submitting') : t('register.submit')}
         </button>
       </form>
       <p className={styles.loginLink}>
-        Déjà un compte ? <Link to="/login">Se connecter</Link>
+        {t('register.already_account')} <Link to="/login">{t('register.login_link')}</Link>
       </p>
     </div>
   )

@@ -1,33 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './BookAppointmentPage.module.css'
 
-const ROLE_LABELS = {
-  MEDECIN: 'Médecin généraliste',
-  KINE: 'Kinésithérapeute',
-  PSYCHOLOGUE: 'Psychologue',
-}
-
-const STATUS_LABELS = {
-  PENDING: 'En attente',
-  CONFIRMED: 'Confirmé',
-  CANCELLED: 'Annulé',
-  COMPLETED: 'Terminé',
-  NO_SHOW: 'Absence',
-}
-
 const CANCELLABLE_STATUSES = ['PENDING', 'CONFIRMED']
 
-const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const WEEKDAY_LABELS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
-function formatSlotTime(isoString) {
-  return new Date(isoString).toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })
+function formatSlotTime(isoString, locale) {
+  return new Date(isoString).toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-BE', { hour: '2-digit', minute: '2-digit' })
 }
 
-function formatAppointmentDateTime(isoString) {
-  return new Date(isoString).toLocaleString('fr-BE', {
+function formatAppointmentDateTime(isoString, locale) {
+  return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
@@ -52,8 +40,10 @@ function buildMonthGrid(year, month) {
 }
 
 export default function BookAppointmentPage() {
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const isEnglish = i18n.language?.startsWith('en')
 
   const now = new Date()
   const todayISO = toISODate(now.getFullYear(), now.getMonth(), now.getDate())
@@ -109,9 +99,9 @@ export default function BookAppointmentPage() {
       params: { professional: professionalId, medical_house: house.id, date },
     })
       .then(({ data }) => setSlots(data.slots))
-      .catch(() => setError("Impossible de charger les créneaux."))
+      .catch(() => setError(t('book_appointment.error_slots')))
       .finally(() => setLoadingSlots(false))
-  }, [professionalId, date, house])
+  }, [professionalId, date, house, t])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -135,7 +125,7 @@ export default function BookAppointmentPage() {
     } catch (err) {
       const data = err.response?.data
       const firstError = data ? Object.values(data)[0] : null
-      setError(Array.isArray(firstError) ? firstError[0] : firstError || 'Erreur lors de la réservation.')
+      setError(Array.isArray(firstError) ? firstError[0] : firstError || t('book_appointment.error_booking'))
     } finally {
       setSubmitting(false)
     }
@@ -149,7 +139,7 @@ export default function BookAppointmentPage() {
       setCancellingId(null)
       loadMyAppointments()
     } catch (err) {
-      setCancelError(err.response?.data?.detail || "Erreur lors de l'annulation.")
+      setCancelError(err.response?.data?.detail || t('book_appointment.error_cancel'))
     } finally {
       setCancelSubmittingId(null)
     }
@@ -165,10 +155,11 @@ export default function BookAppointmentPage() {
   }
   const isPrevDisabled = calendarMonth.year === now.getFullYear() && calendarMonth.month === now.getMonth()
 
-  const professionals = house?.staff?.filter((s) => Object.keys(ROLE_LABELS).includes(s.role)) || []
+  const professionals = house?.staff?.filter((s) => ['MEDECIN', 'KINE', 'PSYCHOLOGUE'].includes(s.role)) || []
   const monthLabel = new Date(calendarMonth.year, calendarMonth.month, 1)
-    .toLocaleDateString('fr-BE', { month: 'long', year: 'numeric' })
+    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { month: 'long', year: 'numeric' })
   const weeks = buildMonthGrid(calendarMonth.year, calendarMonth.month)
+  const weekdayLabels = isEnglish ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_FR
 
   if (success) {
     return (
@@ -176,14 +167,14 @@ export default function BookAppointmentPage() {
         <div className={styles.successContainer}>
           <div className={styles.successCard}>
             <div className={styles.successIcon}>✅</div>
-            <h1 className={styles.successTitle}>Rendez-vous confirmé</h1>
-            <p className={styles.successText}>Votre rendez-vous a bien été enregistré.</p>
+            <h1 className={styles.successTitle}>{t('book_appointment.success_title')}</h1>
+            <p className={styles.successText}>{t('book_appointment.success_text')}</p>
             <div className={styles.successActions}>
               <button onClick={() => navigate(`/pay/${success.id}`)} className={styles.btnPrimary}>
-                Payer maintenant
+                {t('book_appointment.pay_now')}
               </button>
               <Link to="/history">
-                <button className={styles.btnSecondary}>Voir mon historique</button>
+                <button className={styles.btnSecondary}>{t('book_appointment.view_history')}</button>
               </Link>
             </div>
           </div>
@@ -195,36 +186,38 @@ export default function BookAppointmentPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>Prendre rendez-vous</h1>
+        <h1 className={styles.title}>{t('book_appointment.title')}</h1>
         <p className={styles.backLinkRow}>
-          <Link to="/app" className={styles.backLink}>← Retour à l'accueil</Link>
+          <Link to="/app" className={styles.backLink}>← {t('common.back_to_home')}</Link>
         </p>
 
         <form onSubmit={handleSubmit} className={styles.formCard}>
           {dependents.length > 0 && (
             <div className={styles.field}>
-              <label className={styles.fieldLabel}>Pour qui ?</label>
+              <label className={styles.fieldLabel}>{t('book_appointment.for_whom_label')}</label>
               <select value={bookingFor} onChange={(e) => setBookingFor(e.target.value)} className={styles.input}>
-                <option value="self">Moi-même ({user?.username})</option>
+                <option value="self">{t('book_appointment.myself_option', { username: user?.username })}</option>
                 {dependents.map((dep) => (
-                  <option key={dep.id} value={dep.id}>{dep.username} ({dep.age} ans)</option>
+                  <option key={dep.id} value={dep.id}>
+                    {dep.username} ({t('dependents.age_years', { age: dep.age })})
+                  </option>
                 ))}
               </select>
             </div>
           )}
 
           <div className={styles.field}>
-            <label className={styles.fieldLabel}>Professionnel</label>
+            <label className={styles.fieldLabel}>{t('book_appointment.professional_label')}</label>
             <select value={professionalId} onChange={(e) => setProfessionalId(e.target.value)} required className={styles.input}>
-              <option value="">Sélectionner un professionnel</option>
+              <option value="">{t('book_appointment.select_professional')}</option>
               {professionals.map((p) => (
-                <option key={p.id} value={p.id}>{p.full_name} — {ROLE_LABELS[p.role]}</option>
+                <option key={p.id} value={p.id}>{p.full_name} — {t(`roles.${p.role}`, p.role)}</option>
               ))}
             </select>
           </div>
 
           <div className={styles.field}>
-            <label className={styles.fieldLabel}>Date</label>
+            <label className={styles.fieldLabel}>{t('book_appointment.date_label')}</label>
             <div className={styles.calendarWrap}>
               <div className={styles.calendarHeader}>
                 <button
@@ -239,7 +232,7 @@ export default function BookAppointmentPage() {
                 <button type="button" onClick={goNextMonth} className={styles.calendarNavBtn}>›</button>
               </div>
               <div className={styles.calendarGrid}>
-                {WEEKDAY_LABELS.map((wd, i) => (
+                {weekdayLabels.map((wd, i) => (
                   <div key={i} className={styles.calendarWeekday}>{wd}</div>
                 ))}
                 {weeks.flat().map((day, i) => {
@@ -267,15 +260,15 @@ export default function BookAppointmentPage() {
             </div>
           </div>
 
-          {loadingSlots && <p className={styles.loadingText}>Chargement des créneaux...</p>}
+          {loadingSlots && <p className={styles.loadingText}>{t('book_appointment.loading_slots')}</p>}
 
           {!loadingSlots && professionalId && date && slots.length === 0 && (
-            <p className={styles.loadingText}>Aucun créneau disponible à cette date.</p>
+            <p className={styles.loadingText}>{t('book_appointment.no_slots')}</p>
           )}
 
           {slots.length > 0 && (
             <div className={styles.field}>
-              <label className={styles.fieldLabel}>Créneau</label>
+              <label className={styles.fieldLabel}>{t('book_appointment.slot_label')}</label>
               <div className={styles.slotsWrap}>
                 {slots.map((slot) => {
                   const isSelected = selectedSlot?.start === slot.start
@@ -286,7 +279,7 @@ export default function BookAppointmentPage() {
                       onClick={() => setSelectedSlot(slot)}
                       className={isSelected ? styles.slotButtonSelected : styles.slotButton}
                     >
-                      {formatSlotTime(slot.start)}
+                      {formatSlotTime(slot.start, isEnglish ? 'en' : 'fr')}
                     </button>
                   )
                 })}
@@ -295,7 +288,7 @@ export default function BookAppointmentPage() {
           )}
 
           <div className={styles.field}>
-            <label className={styles.fieldLabel}>Motif (facultatif)</label>
+            <label className={styles.fieldLabel}>{t('book_appointment.reason_label')}</label>
             <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} className={styles.input} />
           </div>
 
@@ -306,16 +299,16 @@ export default function BookAppointmentPage() {
             disabled={!selectedSlot || submitting}
             className={!selectedSlot || submitting ? styles.submitButtonDisabled : styles.submitButton}
           >
-            {submitting ? 'Réservation...' : 'Confirmer le rendez-vous'}
+            {submitting ? t('book_appointment.submitting') : t('book_appointment.submit')}
           </button>
         </form>
 
         <section className={styles.myAppointmentsSection}>
-          <h2 className={styles.myAppointmentsTitle}>Mes rendez-vous</h2>
+          <h2 className={styles.myAppointmentsTitle}>{t('book_appointment.my_appointments_title')}</h2>
 
-          {loadingAppointments && <p className={styles.loadingText}>Chargement...</p>}
+          {loadingAppointments && <p className={styles.loadingText}>{t('book_appointment.loading')}</p>}
           {!loadingAppointments && myAppointments.length === 0 && (
-            <p className={styles.loadingText}>Vous n'avez aucun rendez-vous pour le moment.</p>
+            <p className={styles.loadingText}>{t('book_appointment.no_appointments')}</p>
           )}
           {cancelError && <p className={styles.errorText}>{cancelError}</p>}
 
@@ -324,16 +317,18 @@ export default function BookAppointmentPage() {
             return (
               <div key={appt.id} className={styles.appointmentCard}>
                 <div className={styles.appointmentInfo}>
-                  <p className={styles.appointmentDate}>{formatAppointmentDateTime(appt.start_datetime)}</p>
+                  <p className={styles.appointmentDate}>{formatAppointmentDateTime(appt.start_datetime, isEnglish ? 'en' : 'fr')}</p>
                   <p className={styles.appointmentMeta}>
-                    {appt.professional_username} — {ROLE_LABELS[appt.professional_role] || appt.professional_role}
+                    {appt.professional_username} — {t(`roles.${appt.professional_role}`, appt.professional_role)}
                     {' — '}{appt.medical_house_name}
                   </p>
-                  {appt.reason && <p className={styles.appointmentMeta}>Motif : {appt.reason}</p>}
+                  {appt.reason && (
+                    <p className={styles.appointmentMeta}>{t('book_appointment.reason_prefix', { reason: appt.reason })}</p>
+                  )}
                 </div>
                 <div className={styles.appointmentActions}>
                   <span className={styles[`statusBadge${appt.status}`] || styles.statusBadge}>
-                    {STATUS_LABELS[appt.status] || appt.status}
+                    {t(`status.${appt.status}`, appt.status)}
                   </span>
                   {isCancellable && cancellingId !== appt.id && (
                     <button
@@ -341,26 +336,26 @@ export default function BookAppointmentPage() {
                       onClick={() => setCancellingId(appt.id)}
                       className={styles.cancelButton}
                     >
-                      Annuler
+                      {t('book_appointment.cancel_button')}
                     </button>
                   )}
                   {isCancellable && cancellingId === appt.id && (
                     <div className={styles.cancelConfirmRow}>
-                      <span className={styles.cancelConfirmText}>Confirmer ?</span>
+                      <span className={styles.cancelConfirmText}>{t('book_appointment.confirm_cancel_question')}</span>
                       <button
                         type="button"
                         onClick={() => handleCancelAppointment(appt.id)}
                         disabled={cancelSubmittingId === appt.id}
                         className={styles.cancelConfirmBtn}
                       >
-                        {cancelSubmittingId === appt.id ? '...' : 'Oui'}
+                        {cancelSubmittingId === appt.id ? '...' : t('book_appointment.yes')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setCancellingId(null)}
                         className={styles.cancelAbortBtn}
                       >
-                        Non
+                        {t('book_appointment.no')}
                       </button>
                     </div>
                   )}
