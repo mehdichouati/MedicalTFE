@@ -100,7 +100,10 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     ordering = ('last_name', 'first_name')
 
     def get_queryset(self):
-        return User.objects.exclude(role='ADMIN')
+        qs = User.objects.exclude(role='ADMIN')
+        if self.request.query_params.get('professionals_only') == 'true':
+            qs = qs.exclude(role='PATIENT')
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'create':

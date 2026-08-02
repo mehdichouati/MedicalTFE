@@ -58,6 +58,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id', 'is_email_verified', 'created_at')
 
+    def update(self, instance, validated_data):
+        # F1/N1 — si l'email change, la verification precedente ne vaut
+        # plus (elle etait valable pour l'ancienne adresse).
+        if 'email' in validated_data and validated_data['email'] != instance.email:
+            instance.is_email_verified = False
+        return super().update(instance, validated_data)
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     """F9 — Changement de mot de passe (exige l'ancien pour confirmation)."""

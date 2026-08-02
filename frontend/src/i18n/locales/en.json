@@ -58,7 +58,8 @@
     "no_documents": "No documents yet.",
     "deposited_by": "uploaded by",
     "on_date": "on",
-    "load_error": "Unable to load history."
+    "load_error": "Unable to load history.",
+    "scroll_hint": "Scroll to see more..."
   },
   "status": {
     "PENDING": "Pending",
@@ -94,7 +95,11 @@
     "dpo_section": "Privacy and data protection",
     "dpo_intro": "In accordance with the GDPR, you can contact our Data Protection Officer (DPO) with any question regarding the processing of your health data, or to exercise your rights of access, rectification or erasure.",
     "dpo_email_label": "DPO contact",
-    "dpo_legal_note": "Processing based on the care contract and, where applicable, your explicit consent (GDPR art. 9)."
+    "dpo_legal_note": "Processing based on the care contract and, where applicable, your explicit consent (GDPR art. 9).",
+    "username": "Username",
+    "username_change_note": "Note: this will also change your login identifier.",
+    "email": "Email address",
+    "email_verification_reset": "Note: changing your email address will require re-verification."
   },
   "triage": {
     "title": "Orientation assistant",
@@ -164,5 +169,33 @@
     "sort_newest": "Sort: Newest",
     "sort_oldest": "Sort: Oldest",
     "no_appointments": "No appointments found."
+  },
+  "showcase": {
+    "default_house_name": "Medical Practice",
+    "default_house_name_lowercase": "our medical practice",
+    "hero_subtitle": "Community-based care, with a human and coordinated approach.",
+    "login_button": "Log in",
+    "register_button": "Create an account",
+    "facade_alt": "Medical practice facade",
+    "why_choose_title": "Why choose {{name}}?",
+    "highlight_1_title": "A multidisciplinary team",
+    "highlight_1_text": "General practitioners, physiotherapists and psychologists working together for complete care.",
+    "highlight_2_title": "Simplified appointment booking",
+    "highlight_2_text": "Book online in a few clicks, receive your reminders automatically.",
+    "highlight_3_title": "Secure payments and data",
+    "highlight_3_text": "Your payments and health data are protected in line with GDPR standards.",
+    "highlight_4_title": "A human approach",
+    "highlight_4_text": "Personalised support, listening to every patient.",
+    "waiting_room_alt": "Waiting room",
+    "waiting_room_title": "A welcome designed for you",
+    "waiting_room_body": "A calm, accessible space where every patient is cared for attentively, from booking through to post-consultation follow-up.",
+    "team_title": "Our team",
+    "team_alt": "Our team",
+    "team_empty": "Team coming soon.",
+    "reviews_title": "Patient reviews",
+    "reviews_meta": "({{rating}}/5 based on {{count}} reviews)",
+    "reviews_prev": "Previous reviews",
+    "reviews_next": "Next reviews",
+    "reviews_empty": "No reviews yet."
   }
 }

@@ -5,9 +5,24 @@ import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './ProfilePage.module.css'
 
+function CollapsibleSection({ title, isOpen, onToggle, children }) {
+  return (
+    <section className={styles.section}>
+      <button type="button" onClick={onToggle} className={styles.sectionToggle}>
+        <h2 className={styles.sectionToggleTitle}>{title}</h2>
+        <span className={styles.sectionToggleIcon}>{isOpen ? '▾' : '▸'}</span>
+      </button>
+      {isOpen && <div className={styles.sectionContent}>{children}</div>}
+    </section>
+  )
+}
+
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
   const { user, setUser } = useAuth()
+
+  const [openSections, setOpenSections] = useState({})
+  const toggleSection = (key) => setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }))
 
   const [dependents, setDependents] = useState([])
   const [showDependentForm, setShowDependentForm] = useState(false)
@@ -41,8 +56,9 @@ export default function ProfilePage() {
     }
   }
 
-  const [phoneNumber, setPhoneNumber] = useState('')
   const [language, setLanguage] = useState('fr')
+  const [usernameField, setUsernameField] = useState('')
+  const [emailField, setEmailField] = useState('')
   const [profileMessage, setProfileMessage] = useState('')
   const [profileError, setProfileError] = useState('')
   const [savingProfile, setSavingProfile] = useState(false)
@@ -65,8 +81,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      setPhoneNumber(user.phone_number || '')
       setLanguage(user.language || 'fr')
+      setUsernameField(user.username || '')
+      setEmailField(user.email || '')
     }
     apiClient.get('/notifications/preferences/')
       .then(({ data }) => setEmailEnabled(data.email_enabled))
@@ -95,14 +112,17 @@ export default function ProfilePage() {
     setSavingProfile(true)
     try {
       const { data } = await apiClient.patch('/auth/me/', {
-        phone_number: phoneNumber,
         language,
+        username: usernameField,
+        email: emailField,
       })
       setUser(data)
       i18n.changeLanguage(language)
       setProfileMessage(t('profile.profile_updated'))
-    } catch {
-      setProfileError(t('common.error_generic'))
+    } catch (err) {
+      const errData = err.response?.data
+      const firstError = errData ? Object.values(errData)[0] : null
+      setProfileError(Array.isArray(firstError) ? firstError[0] : firstError || t('common.error_generic'))
     } finally {
       setSavingProfile(false)
     }
@@ -165,8 +185,11 @@ export default function ProfilePage() {
       <h1>{t('profile.title')}</h1>
       <p><Link to="/app">{t('common.back_to_home')}</Link></p>
 
-      <section className={styles.section}>
-        <h2>{t('profile.photo_section')}</h2>
+      <CollapsibleSection
+        title={t('profile.photo_section')}
+        isOpen={!!openSections.photo}
+        onToggle={() => toggleSection('photo')}
+      >
         {user.profile_photo && (
           <img src={user.profile_photo} alt={t('profile.photo_section')} className={styles.avatar} />
         )}
@@ -178,19 +201,39 @@ export default function ProfilePage() {
           {photoMessage && <p className={styles.successText}>{photoMessage}</p>}
           {photoError && <p className={styles.errorText}>{photoError}</p>}
         </form>
-      </section>
+      </CollapsibleSection>
 
-      <section className={styles.section}>
-        <h2>{t('profile.info_section')}</h2>
+      <CollapsibleSection
+        title={t('profile.info_section')}
+        isOpen={!!openSections.info}
+        onToggle={() => toggleSection('info')}
+      >
         <form onSubmit={handleProfileSubmit}>
           <div className={styles.field}>
-            <label>{t('profile.phone')}</label><br />
+            <label>{t('profile.username')}</label><br />
             <input
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              type="text"
+              value={usernameField}
+              onChange={(e) => setUsernameField(e.target.value)}
+              required
               className={styles.input}
             />
+            {usernameField !== user.username && (
+              <p className={styles.emailChangeNote}>{t('profile.username_change_note')}</p>
+            )}
+          </div>
+          <div className={styles.field}>
+            <label>{t('profile.email')}</label><br />
+            <input
+              type="email"
+              value={emailField}
+              onChange={(e) => setEmailField(e.target.value)}
+              required
+              className={styles.input}
+            />
+            {emailField !== user.email && (
+              <p className={styles.emailChangeNote}>{t('profile.email_verification_reset')}</p>
+            )}
           </div>
           <div className={styles.field}>
             <label>{t('profile.language')}</label><br />
@@ -205,10 +248,13 @@ export default function ProfilePage() {
           {profileMessage && <p className={styles.successText}>{profileMessage}</p>}
           {profileError && <p className={styles.errorText}>{profileError}</p>}
         </form>
-      </section>
+      </CollapsibleSection>
 
-      <section className={styles.section}>
-        <h2>{t('profile.password_section')}</h2>
+      <CollapsibleSection
+        title={t('profile.password_section')}
+        isOpen={!!openSections.password}
+        onToggle={() => toggleSection('password')}
+      >
         <form onSubmit={handlePasswordSubmit}>
           <div className={styles.field}>
             <label>{t('profile.old_password')}</label><br />
@@ -246,10 +292,13 @@ export default function ProfilePage() {
           {passwordMessage && <p className={styles.successText}>{passwordMessage}</p>}
           {passwordError && <p className={styles.errorText}>{passwordError}</p>}
         </form>
-      </section>
+      </CollapsibleSection>
 
-      <section className={styles.section}>
-        <h2>{t('profile.notifications_section', 'Notifications')}</h2>
+      <CollapsibleSection
+        title={t('profile.notifications_section', 'Notifications')}
+        isOpen={!!openSections.notifications}
+        onToggle={() => toggleSection('notifications')}
+      >
         <form onSubmit={handleNotifSubmit}>
           <label className={styles.checkboxRow}>
             <input
@@ -264,10 +313,13 @@ export default function ProfilePage() {
           </button>
           {notifMessage && <p className={styles.successText}>{notifMessage}</p>}
         </form>
-      </section>
+      </CollapsibleSection>
 
-      <section className={styles.section}>
-        <h2>{t('profile.dpo_section')}</h2>
+      <CollapsibleSection
+        title={t('profile.dpo_section')}
+        isOpen={!!openSections.dpo}
+        onToggle={() => toggleSection('dpo')}
+      >
         <div className={styles.dpoBox}>
           <p>{t('profile.dpo_intro')}</p>
           <p>
@@ -276,11 +328,14 @@ export default function ProfilePage() {
           </p>
           <p className={styles.dpoLegalNote}>{t('profile.dpo_legal_note')}</p>
         </div>
-      </section>
+      </CollapsibleSection>
 
       {user.role === 'PATIENT' && (
-        <section className={styles.section}>
-          <h2>Mes enfants</h2>
+        <CollapsibleSection
+          title="Mes enfants"
+          isOpen={!!openSections.dependents}
+          onToggle={() => toggleSection('dependents')}
+        >
           {dependents.length === 0 && <p>Aucun enfant rattaché.</p>}
           {dependents.map((dep) => (
             <div key={dep.id} className={styles.dependentCard}>
@@ -344,7 +399,7 @@ export default function ProfilePage() {
               + Ajouter un enfant
             </button>
           )}
-        </section>
+        </CollapsibleSection>
       )}
     </div>
   )

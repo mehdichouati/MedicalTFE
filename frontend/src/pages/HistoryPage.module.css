@@ -138,3 +138,28 @@
   padding: 4px 12px;
   font-size: 14px;
 }
+
+.scrollSentinel {
+  padding: 12px 0;
+  text-align: center;
+}
+
+.scrollHint {
+  font-size: 13px;
+  color: #9aa3b2;
+}
+
+.scrollableList {
+  max-height: 620px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.scrollableList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollableList::-webkit-scrollbar-thumb {
+  background: #dbe2e8;
+  border-radius: 3px;
+}

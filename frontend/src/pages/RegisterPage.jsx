@@ -9,7 +9,7 @@ export default function RegisterPage() {
   const { login } = useAuth()
 
   const [form, setForm] = useState({
-    username: '', email: '', password: '', password2: '', phone_number: '', date_of_birth: '',
+    username: '', email: '', password: '', password2: '', date_of_birth: '',
   })
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -44,10 +44,6 @@ export default function RegisterPage() {
         <div className={styles.field}>
           <label>Email</label><br />
           <input type="email" value={form.email} onChange={update('email')} required className={styles.input} />
-        </div>
-        <div className={styles.field}>
-          <label>Téléphone</label><br />
-          <input type="tel" value={form.phone_number} onChange={update('phone_number')} className={styles.input} />
         </div>
         <div className={styles.field}>
           <label>Date de naissance</label><br />

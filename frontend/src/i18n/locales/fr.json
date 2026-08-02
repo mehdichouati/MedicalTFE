@@ -94,7 +94,11 @@
     "dpo_section": "Confidentialité et protection des données",
     "dpo_intro": "Conformément au RGPD, vous pouvez contacter notre Délégué à la Protection des Données (DPO) pour toute question relative au traitement de vos données de santé, ou pour exercer vos droits d'accès, de rectification ou d'effacement.",
     "dpo_email_label": "Contact DPO",
-    "dpo_legal_note": "Traitement fondé sur le contrat de soins et, le cas échéant, votre consentement explicite (art. 9 RGPD)."
+    "dpo_legal_note": "Traitement fondé sur le contrat de soins et, le cas échéant, votre consentement explicite (art. 9 RGPD).",
+    "username": "Nom d'utilisateur",
+    "username_change_note": "Attention : ceci modifiera aussi votre identifiant de connexion.",
+    "email": "Adresse email",
+    "email_verification_reset": "Attention : changer votre adresse email nécessitera une nouvelle vérification."
   },
   "triage": {
     "title": "Aide à l'orientation",
@@ -164,5 +168,33 @@
     "sort_newest": "Trier : Plus récent",
     "sort_oldest": "Trier : Plus ancien",
     "no_appointments": "Aucun rendez-vous trouvé."
+  },
+  "showcase": {
+    "default_house_name": "Maison Médicale",
+    "default_house_name_lowercase": "notre maison médicale",
+    "hero_subtitle": "Des soins de proximité, une prise en charge humaine et coordonnée.",
+    "login_button": "Se connecter",
+    "register_button": "Créer un compte",
+    "facade_alt": "Façade de la maison médicale",
+    "why_choose_title": "Pourquoi choisir {{name}} ?",
+    "highlight_1_title": "Une équipe pluridisciplinaire",
+    "highlight_1_text": "Médecins généralistes, kinésithérapeutes et psychologues réunis pour un suivi complet.",
+    "highlight_2_title": "Prise de rendez-vous simplifiée",
+    "highlight_2_text": "Réservez en ligne en quelques clics, recevez vos rappels automatiquement.",
+    "highlight_3_title": "Paiement et données sécurisés",
+    "highlight_3_text": "Vos paiements et vos données de santé sont protégés selon les normes RGPD.",
+    "highlight_4_title": "Une approche humaine",
+    "highlight_4_text": "Un accompagnement personnalisé, à l'écoute de chaque patient.",
+    "waiting_room_alt": "Salle d'attente",
+    "waiting_room_title": "Un accueil pensé pour vous",
+    "waiting_room_body": "Un espace calme et accessible, où chaque patient est pris en charge avec attention, de la prise de rendez-vous jusqu'au suivi post-consultation.",
+    "team_title": "Notre équipe",
+    "team_alt": "Notre équipe",
+    "team_empty": "Équipe à venir.",
+    "reviews_title": "Avis de nos patients",
+    "reviews_meta": "({{rating}}/5 sur {{count}} avis)",
+    "reviews_prev": "Avis précédents",
+    "reviews_next": "Avis suivants",
+    "reviews_empty": "Aucun avis pour le moment."
   }
 }

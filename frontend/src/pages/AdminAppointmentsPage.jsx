@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import styles from './AdminAppointmentsPage.module.css'
@@ -15,10 +15,13 @@ function formatDateTime(isoString, locale) {
 
 export default function AdminAppointmentsPage() {
   const { t, i18n } = useTranslation()
+  const [searchParams] = useSearchParams()
+  const dateFilter = searchParams.get('date') || ''
+  const statusInFilter = searchParams.get('status_in') || ''
   const [appointments, setAppointments] = useState([])
   const [count, setCount] = useState(0)
   const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '')
   const [ordering, setOrdering] = useState('-start_datetime')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -27,6 +30,8 @@ export default function AdminAppointmentsPage() {
     setLoading(true)
     const params = { page, ordering }
     if (statusFilter) params.status = statusFilter
+    if (dateFilter) params.date = dateFilter
+    if (statusInFilter) params.status_in = statusInFilter
 
     apiClient.get('/appointments/', { params })
       .then(({ data }) => {
@@ -40,7 +45,7 @@ export default function AdminAppointmentsPage() {
       })
       .catch(() => setError(t('common.error_generic')))
       .finally(() => setLoading(false))
-  }, [page, ordering, statusFilter, t])
+  }, [page, ordering, statusFilter, dateFilter, statusInFilter, t])
 
   useEffect(() => {
     loadAppointments()

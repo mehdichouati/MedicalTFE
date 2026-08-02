@@ -73,6 +73,7 @@ export default function AdminUsersPage() {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const initialRole = searchParams.get('role') || ''
+  const professionalsOnly = searchParams.get('professionals_only') === 'true'
 
   const [users, setUsers] = useState([])
   const [count, setCount] = useState(0)
@@ -94,6 +95,7 @@ export default function AdminUsersPage() {
     if (debouncedSearch) params.search = debouncedSearch
     if (role) params.role = role
     if (activeFilter) params.is_active = activeFilter
+    if (professionalsOnly) params.professionals_only = 'true'
 
     apiClient.get('/auth/admin/users/', { params })
       .then(({ data }) => {
@@ -102,7 +104,7 @@ export default function AdminUsersPage() {
       })
       .catch(() => setError(t('common.error_generic')))
       .finally(() => setLoading(false))
-  }, [page, ordering, debouncedSearch, role, activeFilter, t])
+  }, [page, ordering, debouncedSearch, role, activeFilter, professionalsOnly, t])
 
   useEffect(() => {
     loadUsers()

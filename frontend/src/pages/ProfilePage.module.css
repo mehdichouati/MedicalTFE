@@ -111,3 +111,34 @@
   color: #666;
   margin-top: 8px;
 }
+
+.emailChangeNote {
+  font-size: 12px;
+  color: #92650a;
+  margin-top: 4px;
+}
+
+.sectionToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sectionToggleTitle {
+  margin: 0;
+}
+
+.sectionToggleIcon {
+  color: #0a5c78;
+  font-size: 14px;
+}
+
+.sectionContent {
+  margin-top: 12px;
+}

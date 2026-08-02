@@ -1,36 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 import styles from './HomeShowcasePage.module.css'
 
 const HIGHLIGHTS = [
-  {
-    icon: '🩺',
-    title: 'Une équipe pluridisciplinaire',
-    text: 'Médecins généralistes, kinésithérapeutes et psychologues réunis pour un suivi complet.',
-  },
-  {
-    icon: '📅',
-    title: 'Prise de rendez-vous simplifiée',
-    text: 'Réservez en ligne en quelques clics, recevez vos rappels automatiquement.',
-  },
-  {
-    icon: '🔒',
-    title: 'Paiement et données sécurisés',
-    text: 'Vos paiements et vos données de santé sont protégés selon les normes RGPD.',
-  },
-  {
-    icon: '🤝',
-    title: 'Une approche humaine',
-    text: 'Un accompagnement personnalisé, à l\'écoute de chaque patient.',
-  },
+  { icon: '🩺', titleKey: 'showcase.highlight_1_title', textKey: 'showcase.highlight_1_text' },
+  { icon: '📅', titleKey: 'showcase.highlight_2_title', textKey: 'showcase.highlight_2_text' },
+  { icon: '🔒', titleKey: 'showcase.highlight_3_title', textKey: 'showcase.highlight_3_text' },
+  { icon: '🤝', titleKey: 'showcase.highlight_4_title', textKey: 'showcase.highlight_4_text' },
 ]
-
-const ROLE_LABELS = {
-  MEDECIN: 'Médecin généraliste',
-  KINE: 'Kinésithérapeute',
-  PSYCHOLOGUE: 'Psychologue',
-}
 
 const ROLE_ICONS = {
   MEDECIN: '🩺',
@@ -47,7 +27,15 @@ function Stars({ rating }) {
 }
 
 export default function HomeShowcasePage() {
+  const { t } = useTranslation()
   const [house, setHouse] = useState(null)
+  const reviewsScrollRef = useRef(null)
+
+  const scrollReviews = (direction) => {
+    if (!reviewsScrollRef.current) return
+    const amount = 300
+    reviewsScrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     apiClient.get('/public/medical-house/')
@@ -57,83 +45,102 @@ export default function HomeShowcasePage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.topBar}>
+        <LanguageSwitcher />
+      </div>
+
       <section className={styles.hero}>
         <div className={styles.heroText}>
-          <h1 className={styles.heroTitle}>{house?.name || 'Maison Médicale'}</h1>
+          <h1 className={styles.heroTitle}>{house?.name || t('showcase.default_house_name')}</h1>
           <p className={styles.heroSubtitle}>
-            Des soins de proximité, une prise en charge humaine et coordonnée.
+            {t('showcase.hero_subtitle')}
           </p>
           <div className={styles.heroActions}>
             <Link to="/login">
-              <button className={styles.btnPrimary}>Se connecter</button>
+              <button className={styles.btnPrimary}>{t('showcase.login_button')}</button>
             </Link>
             <Link to="/register">
-              <button className={styles.btnSecondary}>Créer un compte</button>
+              <button className={styles.btnSecondary}>{t('showcase.register_button')}</button>
             </Link>
           </div>
         </div>
         <div className={styles.heroImageWrap}>
-          <img src="/images/facade.jpg" alt="Façade de la maison médicale" className={styles.heroImage} />
+          <img src="/images/facade.jpg" alt={t('showcase.facade_alt')} className={styles.heroImage} />
         </div>
       </section>
 
       <section className={styles.sectionAlt}>
-        <h2 className={styles.sectionTitle}>Pourquoi choisir {house?.name || 'notre maison médicale'} ?</h2>
+        <h2 className={styles.sectionTitle}>
+          {t('showcase.why_choose_title', { name: house?.name || t('showcase.default_house_name_lowercase') })}
+        </h2>
         <div className={styles.highlightGrid}>
           {HIGHLIGHTS.map((h, i) => (
             <div key={i} className={styles.highlightCard}>
               <div className={styles.highlightIcon}>{h.icon}</div>
-              <h3 className={styles.highlightTitle}>{h.title}</h3>
-              <p className={styles.highlightText}>{h.text}</p>
+              <h3 className={styles.highlightTitle}>{t(h.titleKey)}</h3>
+              <p className={styles.highlightText}>{t(h.textKey)}</p>
             </div>
           ))}
         </div>
       </section>
 
       <section className={styles.waitingRoomSection}>
-        <img src="/images/waiting_room.jpg" alt="Salle d'attente" className={styles.waitingRoomImage} />
+        <img src="/images/waiting_room.jpg" alt={t('showcase.waiting_room_alt')} className={styles.waitingRoomImage} />
         <div className={styles.waitingRoomText}>
-          <h2 className={styles.waitingRoomTitle}>Un accueil pensé pour vous</h2>
+          <h2 className={styles.waitingRoomTitle}>{t('showcase.waiting_room_title')}</h2>
           <p className={styles.waitingRoomBody}>
-            Un espace calme et accessible, où chaque patient est pris en charge avec attention,
-            de la prise de rendez-vous jusqu'au suivi post-consultation.
+            {t('showcase.waiting_room_body')}
           </p>
         </div>
       </section>
 
       <section className={styles.sectionAlt}>
-        <h2 className={styles.sectionTitleSm}>Notre équipe</h2>
-        <img src="/images/team1.jpg" alt="Notre équipe" className={styles.teamImage} />
+        <h2 className={styles.sectionTitleSm}>{t('showcase.team_title')}</h2>
+        <img src="/images/team1.jpg" alt={t('showcase.team_alt')} className={styles.teamImage} />
         <div className={styles.teamGrid}>
           {house?.staff?.map((member) => (
             <div key={member.id} className={styles.teamCard}>
               <div className={styles.teamAvatar}>{ROLE_ICONS[member.role] || '👤'}</div>
               <p className={styles.teamName}>{member.full_name}</p>
-              <p className={styles.teamRole}>{ROLE_LABELS[member.role] || member.role}</p>
+              <p className={styles.teamRole}>{t(`roles.${member.role}`, member.role)}</p>
             </div>
           ))}
           {(!house?.staff || house.staff.length === 0) && (
-            <p className={styles.emptyText}>Équipe à venir.</p>
+            <p className={styles.emptyText}>{t('showcase.team_empty')}</p>
           )}
         </div>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.reviewsHeading}>
-          Avis de nos patients {house?.average_rating && <span className={styles.reviewsMeta}>({house.average_rating}/5 sur {house.review_count} avis)</span>}
-        </h2>
-        <div className={styles.reviewsGrid}>
-          {house?.reviews?.map((review) => (
-            <div key={review.id} className={styles.reviewCard}>
-              <Stars rating={review.rating} />
-              {review.comment && <p className={styles.reviewComment}>{review.comment}</p>}
-              <p className={styles.reviewAuthor}>{review.author}</p>
-            </div>
-          ))}
-          {(!house?.reviews || house.reviews.length === 0) && (
-            <p className={styles.emptyText}>Aucun avis pour le moment.</p>
+          {t('showcase.reviews_title')}{' '}
+          {house?.average_rating && (
+            <span className={styles.reviewsMeta}>
+              {t('showcase.reviews_meta', { rating: house.average_rating, count: house.review_count })}
+            </span>
           )}
-        </div>
+        </h2>
+        {house?.reviews && house.reviews.length > 0 ? (
+          <div className={styles.reviewsCarouselWrap}>
+            <button type="button" onClick={() => scrollReviews('left')} className={styles.carouselArrow} aria-label={t('showcase.reviews_prev')}>
+              ‹
+            </button>
+            <div className={styles.reviewsCarousel} ref={reviewsScrollRef}>
+              {house.reviews.map((review) => (
+                <div key={review.id} className={styles.reviewCard}>
+                  <Stars rating={review.rating} />
+                  {review.comment && <p className={styles.reviewComment}>{review.comment}</p>}
+                  <p className={styles.reviewAuthor}>{review.author}</p>
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => scrollReviews('right')} className={styles.carouselArrow} aria-label={t('showcase.reviews_next')}>
+              ›
+            </button>
+          </div>
+        ) : (
+          <p className={styles.emptyText}>{t('showcase.reviews_empty')}</p>
+        )}
       </section>
 
       <footer className={styles.footer}>

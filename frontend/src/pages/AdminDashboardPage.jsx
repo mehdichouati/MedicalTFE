@@ -69,13 +69,13 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className={styles.cardGrid}>
-          <StatCard label={t('admin_dashboard.appointments_today')} value={summary.appointments_today} accent="#5b8def" onClick={() => navigate('/admin/appointments')} />
+         <StatCard label={t('admin_dashboard.appointments_today')} value={summary.appointments_today} accent="#5b8def" onClick={() => navigate('/admin/appointments?date=today')} />
           <StatCard label={t('admin_dashboard.pending')} value={summary.pending_appointments} accent="#f0a94e" onClick={() => navigate('/admin/appointments?status=PENDING')} />
           <StatCard label={t('admin_dashboard.completed')} value={summary.completed_appointments} accent="#4caf7d" onClick={() => navigate('/admin/appointments?status=COMPLETED')} />
-          <StatCard label={t('admin_dashboard.cancelled_noshow')} value={summary.cancelled_appointments + summary.no_show_appointments} accent="#e0574f" onClick={() => navigate('/admin/appointments')} />
+          <StatCard label={t('admin_dashboard.cancelled_noshow')} value={summary.cancelled_appointments + summary.no_show_appointments} accent="#e0574f" onClick={() => navigate('/admin/appointments?status_in=CANCELLED,NO_SHOW')} />
           <StatCard label={t('admin_dashboard.net_revenue')} value={`${summary.net_revenue_eur.toFixed(2)} €`} accent="#c084fc" />
           <StatCard label={t('admin_dashboard.patients')} value={summary.total_patients} accent="#5b8def" onClick={() => navigate('/admin/users?role=PATIENT')} />
-          <StatCard label={t('admin_dashboard.professionals')} value={summary.total_professionals} accent="#5b8def" onClick={() => navigate('/admin/users')} />
+          <StatCard label={t('admin_dashboard.professionals')} value={summary.total_professionals} accent="#5b8def" onClick={() => navigate('/admin/users?professionals_only=true')} />
           <StatCard label={t('admin_dashboard.medical_houses')} value={summary.total_medical_houses} accent="#5b8def" />
           <StatCard label="Avis patients" value={summary.pending_reviews ?? '—'} accent="#f0a94e" onClick={() => navigate('/admin/reviews')} />
         </div>

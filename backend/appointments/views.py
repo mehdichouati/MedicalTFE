@@ -161,8 +161,16 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        date_filter = self.request.query_params.get('date')
+        status_in = self.request.query_params.get('status_in')
+
         if user.role == 'ADMIN':
-            return Appointment.objects.all()
+            qs = Appointment.objects.all()
+            if date_filter == 'today':
+                qs = qs.filter(start_datetime__date=timezone.now().date())
+            if status_in:
+                qs = qs.filter(status__in=status_in.split(','))
+            return qs
         if user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
             return Appointment.objects.filter(professional=user)
         dependent_ids = LegalGuardianLink.objects.filter(

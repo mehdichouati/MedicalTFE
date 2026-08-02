@@ -167,103 +167,109 @@ export default function HistoryPage() {
       {history.appointments.length === 0 && (
         <p className={styles.emptyText}>{t('history.no_appointments')}</p>
       )}
-      {history.appointments.map((appt) => {
-        const payment = getPaymentForAppointment(appt.id)
-        const canPay = appt.status !== 'CANCELLED' && (!payment || ['PENDING', 'FAILED'].includes(payment.status))
+      <div className={styles.scrollableList}>
+        {history.appointments.map((appt) => {
+          const payment = getPaymentForAppointment(appt.id)
+          const canPay = appt.status !== 'CANCELLED' && (!payment || ['PENDING', 'FAILED'].includes(payment.status))
 
-        return (
-          <div key={appt.id} className={styles.card}>
-            <p className={styles.cardDate}>
-              {formatDateTime(appt.start_datetime, i18n.language)}
-            </p>
-            <p className={styles.cardMeta}>
-              {appt.professional_username} ({appt.professional_role}) — {appt.medical_house_name}
-            </p>
-            <p className={styles.cardMeta}>
-              {t('history.status')} : {t(`status.${appt.status}`)}
-              {appt.reason && ` — ${appt.reason}`}
-            </p>
-            {payment && (
+          return (
+            <div key={appt.id} className={styles.card}>
+              <p className={styles.cardDate}>
+                {formatDateTime(appt.start_datetime, i18n.language)}
+              </p>
               <p className={styles.cardMeta}>
-                {t('history.payment')} : {t(`status.${payment.status}`, payment.status_display)} ({payment.amount_eur} €)
-                {payment.refunded_amount_cents > 0 && ` — ${t('history.refunded')} : ${(payment.refunded_amount_cents / 100).toFixed(2)} €`}
+                {appt.professional_username} ({appt.professional_role}) — {appt.medical_house_name}
               </p>
-            )}
-            {canPay && (
-              <p className={styles.actionRow}>
-                <Link to={`/pay/${appt.id}`}>{t('history.pay_button')}</Link>
+              <p className={styles.cardMeta}>
+                {t('history.status')} : {t(`status.${appt.status}`)}
+                {appt.reason && ` — ${appt.reason}`}
               </p>
-            )}
-            {appt.status === 'COMPLETED' && payment && ['SUCCEEDED', 'PARTIALLY_REFUNDED', 'REFUNDED'].includes(payment.status) && (
-              <p className={styles.actionRow}>
-                <button onClick={() => downloadReceipt(appt.id)} className={styles.downloadButton}>
-                  {t('history.download_receipt')}
-                </button>
-              </p>
-            )}
-
-            {appt.status === 'COMPLETED' && (() => {
-              const review = getReviewForAppointment(appt.id)
-              if (review) {
-                return (
-                  <p className={styles.reviewStatus}>
-                    Votre avis ({review.rating}/5) — {review.moderation_status_display}
-                  </p>
-                )
-              }
-              if (openReviewFor === appt.id) {
-                return (
-                  <ReviewForm
-                    appointmentId={appt.id}
-                    onSubmitted={() => { setOpenReviewFor(null); loadReviews() }}
-                  />
-                )
-              }
-              return (
+              {payment && (
+                <p className={styles.cardMeta}>
+                  {t('history.payment')} : {t(`status.${payment.status}`, payment.status_display)} ({payment.amount_eur} €)
+                  {payment.refunded_amount_cents > 0 && ` — ${t('history.refunded')} : ${(payment.refunded_amount_cents / 100).toFixed(2)} €`}
+                </p>
+              )}
+              {canPay && (
                 <p className={styles.actionRow}>
-                  <button onClick={() => setOpenReviewFor(appt.id)} className={styles.reviewOpenButton}>
-                    Évaluer cette consultation
+                  <Link to={`/pay/${appt.id}`}>{t('history.pay_button')}</Link>
+                </p>
+              )}
+              {appt.status === 'COMPLETED' && payment && ['SUCCEEDED', 'PARTIALLY_REFUNDED', 'REFUNDED'].includes(payment.status) && (
+                <p className={styles.actionRow}>
+                  <button onClick={() => downloadReceipt(appt.id)} className={styles.downloadButton}>
+                    {t('history.download_receipt')}
                   </button>
                 </p>
-              )
-            })()}
-          </div>
-        )
-      })}
+              )}
+
+              {appt.status === 'COMPLETED' && (() => {
+                const review = getReviewForAppointment(appt.id)
+                if (review) {
+                  return (
+                    <p className={styles.reviewStatus}>
+                      Votre avis ({review.rating}/5) — {review.moderation_status_display}
+                    </p>
+                  )
+                }
+                if (openReviewFor === appt.id) {
+                  return (
+                    <ReviewForm
+                      appointmentId={appt.id}
+                      onSubmitted={() => { setOpenReviewFor(null); loadReviews() }}
+                    />
+                  )
+                }
+                return (
+                  <p className={styles.actionRow}>
+                    <button onClick={() => setOpenReviewFor(appt.id)} className={styles.reviewOpenButton}>
+                      Évaluer cette consultation
+                    </button>
+                  </p>
+                )
+              })()}
+            </div>
+          )
+        })}
+      </div>
 
       <h2 className={styles.sectionTitle}>{t('history.triage_section')}</h2>
       {history.triage_assessments.length === 0 && (
         <p className={styles.emptyText}>{t('history.no_triage')}</p>
       )}
-      {history.triage_assessments.map((assessment) => {
-        const style = ORIENTATION_STYLES[assessment.orientation] || {}
-        return (
-          <div key={assessment.id} className={styles.orientationCard} style={style}>
-            <p className={styles.orientationTitle}>
-              {t(`orientation.${assessment.orientation}`)}
-            </p>
-            <p className={styles.orientationDate}>
-              {formatDateTime(assessment.created_at, i18n.language)}
-            </p>
-          </div>
-        )
-      })}
+      <div className={styles.scrollableList}>
+        {history.triage_assessments.map((assessment) => {
+          const style = ORIENTATION_STYLES[assessment.orientation] || {}
+          return (
+            <div key={assessment.id} className={styles.orientationCard} style={style}>
+              <p className={styles.orientationTitle}>
+                {t(`orientation.${assessment.orientation}`)}
+              </p>
+              <p className={styles.orientationDate}>
+                {formatDateTime(assessment.created_at, i18n.language)}
+              </p>
+            </div>
+          )
+        })}
+      </div>
 
       <h2 className={styles.sectionTitle}>{t('history.documents_section')}</h2>
       {documents.length === 0 && (
         <p className={styles.emptyText}>{t('history.no_documents')}</p>
       )}
-      {documents.map((doc) => (
-        <div key={doc.id} className={styles.card}>
-          <p className={styles.docTitle}>{doc.title}</p>
-          <p className={styles.docMeta}>
-            {t(`history.doc_type_${doc.document_type}`)} — {t('history.deposited_by')} {doc.uploaded_by_username} {t('history.on_date')} {formatDateTime(doc.uploaded_at, i18n.language)}
-          </p>
-          <p className={styles.docLinkRow}>
-            <a href={doc.file} target="_blank" rel="noreferrer">{t('common.download')}</a>
-          </p>
-        </div>
-      ))}
+      <div className={styles.scrollableList}>
+        {documents.map((doc) => (
+          <div key={doc.id} className={styles.card}>
+            <p className={styles.docTitle}>{doc.title}</p>
+            <p className={styles.docMeta}>
+              {t(`history.doc_type_${doc.document_type}`)} — {t('history.deposited_by')} {doc.uploaded_by_username} {t('history.on_date')} {formatDateTime(doc.uploaded_at, i18n.language)}
+            </p>
+            <p className={styles.docLinkRow}>
+              <a href={doc.file} target="_blank" rel="noreferrer">{t('common.download')}</a>
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
