@@ -46,4 +46,17 @@ apiClient.interceptors.response.use(
   }
 )
 
+// Recupere toutes les pages d'une liste paginee par l'API (PAGE_SIZE = 20)
+export async function fetchAllPages(url, params = {}) {
+  let page = 1
+  let all = []
+  while (true) {
+    const { data } = await apiClient.get(url, { params: { ...params, page } })
+    if (Array.isArray(data)) return data
+    all = all.concat(data.results)
+    if (!data.next) return all
+    page += 1
+  }
+}
+
 export default apiClient

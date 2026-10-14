@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../api/client'
+import apiClient, { fetchAllPages } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './ProfessionalAppointmentsPage.module.css'
 
@@ -132,10 +132,11 @@ export default function ProfessionalAppointmentsPage() {
   const [calendarMonth, setCalendarMonth] = useState({ year: now.getFullYear(), month: now.getMonth() })
   const [selectedDate, setSelectedDate] = useState(todayISO)
 
+  // Charge TOUTES les pages de rendez-vous (l'API pagine par 20)
   const loadAppointments = () => {
     setLoading(true)
-    apiClient.get('/appointments/')
-      .then(({ data }) => setAppointments(Array.isArray(data) ? data : data.results))
+    fetchAllPages('/appointments/')
+      .then((data) => setAppointments(data))
       .catch(() => setError(t('professional_appointments.load_error')))
       .finally(() => setLoading(false))
   }

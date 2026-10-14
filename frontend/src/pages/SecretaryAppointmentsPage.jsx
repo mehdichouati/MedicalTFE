@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import apiClient from '../api/client'
+import apiClient, { fetchAllPages } from '../api/client'
 import styles from './SecretaryAppointmentsPage.module.css'
 
 const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
@@ -72,10 +72,11 @@ export default function SecretaryAppointmentsPage() {
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState('')
 
+  // Charge TOUTES les pages de rendez-vous (l'API pagine par 20)
   const loadAppointments = () => {
     setLoading(true)
-    apiClient.get('/appointments/')
-      .then(({ data }) => setAppointments(Array.isArray(data) ? data : data.results))
+    fetchAllPages('/appointments/')
+      .then((data) => setAppointments(data))
       .catch(() => setError(t('secretary.load_error')))
       .finally(() => setLoading(false))
   }
