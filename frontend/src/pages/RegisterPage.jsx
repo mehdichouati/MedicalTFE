@@ -23,7 +23,8 @@ export default function RegisterPage() {
     setError('')
     setSubmitting(true)
     try {
-      await apiClient.post('/auth/register/', { ...form, role: 'PATIENT' })
+      // N1 — Le role n'est plus envoye : le backend cree toujours un patient.
+      await apiClient.post('/auth/register/', form)
       await login(form.username, form.password)
       navigate('/app')
     } catch (err) {
@@ -40,27 +41,67 @@ export default function RegisterPage() {
       <h1>{t('register.title')}</h1>
       <form onSubmit={handleSubmit}>
         <div className={styles.field}>
-          <label>{t('register.username')}</label><br />
-          <input type="text" value={form.username} onChange={update('username')} required className={styles.input} />
+          <label htmlFor="register-username">{t('register.username')}</label><br />
+          <input
+            id="register-username"
+            type="text"
+            value={form.username}
+            onChange={update('username')}
+            autoComplete="username"
+            required
+            className={styles.input}
+          />
         </div>
         <div className={styles.field}>
-          <label>{t('register.email')}</label><br />
-          <input type="email" value={form.email} onChange={update('email')} required className={styles.input} />
+          <label htmlFor="register-email">{t('register.email')}</label><br />
+          <input
+            id="register-email"
+            type="email"
+            value={form.email}
+            onChange={update('email')}
+            autoComplete="email"
+            required
+            className={styles.input}
+          />
         </div>
         <div className={styles.field}>
-          <label>{t('register.date_of_birth')}</label><br />
-          <input type="date" value={form.date_of_birth} onChange={update('date_of_birth')} required className={styles.input} />
+          <label htmlFor="register-date-of-birth">{t('register.date_of_birth')}</label><br />
+          <input
+            id="register-date-of-birth"
+            type="date"
+            value={form.date_of_birth}
+            onChange={update('date_of_birth')}
+            autoComplete="bday"
+            required
+            className={styles.input}
+          />
           <p className={styles.hint}>
             {t('register.minor_hint')}
           </p>
         </div>
         <div className={styles.field}>
-          <label>{t('register.password')}</label><br />
-          <input type="password" value={form.password} onChange={update('password')} required className={styles.input} />
+          <label htmlFor="register-password">{t('register.password')}</label><br />
+          <input
+            id="register-password"
+            type="password"
+            value={form.password}
+            onChange={update('password')}
+            autoComplete="new-password"
+            required
+            className={styles.input}
+          />
         </div>
         <div className={styles.field}>
-          <label>{t('register.confirm_password')}</label><br />
-          <input type="password" value={form.password2} onChange={update('password2')} required className={styles.input} />
+          <label htmlFor="register-password2">{t('register.confirm_password')}</label><br />
+          <input
+            id="register-password2"
+            type="password"
+            value={form.password2}
+            onChange={update('password2')}
+            autoComplete="new-password"
+            required
+            className={styles.input}
+          />
         </div>
         <div className={styles.field}>
           <label className={styles.consentLabel}>
@@ -75,7 +116,7 @@ export default function RegisterPage() {
           <p className={styles.hint}>{t('register.health_data_consent_note')}</p>
         </div>
 
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>}
         <button type="submit" disabled={submitting} className={styles.submitButton}>
           {submitting ? t('register.submitting') : t('register.submit')}
         </button>
