@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django.contrib.auth.password_validation import validate_password
@@ -10,6 +11,29 @@ def _calculate_age(date_of_birth):
     return today.year - date_of_birth.year - (
         (today.month, today.day) < (date_of_birth.month, date_of_birth.day)
     )
+
+
+def _validate_license_number(role, number):
+    """F16 — Controle du format du numero d'habilitation selon le role.
+
+    Medecin et kine : numero INAMI de 11 chiffres. Psychologue : numero
+    d'inscription a la Commission des Psychologues, obligatoire. Le
+    numero est verifie par l'admin dans le registre officiel avant
+    d'etre encode.
+    """
+    number = (number or '').strip()
+
+    if role in (User.Role.MEDECIN, User.Role.KINE) and not re.fullmatch(r'\d{11}', number):
+        raise serializers.ValidationError({
+            'license_number': "Le numéro INAMI doit contenir exactement 11 chiffres."
+        })
+    if role == User.Role.PSYCHOLOGUE and not number:
+        raise serializers.ValidationError({
+            'license_number': "Le numéro d'inscription à la Commission des Psychologues est obligatoire."
+        })
+
+    return number
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     """F1/F15 — Inscription autonome. Refusee pour les moins de 16 ans
@@ -24,7 +48,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password2', 'role', 'phone_number', 'date_of_birth', 'health_data_consent')
+        fields = ('username', 'email', 'password', 'password2', 'phone_number', 'date_of_birth', 'health_data_consent')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -52,7 +76,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
-            role=validated_data.get('role', User.Role.PATIENT),
+            # N1 — L'inscription publique cree uniquement des patients.
+            # Les comptes professionnels sont crees par l'administrateur
+            # apres verification de l'habilitation (INAMI / Commission).
+            role=User.Role.PATIENT,
             phone_number=validated_data.get('phone_number', ''),
             date_of_birth=validated_data['date_of_birth'],
             password=validated_data['password'],
@@ -113,12 +140,21 @@ class AdminUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'username', 'first_name', 'last_name', 'full_name', 'email',
-            'role', 'phone_number', 'is_active', 'created_at',
+            'role', 'phone_number', 'license_number', 'is_active', 'created_at',
         )
         read_only_fields = ('id', 'created_at')
 
     def get_full_name(self, obj):
         return obj.get_full_name() or obj.username
+
+    def validate(self, attrs):
+        # F16 — On ne controle le numero que si le role ou le numero
+        # change (une simple activation/desactivation n'est pas bloquee).
+        if 'role' in attrs or 'license_number' in attrs:
+            role = attrs.get('role', getattr(self.instance, 'role', None))
+            number = attrs.get('license_number', getattr(self.instance, 'license_number', ''))
+            attrs['license_number'] = _validate_license_number(role, number)
+        return attrs
 
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
@@ -126,7 +162,13 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'role', 'phone_number', 'password')
+        fields = ('username', 'first_name', 'last_name', 'email', 'role', 'phone_number', 'license_number', 'password')
+
+    def validate(self, attrs):
+        attrs['license_number'] = _validate_license_number(
+            attrs.get('role'), attrs.get('license_number', ''),
+        )
+        return attrs
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -143,6 +185,7 @@ class AuditLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLog
         fields = ('id', 'actor', 'actor_username', 'action', 'action_display', 'target_description', 'timestamp')
+
 
 class CreateDependentSerializer(serializers.Serializer):
     """F15 — Creation d'un compte mineur par le parent, avec declaration
