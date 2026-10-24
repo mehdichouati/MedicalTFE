@@ -18,6 +18,21 @@ const ROLE_ICONS = {
   PSYCHOLOGUE: '🧠',
 }
 
+// F16 — Registres officiels permettant au patient de verifier lui-meme
+// l'habilitation d'un professionnel.
+const INAMI_SEARCH_URL = 'https://www.inami.fgov.be/fr/programmes-web/rechercher-un-dispensateur-de-soins'
+const COMPSY_SEARCH_URL = 'https://www.compsy.be/en_GB/search'
+
+// F16 — Affiche le numero INAMI au format officiel X-XXXXX-XX-XXX.
+// Le numero de la Commission des Psychologues est affiche tel quel.
+function formatLicenseNumber(member) {
+  const number = member.license_number
+  if (member.role !== 'PSYCHOLOGUE' && /^\d{11}$/.test(number)) {
+    return `${number.slice(0, 1)}-${number.slice(1, 6)}-${number.slice(6, 8)}-${number.slice(8)}`
+  }
+  return number
+}
+
 function Stars({ rating }) {
   return (
     <span className={styles.stars}>
@@ -56,11 +71,11 @@ export default function HomeShowcasePage() {
             {t('showcase.hero_subtitle')}
           </p>
           <div className={styles.heroActions}>
-            <Link to="/login">
-              <button className={styles.btnPrimary}>{t('showcase.login_button')}</button>
+            <Link to="/login" className={styles.btnPrimary}>
+              {t('showcase.login_button')}
             </Link>
-            <Link to="/register">
-              <button className={styles.btnSecondary}>{t('showcase.register_button')}</button>
+            <Link to="/register" className={styles.btnSecondary}>
+              {t('showcase.register_button')}
             </Link>
           </div>
         </div>
@@ -74,9 +89,9 @@ export default function HomeShowcasePage() {
           {t('showcase.why_choose_title', { name: house?.name || t('showcase.default_house_name_lowercase') })}
         </h2>
         <div className={styles.highlightGrid}>
-          {HIGHLIGHTS.map((h, i) => (
-            <div key={i} className={styles.highlightCard}>
-              <div className={styles.highlightIcon}>{h.icon}</div>
+          {HIGHLIGHTS.map((h) => (
+            <div key={h.titleKey} className={styles.highlightCard}>
+              <div className={styles.highlightIcon} aria-hidden="true">{h.icon}</div>
               <h3 className={styles.highlightTitle}>{t(h.titleKey)}</h3>
               <p className={styles.highlightText}>{t(h.textKey)}</p>
             </div>
@@ -100,14 +115,34 @@ export default function HomeShowcasePage() {
         <div className={styles.teamGrid}>
           {house?.staff?.map((member) => (
             <div key={member.id} className={styles.teamCard}>
-              <div className={styles.teamAvatar}>{ROLE_ICONS[member.role] || '👤'}</div>
+              <div className={styles.teamAvatar} aria-hidden="true">{ROLE_ICONS[member.role] || '👤'}</div>
               <p className={styles.teamName}>{member.full_name}</p>
               <p className={styles.teamRole}>{t(`roles.${member.role}`, member.role)}</p>
+              {member.license_number && (
+                <p className={styles.teamLicense}>
+                  {member.role === 'PSYCHOLOGUE'
+                    ? t('showcase.license_compsy')
+                    : t('showcase.license_inami')}
+                  {' '}{formatLicenseNumber(member)}
+                </p>
+              )}
             </div>
           ))}
           {(!house?.staff || house.staff.length === 0) && (
             <p className={styles.emptyText}>{t('showcase.team_empty')}</p>
           )}
+        </div>
+
+        <div className={styles.verifyBox}>
+          <p className={styles.verifyNote}>{t('showcase.verify_note')}</p>
+          <div className={styles.verifyLinks}>
+            <a href={INAMI_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyLink}>
+              {t('showcase.verify_inami')}
+            </a>
+            <a href={COMPSY_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyLink}>
+              {t('showcase.verify_compsy')}
+            </a>
+          </div>
         </div>
       </section>
 

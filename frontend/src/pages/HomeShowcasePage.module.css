@@ -32,27 +32,41 @@
 .heroActions {
   margin-top: 28px;
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
-.btnPrimary {
+.btnPrimary,
+.btnSecondary {
+  display: inline-block;
   padding: 12px 28px;
-  background: #0a5c78;
-  color: #fff;
-  border: none;
   border-radius: 24px;
   font-size: 15px;
+  text-decoration: none;
   cursor: pointer;
 }
 
+.btnPrimary {
+  background: #0a5c78;
+  color: #fff;
+  border: 2px solid #0a5c78;
+}
+
+.btnPrimary:hover,
+.btnPrimary:focus-visible {
+  background: #084a61;
+  border-color: #084a61;
+}
+
 .btnSecondary {
-  padding: 12px 28px;
   background: #fff;
   color: #0a5c78;
   border: 2px solid #0a5c78;
-  border-radius: 24px;
-  font-size: 15px;
-  cursor: pointer;
+}
+
+.btnSecondary:hover,
+.btnSecondary:focus-visible {
+  background: #eef5f8;
 }
 
 .heroImageWrap {
@@ -193,6 +207,42 @@
   color: #0a5c78;
   font-weight: 600;
   letter-spacing: 0.3px;
+}
+
+.teamLicense {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #52606d;
+  font-variant-numeric: tabular-nums;
+}
+
+.verifyBox {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.verifyNote {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #52606d;
+}
+
+.verifyLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 24px;
+}
+
+.verifyLink {
+  color: #0a5c78;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.verifyLink:hover,
+.verifyLink:focus-visible {
+  text-decoration: none;
 }
 
 .emptyText {
