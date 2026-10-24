@@ -29,8 +29,13 @@ class MedicalHouseStaffViewSet(viewsets.ModelViewSet):
 class PublicMedicalHouseView(APIView):
     """Page vitrine — infos publiques d'une maison medicale, sans authentification.
 
-    Renvoie les infos de base, l'equipe (nom + role), et les avis patients
-    approuves (avec moyenne), pour affichage sur la page d'accueil publique.
+    Renvoie les infos de base, l'equipe (nom + role + numero d'habilitation),
+    et les avis patients approuves (avec moyenne), pour affichage sur la
+    page d'accueil publique.
+
+    F16 — Le numero INAMI / Commission des Psychologues est une donnee
+    professionnelle deja publique dans les registres officiels : l'afficher
+    permet au patient de verifier lui-meme l'habilitation du professionnel.
     """
 
     permission_classes = (permissions.AllowAny,)
@@ -48,6 +53,7 @@ class PublicMedicalHouseView(APIView):
                 'id': s.professional.id,
                 'full_name': s.professional.get_full_name() or s.professional.username,
                 'role': s.professional.role,
+                'license_number': s.professional.license_number,
             }
             for s in staff
         ]
