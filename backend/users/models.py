@@ -19,6 +19,10 @@ class User(AbstractUser):
     language = models.CharField(max_length=5, default='fr', choices=[('fr', 'Français'), ('en', 'English')])
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
+    # F16 — Numero d'habilitation officiel : INAMI (medecin, kine) ou
+    # Commission des Psychologues (psychologue). Encode par l'admin
+    # apres verification dans le registre public.
+    license_number = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     # F1 — Preuve du consentement explicite au traitement des donnees de
@@ -99,7 +103,7 @@ class AuditLog(models.Model):
         PAYMENT_REFUNDED = 'PAYMENT_REFUNDED', 'Paiement remboursé'
         APPOINTMENT_CREATED_BY_STAFF = 'APPOINTMENT_CREATED_BY_STAFF', 'Rendez-vous créé par le secrétariat'
         APPOINTMENT_CANCELLED_BY_STAFF = 'APPOINTMENT_CANCELLED_BY_STAFF', 'Rendez-vous annulé par le secrétariat'
-        
+
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='audit_actions',
     )
