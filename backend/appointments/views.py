@@ -27,6 +27,7 @@ SLOT_DURATION_MINUTES = 30
 # F4 — Politique d'annulation.
 LATE_CANCELLATION_WINDOW = timedelta(hours=24)
 LATE_CANCELLATION_FEE_CENTS = 500  # 5 EUR
+ACTIVE_STATUSES = (Appointment.Status.PENDING, Appointment.Status.CONFIRMED)
 
 
 def _is_guardian_of(guardian, patient_id):
@@ -46,8 +47,14 @@ def _secretary_can_manage(secretary, professional):
     return MedicalHouseStaff.objects.filter(professional=professional, medical_house_id__in=house_ids).exists()
 
 
-def _apply_cancellation_policy(appointment, actor):
-    """F4 — Applique la politique d'annulation/no-show a un rendez-vous."""
+def _apply_cancellation_policy(appointment, actor, fee_applies=True):
+    """F4 — Applique la politique d'annulation/no-show a un rendez-vous.
+
+    L'indemnite de 5 EUR est retenue sur le remboursement d'un paiement deja
+    effectue. Si le patient n'a rien paye, aucune somme ne lui est reclamee.
+    fee_applies=False : le patient n'est pas responsable (annulation par le
+    centre), le remboursement est donc toujours total.
+    """
     from payments.models import Payment
     from notifications.services import notify_payment_refunded
     import stripe
@@ -60,7 +67,7 @@ def _apply_cancellation_policy(appointment, actor):
         return
 
     now = timezone.now()
-    is_late = (appointment.start_datetime - now) < LATE_CANCELLATION_WINDOW
+    is_late = fee_applies and (appointment.start_datetime - now) < LATE_CANCELLATION_WINDOW
 
     if payment.status == Payment.Status.SUCCEEDED:
         if is_late:
@@ -89,10 +96,6 @@ def _apply_cancellation_policy(appointment, actor):
                 action=AuditLog.Action.PAYMENT_REFUNDED,
                 target_description=f"Paiement #{payment.id} — {payment.refunded_amount_cents / 100:.2f} EUR remboursés — {payment.patient}",
             )
-    else:
-        if is_late:
-            payment.late_cancellation_fee_due_cents = LATE_CANCELLATION_FEE_CENTS
-            payment.save(update_fields=['late_cancellation_fee_due_cents'])
 
 
 class IsOwnerOrAdmin(permissions.BasePermission):
@@ -237,11 +240,17 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         appointment = self.get_object()
+        if appointment.status not in ACTIVE_STATUSES:
+            return Response(
+                {'detail': "Ce rendez-vous ne peut plus être annulé."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         appointment.status = Appointment.Status.CANCELLED
         appointment.cancelled_at = timezone.now()
         appointment.cancelled_by = request.user
         appointment.save(update_fields=['status', 'cancelled_at', 'cancelled_by'])
-        _apply_cancellation_policy(appointment, request.user)
+        # Seule une annulation par le patient ou son parent entraine l'indemnite.
+        _apply_cancellation_policy(appointment, request.user, fee_applies=request.user.role == 'PATIENT')
         notify_appointment_cancellation(appointment)
         if request.user.role == 'SECRETAIRE':
             AuditLog.objects.create(
@@ -262,6 +271,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if appointment.start_datetime > timezone.now():
             return Response(
                 {'detail': "Vous ne pouvez pas signaler une absence pour un rendez-vous qui n'a pas encore eu lieu."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if appointment.status not in ACTIVE_STATUSES:
+            return Response(
+                {'detail': "Ce rendez-vous a déjà été clôturé."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         appointment.status = Appointment.Status.NO_SHOW
@@ -285,6 +299,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if appointment.start_datetime > timezone.now():
             return Response(
                 {'detail': "Vous ne pouvez pas terminer un rendez-vous qui n'a pas encore eu lieu."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if appointment.status not in ACTIVE_STATUSES:
+            return Response(
+                {'detail': "Ce rendez-vous a déjà été clôturé."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         appointment.status = Appointment.Status.COMPLETED
