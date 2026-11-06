@@ -151,6 +151,15 @@
   cursor: pointer;
 }
 
+.policyLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #52606d;
+  margin-bottom: 16px;
+}
+
 .errorText {
   color: #b3261e;
   font-size: 14px;
@@ -298,13 +307,15 @@
   padding: 14px 16px;
   margin-bottom: 10px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
 .appointmentInfo {
-  flex: 1;
+  flex: 1 1 240px;
+  min-width: 0;
 }
 
 .appointmentDate {
@@ -323,9 +334,11 @@
 
 .appointmentActions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .statusBadge {
@@ -388,11 +401,15 @@
 
 .cancelConfirmRow {
   display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .cancelConfirmText {
+  flex: 1 1 100%;
   font-size: 12px;
   color: #52606d;
 }

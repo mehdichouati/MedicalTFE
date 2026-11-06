@@ -4,10 +4,17 @@ Respecte les preferences utilisateur (F12 : possibilite de desactiver),
 journalise chaque envoi (Notification), et ne bloque jamais le flux
 principal (RDV, paiement) si l'envoi echoue.
 """
-from django.core.mail import send_mail
+from html import escape
+
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone
+from django.utils.text import slugify
 
 from .models import Notification, NotificationPreference
+from .pdf import build_summary_pdf
+
+PRIMARY_COLOR = '#0a5c78'
 
 
 def _get_or_create_preference(user):
@@ -15,8 +22,12 @@ def _get_or_create_preference(user):
     return preference
 
 
-def send_notification_email(recipient, notification_type, subject, body):
-    """Envoie un email si l'utilisateur ne l'a pas desactive, journalise le resultat."""
+def send_notification_email(recipient, notification_type, subject, body, html_body=None, attachment_builder=None):
+    """Envoie un email si l'utilisateur ne l'a pas desactive, journalise le resultat.
+
+    attachment_builder renvoie (nom du fichier, contenu du PDF). Il est appele
+    dans le try pour qu'une erreur de PDF ne bloque jamais le flux principal.
+    """
     preference = _get_or_create_preference(recipient)
 
     notification = Notification.objects.create(
@@ -40,15 +51,19 @@ def send_notification_email(recipient, notification_type, subject, body):
         return notification
 
     try:
-        send_mail(
+        email = EmailMultiAlternatives(
             subject=subject,
-            message=body,
+            body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[recipient.email],
-            fail_silently=False,
+            to=[recipient.email],
         )
+        if html_body:
+            email.attach_alternative(html_body, 'text/html')
+        if attachment_builder:
+            filename, content = attachment_builder()
+            email.attach(filename, content, 'application/pdf')
+        email.send(fail_silently=False)
         notification.status = Notification.Status.SENT
-        from django.utils import timezone
         notification.sent_at = timezone.now()
         notification.save(update_fields=['status', 'sent_at'])
     except Exception as e:
@@ -59,73 +74,146 @@ def send_notification_email(recipient, notification_type, subject, body):
     return notification
 
 
-def notify_appointment_confirmation(appointment):
-    subject = "Confirmation de votre rendez-vous"
-    body = (
-        f"Bonjour {appointment.patient.get_full_name() or appointment.patient.username},\n\n"
-        f"Votre rendez-vous avec {appointment.professional.get_full_name() or appointment.professional.username} "
-        f"est confirme le {appointment.start_datetime.strftime('%d/%m/%Y a %H:%M')} "
-        f"a {appointment.medical_house.name}.\n\n"
-        f"Motif : {appointment.reason or 'Non precise'}\n\n"
-        f"Cordialement,\nMaison Medicale"
+def _person_name(user):
+    return user.get_full_name() or user.username
+
+
+def _format_datetime(value):
+    """Convertit en heure locale : les dates sont stockees en UTC."""
+    return timezone.localtime(value).strftime('%d/%m/%Y à %H:%M')
+
+
+def _appointment_details(appointment):
+    return [
+        ("Date", _format_datetime(appointment.start_datetime)),
+        ("Professionnel", _person_name(appointment.professional)),
+        ("Lieu", appointment.medical_house.name),
+    ]
+
+
+def _build_html(title, greeting, paragraphs, details, house_name):
+    paragraphs_html = ''.join(
+        f'<p style="margin:0 0 14px;color:#1a1a2e;">{escape(paragraph)}</p>' for paragraph in paragraphs
     )
+    rows_html = ''.join(
+        f'<tr><td style="padding:6px 16px 6px 0;color:#52606d;">{escape(label)}</td>'
+        f'<td style="padding:6px 0;color:#1a1a2e;font-weight:600;">{escape(value)}</td></tr>'
+        for label, value in details
+    )
+    return (
+        '<div style="background:#f7f9fb;padding:24px;font-family:Arial,sans-serif;font-size:15px;line-height:1.5;">'
+        '<div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #eef1f4;border-radius:12px;overflow:hidden;">'
+        f'<div style="background:{PRIMARY_COLOR};color:#ffffff;padding:20px 24px;font-size:20px;font-weight:700;">{escape(title)}</div>'
+        '<div style="padding:24px;">'
+        f'<p style="margin:0 0 14px;color:#1a1a2e;">{escape(greeting)}</p>'
+        f'{paragraphs_html}'
+        f'<table style="border-collapse:collapse;margin:8px 0 18px;">{rows_html}</table>'
+        '<p style="margin:0;color:#52606d;font-size:13px;">Le récapitulatif de ce rendez-vous est joint à cet e-mail au format PDF.</p>'
+        '</div>'
+        f'<div style="padding:16px 24px;border-top:1px solid #eef1f4;color:#52606d;font-size:13px;">Cordialement,<br>{escape(house_name)}</div>'
+        '</div></div>'
+    )
+
+
+def _send_appointment_email(appointment, notification_type, subject, title, paragraphs, details=None):
+    """Construit et envoie un email professionnel avec son PDF recapitulatif."""
+    recipient = appointment.patient
+    greeting = f"Bonjour {_person_name(recipient)},"
+    details = details or _appointment_details(appointment)
+    house_name = appointment.medical_house.name
+
+    details_text = '\n'.join(f"{label} : {value}" for label, value in details)
+    paragraphs_text = '\n\n'.join(paragraphs)
+    body = (
+        f"{greeting}\n\n{paragraphs_text}\n\n{details_text}\n\n"
+        f"Le récapitulatif de ce rendez-vous est joint à cet e-mail au format PDF.\n\n"
+        f"Cordialement,\n{house_name}"
+    )
+
+    def attachment_builder():
+        filename = f"{slugify(title)}-rdv-{appointment.id}.pdf"
+        return filename, build_summary_pdf(appointment, title)
+
     return send_notification_email(
-        appointment.patient, Notification.NotificationType.APPOINTMENT_CONFIRMATION, subject, body,
+        recipient, notification_type, subject, body,
+        html_body=_build_html(title, greeting, paragraphs, details, house_name),
+        attachment_builder=attachment_builder,
+    )
+
+
+def notify_appointment_confirmation(appointment):
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.APPOINTMENT_CONFIRMATION,
+        subject="Confirmation de votre rendez-vous",
+        title="Rendez-vous confirmé",
+        paragraphs=["Votre rendez-vous a bien été enregistré. Voici ses informations :"],
     )
 
 
 def notify_appointment_cancellation(appointment):
-    subject = "Annulation de votre rendez-vous"
-    body = (
-        f"Bonjour {appointment.patient.get_full_name() or appointment.patient.username},\n\n"
-        f"Votre rendez-vous du {appointment.start_datetime.strftime('%d/%m/%Y a %H:%M')} "
-        f"avec {appointment.professional.get_full_name() or appointment.professional.username} "
-        f"a ete annule.\n\n"
-        f"Cordialement,\nMaison Medicale"
-    )
-    return send_notification_email(
-        appointment.patient, Notification.NotificationType.APPOINTMENT_CANCELLATION, subject, body,
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.APPOINTMENT_CANCELLATION,
+        subject="Annulation de votre rendez-vous",
+        title="Rendez-vous annulé",
+        paragraphs=["Votre rendez-vous a bien été annulé. Voici les informations du rendez-vous concerné :"],
     )
 
 
 def notify_payment_succeeded(payment):
-    subject = "Confirmation de paiement"
-    body = (
-        f"Bonjour {payment.patient.get_full_name() or payment.patient.username},\n\n"
-        f"Nous confirmons la reception de votre paiement de {payment.amount_cents / 100:.2f} EUR "
-        f"pour votre rendez-vous du {payment.appointment.start_datetime.strftime('%d/%m/%Y a %H:%M')}.\n\n"
-        f"Cordialement,\nMaison Medicale"
-    )
-    return send_notification_email(
-        payment.patient, Notification.NotificationType.PAYMENT_SUCCEEDED, subject, body,
+    appointment = payment.appointment
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.PAYMENT_SUCCEEDED,
+        subject="Confirmation de votre paiement",
+        title="Paiement confirmé",
+        paragraphs=[f"Nous avons bien reçu votre paiement de {payment.amount_cents / 100:.2f} EUR."],
     )
 
 
 def notify_payment_refunded(payment):
-    subject = "Remboursement effectue"
-    refunded_eur = payment.refunded_amount_cents / 100
-    body = (
-        f"Bonjour {payment.patient.get_full_name() or payment.patient.username},\n\n"
-        f"Un remboursement de {refunded_eur:.2f} EUR a ete effectue pour votre rendez-vous "
-        f"du {payment.appointment.start_datetime.strftime('%d/%m/%Y a %H:%M')}.\n\n"
-        f"Cordialement,\nMaison Medicale"
+    appointment = payment.appointment
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.PAYMENT_REFUNDED,
+        subject="Confirmation de votre remboursement",
+        title="Remboursement effectué",
+        paragraphs=[
+            f"Un remboursement de {payment.refunded_amount_cents / 100:.2f} EUR a été demandé auprès de notre prestataire de paiement. "
+            "Le délai d'apparition sur votre compte dépend de votre banque."
+        ],
     )
-    return send_notification_email(
-        payment.patient, Notification.NotificationType.PAYMENT_REFUNDED, subject, body,
+
+
+def notify_late_cancellation_fee(payment):
+    """F4 — Informe le patient de l'indemnite retenue sur son remboursement."""
+    appointment = payment.appointment
+    retained_cents = payment.amount_cents - payment.refunded_amount_cents
+    if appointment.status == appointment.Status.NO_SHOW:
+        reason = "Vous ne vous êtes pas présenté(e) à votre rendez-vous et celui-ci n'avait pas été annulé."
+    else:
+        reason = "Votre rendez-vous a été annulé moins de 24 heures avant son début."
+
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.PAYMENT_REFUNDED,
+        subject="Indemnité d'annulation tardive",
+        title="Indemnité d'annulation tardive",
+        paragraphs=[
+            reason,
+            f"Conformément aux conditions acceptées lors de la réservation, une indemnité de {retained_cents / 100:.2f} EUR "
+            f"a été retenue sur votre paiement de {payment.amount_cents / 100:.2f} EUR.",
+            "Si votre absence est due à un cas de force majeure, vous pouvez contacter le secrétariat.",
+        ],
     )
 
 
 def notify_appointment_reminder(appointment, hours_before):
-    subject = f"Rappel : rendez-vous dans {hours_before}h"
-    body = (
-        f"Bonjour {appointment.patient.get_full_name() or appointment.patient.username},\n\n"
-        f"Nous vous rappelons votre rendez-vous avec "
-        f"{appointment.professional.get_full_name() or appointment.professional.username} "
-        f"le {appointment.start_datetime.strftime('%d/%m/%Y a %H:%M')} "
-        f"a {appointment.medical_house.name}.\n\n"
-        f"Motif : {appointment.reason or 'Non precise'}\n\n"
-        f"Cordialement,\nMaison Medicale"
-    )
-    return send_notification_email(
-        appointment.patient, Notification.NotificationType.APPOINTMENT_REMINDER, subject, body,
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.APPOINTMENT_REMINDER,
+        subject=f"Rappel : votre rendez-vous dans {hours_before} heures",
+        title="Rappel de rendez-vous",
+        paragraphs=[f"Votre rendez-vous a lieu dans environ {hours_before} heures. Voici ses informations :"],
     )

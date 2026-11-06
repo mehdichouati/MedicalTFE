@@ -180,6 +180,8 @@
     "no_appointments": "Vous n'avez aucun rendez-vous pour le moment.",
     "reason_prefix": "Motif : {{reason}}",
     "cancel_button": "Annuler",
+    "cancellation_policy": "J'ai compris : si j'annule à moins de 24 h du rendez-vous ou si je ne me présente pas, 5 € seront retenus sur le remboursement d'un rendez-vous déjà payé.",
+    "confirm_cancel_late": "Moins de 24 h avant le rendez-vous : 5 € seront retenus si vous avez déjà payé. Confirmer ?",
     "confirm_cancel_question": "Confirmer ?",
     "yes": "Oui",
     "no": "Non",

@@ -1,0 +1,13 @@
+$kind: collection
+variables:
+  base_url: ""
+  token: ""
+  absence_id: ""
+auth:
+  - id: cef8883b-1db8-4ca9-912a-712f97b0b125
+    type: bearer
+    name: Bearer Token
+    credentials:
+      token: "{{token}}"
+    rules:
+      url: localhost:8000/*

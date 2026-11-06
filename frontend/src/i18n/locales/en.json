@@ -180,6 +180,8 @@
     "no_appointments": "You don't have any appointments yet.",
     "reason_prefix": "Reason: {{reason}}",
     "cancel_button": "Cancel",
+    "cancellation_policy": "I understand: if I cancel less than 24 hours before the appointment or do not attend, €5 will be deducted from the refund of a prepaid appointment.",
+    "confirm_cancel_late": "Less than 24 hours before the appointment: €5 will be deducted if you have already paid. Confirm?",
     "confirm_cancel_question": "Confirm?",
     "yes": "Yes",
     "no": "No",

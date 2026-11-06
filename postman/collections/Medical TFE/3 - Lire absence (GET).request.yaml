@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{base_url}}/absences/{{absence_id}}/"
+method: GET
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Absence lue (200)\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      pm.test(\"Bon motif\", function () {\r
+
+      \    pm.expect(pm.response.json().reason).to.eql(\"Formation\");\r
+
+      });\r
+
+      \r
+
+      \r
+
+      // READ (R du CRUD) : vérifie qu'on peut relire l'absence créée\r\n"
+    language: text/javascript
+order: 3000

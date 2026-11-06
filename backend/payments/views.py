@@ -30,6 +30,25 @@ def _is_guardian_of(guardian, patient_id):
     ).exists()
 
 
+def _mark_payment_succeeded(payment):
+    """Confirme un paiement une seule fois, sans ecraser un remboursement."""
+    if payment.status in (
+        Payment.Status.SUCCEEDED,
+        Payment.Status.PARTIALLY_REFUNDED,
+        Payment.Status.REFUNDED,
+    ):
+        return
+
+    payment.status = Payment.Status.SUCCEEDED
+    payment.save(update_fields=['status'])
+    notify_payment_succeeded(payment)
+    AuditLog.objects.create(
+        actor=None,  # confirmé par Stripe, aucun utilisateur authentifié
+        action=AuditLog.Action.PAYMENT_SUCCEEDED,
+        target_description=f"Paiement #{payment.id} de {payment.amount_cents / 100:.2f} EUR — {payment.patient}",
+    )
+
+
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     """F4 — Consultation des paiements (lecture seule : la creation passe
     par CreatePaymentIntentView, jamais par un POST direct sur ce ViewSet,
@@ -94,9 +113,25 @@ class CreatePaymentIntentView(APIView):
 
         # Reutilise le PaymentIntent existant s'il y en a deja un en attente,
         # sinon en cree un nouveau cote Stripe.
-        if payment.stripe_payment_intent_id:
-            intent = stripe.PaymentIntent.retrieve(payment.stripe_payment_intent_id)
-        else:
+        intent = None
+        previous_intent_id = payment.stripe_payment_intent_id
+
+        if previous_intent_id:
+            intent = stripe.PaymentIntent.retrieve(previous_intent_id)
+
+            # Le webhook a pu etre manque : on resynchronise avec Stripe.
+            if intent.status == 'succeeded':
+                _mark_payment_succeeded(payment)
+                return Response(
+                    {'detail': 'Ce rendez-vous est déjà payé.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Un PaymentIntent annule ne peut plus servir.
+            if intent.status == 'canceled':
+                intent = None
+
+        if intent is None:
             intent = stripe.PaymentIntent.create(
                 amount=amount_cents,
                 currency='eur',
@@ -108,7 +143,7 @@ class CreatePaymentIntentView(APIView):
                 # (ex. React StrictMode en dev), Stripe renvoie le MEME
                 # PaymentIntent au lieu d'en creer un second, evitant toute
                 # incoherence entre le formulaire affiche et la base.
-                idempotency_key=f'payment-intent-appointment-{appointment.id}',
+                idempotency_key=f"payment-intent-appointment-{appointment.id}-{previous_intent_id or 'initial'}",
             )
             payment.stripe_payment_intent_id = intent.id
             payment.amount_cents = amount_cents
@@ -141,14 +176,7 @@ def stripe_webhook(request):
         intent = event['data']['object']
         payment = Payment.objects.filter(stripe_payment_intent_id=intent['id']).first()
         if payment:
-            payment.status = Payment.Status.SUCCEEDED
-            payment.save(update_fields=['status'])
-            notify_payment_succeeded(payment)
-            AuditLog.objects.create(
-                actor=None,  # confirmé par Stripe (webhook), aucun utilisateur authentifié
-                action=AuditLog.Action.PAYMENT_SUCCEEDED,
-                target_description=f"Paiement #{payment.id} de {payment.amount_cents / 100:.2f} EUR — {payment.patient}",
-            )
+            _mark_payment_succeeded(payment)
 
     elif event['type'] == 'payment_intent.payment_failed':
         intent = event['data']['object']

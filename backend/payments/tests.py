@@ -174,7 +174,7 @@ class CancellationPolicyTestCase(PaymentTestCaseBase):
         self.assertEqual(payment.refunded_amount_cents, 2000)  # 2500 - 500 (penalite)
         mock_refund.assert_called_once_with(payment_intent='pi_cancel_test_2', amount=2000)
 
-    def test_annulation_tardive_sans_paiement_prealable_fixe_la_penalite_due(self):
+    def test_annulation_tardive_sans_paiement_prealable_ne_reclame_rien(self):
         self.appointment.start_datetime = timezone.now() + timedelta(hours=5)
         self.appointment.save(update_fields=['start_datetime'])
         payment = Payment.objects.create(
@@ -185,5 +185,22 @@ class CancellationPolicyTestCase(PaymentTestCaseBase):
         _apply_cancellation_policy(self.appointment, self.patient)
 
         payment.refresh_from_db()
-        self.assertEqual(payment.late_cancellation_fee_due_cents, 500)
+        self.assertEqual(payment.late_cancellation_fee_due_cents, 0)
         self.assertEqual(payment.status, Payment.Status.PENDING)
+
+    @patch('stripe.Refund.create')
+    def test_annulation_tardive_par_le_centre_donne_remboursement_total(self, mock_refund):
+        self.appointment.start_datetime = timezone.now() + timedelta(hours=5)
+        self.appointment.save(update_fields=['start_datetime'])
+        payment = Payment.objects.create(
+            appointment=self.appointment, patient=self.patient,
+            amount_cents=2500, status=Payment.Status.SUCCEEDED,
+            stripe_payment_intent_id='pi_cancel_test_3',
+        )
+
+        _apply_cancellation_policy(self.appointment, self.patient, fee_applies=False)
+
+        payment.refresh_from_db()
+        self.assertEqual(payment.status, Payment.Status.REFUNDED)
+        self.assertEqual(payment.refunded_amount_cents, 2500)
+        mock_refund.assert_called_once_with(payment_intent='pi_cancel_test_3')

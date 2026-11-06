@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import styles from './BookAppointmentPage.module.css'
 
 const CANCELLABLE_STATUSES = ['PENDING', 'CONFIRMED']
+const LATE_CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000
 
 const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 const WEEKDAY_LABELS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
@@ -60,6 +61,7 @@ export default function BookAppointmentPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(null)
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false)
 
   const [calendarMonth, setCalendarMonth] = useState({ year: now.getFullYear(), month: now.getMonth() })
 
@@ -105,7 +107,7 @@ export default function BookAppointmentPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!selectedSlot) return
+    if (!selectedSlot || !acceptedPolicy) return
     setSubmitting(true)
     setError('')
     try {
@@ -292,12 +294,21 @@ export default function BookAppointmentPage() {
             <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} className={styles.input} />
           </div>
 
+          <label className={styles.policyLabel}>
+            <input
+              type="checkbox"
+              checked={acceptedPolicy}
+              onChange={(e) => setAcceptedPolicy(e.target.checked)}
+            />
+            <span>{t('book_appointment.cancellation_policy')}</span>
+          </label>
+
           {error && <p className={styles.errorText}>{error}</p>}
 
           <button
             type="submit"
-            disabled={!selectedSlot || submitting}
-            className={!selectedSlot || submitting ? styles.submitButtonDisabled : styles.submitButton}
+            disabled={!selectedSlot || !acceptedPolicy || submitting}
+            className={!selectedSlot || !acceptedPolicy || submitting ? styles.submitButtonDisabled : styles.submitButton}
           >
             {submitting ? t('book_appointment.submitting') : t('book_appointment.submit')}
           </button>
@@ -314,6 +325,7 @@ export default function BookAppointmentPage() {
 
           {myAppointments.map((appt) => {
             const isCancellable = CANCELLABLE_STATUSES.includes(appt.status)
+            const isLateCancellation = new Date(appt.start_datetime) - Date.now() < LATE_CANCELLATION_WINDOW_MS
             return (
               <div key={appt.id} className={styles.appointmentCard}>
                 <div className={styles.appointmentInfo}>
@@ -341,7 +353,9 @@ export default function BookAppointmentPage() {
                   )}
                   {isCancellable && cancellingId === appt.id && (
                     <div className={styles.cancelConfirmRow}>
-                      <span className={styles.cancelConfirmText}>{t('book_appointment.confirm_cancel_question')}</span>
+                      <span className={styles.cancelConfirmText}>
+                        {t(isLateCancellation ? 'book_appointment.confirm_cancel_late' : 'book_appointment.confirm_cancel_question')}
+                      </span>
                       <button
                         type="button"
                         onClick={() => handleCancelAppointment(appt.id)}

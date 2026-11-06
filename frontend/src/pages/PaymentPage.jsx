@@ -15,6 +15,7 @@ function CheckoutForm() {
   const elements = useElements()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [isReady, setIsReady] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -35,9 +36,12 @@ function CheckoutForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <PaymentElement />
+      <PaymentElement
+        onReady={() => setIsReady(true)}
+        onLoadError={({ error: loadError }) => setError(loadError.message)}
+      />
       {error && <p className={styles.errorText}>{error}</p>}
-      <button type="submit" disabled={!stripe || submitting} className={styles.payButton}>
+      <button type="submit" disabled={!stripe || !isReady || submitting} className={styles.payButton}>
         {submitting ? t('payment.processing') : t('payment.pay_button', { amount: (CONSULTATION_PRICE_CENTS / 100).toFixed(2) })}
       </button>
     </form>
@@ -56,7 +60,7 @@ export default function PaymentPage() {
       amount_cents: CONSULTATION_PRICE_CENTS,
     })
       .then(({ data }) => setClientSecret(data.client_secret))
-      .catch(() => setError(t('payment.init_error')))
+      .catch((err) => setError(err.response?.data?.detail || t('payment.init_error')))
   }, [appointmentId, t])
 
   return (

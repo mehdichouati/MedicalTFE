@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{base_url}}/absences/{{absence_id}}/"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Absence supprimée (204)\", function () {\r
+
+      \    pm.response.to.have.status(204);\r
+
+      });\r
+
+      \r
+
+      \r
+
+      // DELETE (D du CRUD) : vérifie qu'on peut supprimer l'absence\r\n"
+    language: text/javascript
+order: 5000

@@ -1,0 +1,31 @@
+$kind: http-request
+url: "{{base_url}}/auth/login/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"username\": \"doc1\",\r
+
+    \  \"password\": \"TestPass123!\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Connexion réussie (200)\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      pm.collectionVariables.set(\"token\", pm.response.json().access);\r
+
+      \r
+
+      \r
+
+      // LOGIN : vérifie que doc1 peut se connecter à l'API\r
+
+      // et récupère le jeton d'accès (JWT) pour les requêtes suivantes"
+    language: text/javascript
+order: 1000

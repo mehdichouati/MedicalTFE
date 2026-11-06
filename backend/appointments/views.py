@@ -56,7 +56,7 @@ def _apply_cancellation_policy(appointment, actor, fee_applies=True):
     centre), le remboursement est donc toujours total.
     """
     from payments.models import Payment
-    from notifications.services import notify_payment_refunded
+    from notifications.services import notify_late_cancellation_fee, notify_payment_refunded
     import stripe
     from django.conf import settings
 
@@ -80,6 +80,7 @@ def _apply_cancellation_policy(appointment, actor, fee_applies=True):
             )
             payment.save(update_fields=['refunded_amount_cents', 'status'])
             notify_payment_refunded(payment)
+            notify_late_cancellation_fee(payment)
             AuditLog.objects.create(
                 actor=actor,
                 action=AuditLog.Action.PAYMENT_REFUNDED,

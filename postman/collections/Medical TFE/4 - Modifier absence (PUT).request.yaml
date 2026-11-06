@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{base_url}}/absences/{{absence_id}}/"
+method: PUT
+body:
+  type: json
+  content: "{\r
+
+    \  \"start_datetime\": \"2026-11-02T09:00:00+01:00\",\r
+
+    \  \"end_datetime\": \"2026-11-02T17:00:00+01:00\",\r
+
+    \  \"reason\": \"Congrès médical\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Absence modifiée (200)\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      pm.test(\"Motif mis à jour\", function () {\r
+
+      \    pm.expect(pm.response.json().reason).to.eql(\"Congrès médical\");\r
+
+      });\r
+
+      \r
+
+      // UPDATE (U du CRUD) : vérifie qu'on peut modifier l'absence\r\n"
+    language: text/javascript
+order: 4000
