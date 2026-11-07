@@ -45,6 +45,9 @@ class Absence(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
     reason = models.CharField(max_length=255, blank=True)
+    # Changement d'horaire : une absence declaree moins de 24h a l'avance
+    # n'est acceptee que pour une raison urgente (motif alors obligatoire).
+    is_urgent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
