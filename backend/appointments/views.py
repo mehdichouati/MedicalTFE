@@ -14,7 +14,10 @@ from users.models import User, LegalGuardianLink, AuditLog
 from medical_houses.models import MedicalHouseStaff
 from triage.models import TriageAssessment
 from triage.serializers import TriageAssessmentSerializer
-from notifications.services import notify_appointment_confirmation, notify_appointment_cancellation
+from notifications.services import (
+    notify_appointment_confirmation, notify_appointment_cancellation,
+    notify_appointment_cancelled_by_professional,
+)
 
 from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument, Review
 from .serializers import (
@@ -99,6 +102,42 @@ def _apply_cancellation_policy(appointment, actor, fee_applies=True):
             )
 
 
+def _cancel_appointments_for_absence(absence, actor):
+    """Changement d'horaire — annule les RDV actifs pendant l'absence,
+    rembourse integralement (le patient n'est pas responsable) et previent
+    chaque patient par e-mail avec le PDF recapitulatif.
+    Retourne le nombre de RDV annules."""
+    affected = Appointment.objects.filter(
+        professional=absence.professional,
+        status__in=ACTIVE_STATUSES,
+        start_datetime__lt=absence.end_datetime,
+        end_datetime__gt=absence.start_datetime,
+    )
+    now = timezone.now()
+    count = 0
+    for appointment in affected:
+        appointment.status = Appointment.Status.CANCELLED
+        appointment.cancelled_at = now
+        appointment.cancelled_by = actor
+        appointment.save(update_fields=['status', 'cancelled_at', 'cancelled_by'])
+        _apply_cancellation_policy(appointment, actor, fee_applies=False)
+        notify_appointment_cancelled_by_professional(appointment)
+        count += 1
+
+    start = timezone.localtime(absence.start_datetime)
+    end = timezone.localtime(absence.end_datetime)
+    urgent_label = ' — urgent' if absence.is_urgent else ''
+    AuditLog.objects.create(
+        actor=actor,
+        action=AuditLog.Action.ABSENCE_DECLARED,
+        target_description=(
+            f"Absence de {absence.professional} du {start:%d/%m/%Y %H:%M} "
+            f"au {end:%d/%m/%Y %H:%M} — {count} RDV annulé(s){urgent_label}"
+        ),
+    )
+    return count
+
+
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated)
@@ -132,6 +171,9 @@ class WeeklyAvailabilityViewSet(viewsets.ModelViewSet):
 class AbsenceViewSet(viewsets.ModelViewSet):
     serializer_class = AbsenceSerializer
     permission_classes = (IsOwnerOrAdmin,)
+    # Pas de modification (PUT/PATCH) : deplacer une absence existante
+    # permettrait de contourner la regle des 24h. On supprime puis on recree.
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
 
     def get_queryset(self):
         user = self.request.user
@@ -144,9 +186,16 @@ class AbsenceViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         if user.role in ('MEDECIN', 'KINE', 'PSYCHOLOGUE'):
-            serializer.save(professional=user)
+            absence = serializer.save(professional=user)
         else:
-            serializer.save()
+            absence = serializer.save()
+        self.cancelled_count = _cancel_appointments_for_absence(absence, user)
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        # Permet au frontend d'indiquer combien de patients ont ete prevenus.
+        response.data['cancelled_appointments_count'] = self.cancelled_count
+        return response
 
 
 class IsPatientOwnerProOrAdmin(permissions.BasePermission):

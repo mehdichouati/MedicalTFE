@@ -103,6 +103,7 @@ class AuditLog(models.Model):
         PAYMENT_REFUNDED = 'PAYMENT_REFUNDED', 'Paiement remboursé'
         APPOINTMENT_CREATED_BY_STAFF = 'APPOINTMENT_CREATED_BY_STAFF', 'Rendez-vous créé par le secrétariat'
         APPOINTMENT_CANCELLED_BY_STAFF = 'APPOINTMENT_CANCELLED_BY_STAFF', 'Rendez-vous annulé par le secrétariat'
+        ABSENCE_DECLARED = 'ABSENCE_DECLARED', "Absence déclarée (changement d'horaire)"
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='audit_actions',

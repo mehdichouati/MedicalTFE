@@ -161,6 +161,21 @@ def notify_appointment_cancellation(appointment):
     )
 
 
+def notify_appointment_cancelled_by_professional(appointment):
+    """Changement d'horaire — le motif de l'absence n'est volontairement pas
+    communique au patient (vie privee du professionnel, art. 5.1.c RGPD)."""
+    return _send_appointment_email(
+        appointment,
+        Notification.NotificationType.APPOINTMENT_CANCELLED_BY_PROFESSIONAL,
+        subject="Votre rendez-vous a été annulé par le centre",
+        title="Rendez-vous annulé par le centre",
+        paragraphs=[
+            "Nous sommes au regret de vous informer que votre rendez-vous a été annulé suite à un changement d'horaire de votre professionnel.",
+            "Si vous aviez payé ce rendez-vous, vous serez intégralement remboursé. Vous pouvez reprendre un rendez-vous depuis votre espace patient.",
+        ],
+    )
+
+
 def notify_payment_succeeded(payment):
     appointment = payment.appointment
     return _send_appointment_email(

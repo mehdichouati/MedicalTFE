@@ -35,6 +35,9 @@ class Notification(models.Model):
         APPOINTMENT_CONFIRMATION = 'APPOINTMENT_CONFIRMATION', 'Confirmation de rendez-vous'
         APPOINTMENT_CANCELLATION = 'APPOINTMENT_CANCELLATION', 'Annulation de rendez-vous'
         APPOINTMENT_REMINDER = 'APPOINTMENT_REMINDER', 'Rappel de rendez-vous'
+        APPOINTMENT_CANCELLED_BY_PROFESSIONAL = (
+            'APPOINTMENT_CANCELLED_BY_PROFESSIONAL', "Annulation suite à un changement d'horaire"
+        )
         PAYMENT_SUCCEEDED = 'PAYMENT_SUCCEEDED', 'Paiement réussi'
         PAYMENT_REFUNDED = 'PAYMENT_REFUNDED', 'Remboursement'
 

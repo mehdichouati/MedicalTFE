@@ -1,8 +1,14 @@
+from datetime import timedelta
+
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import serializers
 from .models import WeeklyAvailability, Absence, Appointment, MedicalDocument, Review
 
 PROFESSIONAL_ROLES = ('MEDECIN', 'KINE', 'PSYCHOLOGUE')
+
+# Changement d'horaire : delai minimal pour prevenir les patients.
+SCHEDULE_CHANGE_NOTICE = timedelta(hours=24)
 
 
 class WeeklyAvailabilitySerializer(serializers.ModelSerializer):
@@ -30,12 +36,28 @@ class AbsenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Absence
-        fields = ('id', 'professional', 'professional_username', 'start_datetime', 'end_datetime', 'reason', 'created_at')
+        fields = (
+            'id', 'professional', 'professional_username', 'start_datetime', 'end_datetime',
+            'reason', 'is_urgent', 'created_at',
+        )
         read_only_fields = ('id', 'created_at')
 
     def validate(self, attrs):
-        if attrs['start_datetime'] >= attrs['end_datetime']:
+        start = attrs['start_datetime']
+        end = attrs['end_datetime']
+        if start >= end:
             raise serializers.ValidationError("La date de début doit précéder la date de fin.")
+
+        # Changement d'horaire : les patients doivent etre prevenus au moins
+        # 24h a l'avance, sauf raison urgente justifiee par un motif.
+        is_urgent = attrs.get('is_urgent', False)
+        reason = attrs.get('reason', '').strip()
+        if start - timezone.now() < SCHEDULE_CHANGE_NOTICE and not is_urgent:
+            raise serializers.ValidationError(
+                "Un changement d'horaire doit être déclaré au moins 24 heures à l'avance, sauf raison urgente."
+            )
+        if is_urgent and not reason:
+            raise serializers.ValidationError("Le motif est obligatoire pour une absence urgente.")
         return attrs
 
 
