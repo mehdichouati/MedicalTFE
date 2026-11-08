@@ -6,6 +6,10 @@ import styles from './ProfessionalPlanningPage.module.css'
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6]
 
+// Changement d'horaire : delai minimal pour prevenir les patients (meme regle que le backend).
+const SCHEDULE_CHANGE_NOTICE_MS = 24 * 60 * 60 * 1000
+const EMPTY_ABSENCE_FORM = { start_datetime: '', end_datetime: '', reason: '', is_urgent: false }
+
 function formatDateTime(isoString, locale) {
   return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -25,9 +29,10 @@ export default function ProfessionalPlanningPage() {
   const [availError, setAvailError] = useState('')
   const [deletingAvailId, setDeletingAvailId] = useState(null)
 
-  const [absenceForm, setAbsenceForm] = useState({ start_datetime: '', end_datetime: '', reason: '' })
+  const [absenceForm, setAbsenceForm] = useState(EMPTY_ABSENCE_FORM)
   const [absenceSubmitting, setAbsenceSubmitting] = useState(false)
   const [absenceError, setAbsenceError] = useState('')
+  const [absenceSuccess, setAbsenceSuccess] = useState('')
   const [deletingAbsenceId, setDeletingAbsenceId] = useState(null)
 
   const loadData = () => {
@@ -82,17 +87,34 @@ export default function ProfessionalPlanningPage() {
     }
   }
 
+  const isShortNotice = absenceForm.start_datetime !== ''
+    && new Date(absenceForm.start_datetime) - Date.now() < SCHEDULE_CHANGE_NOTICE_MS
+
   const handleAddAbsence = async (e) => {
     e.preventDefault()
-    setAbsenceSubmitting(true)
     setAbsenceError('')
+    setAbsenceSuccess('')
+
+    // Verification cote client pour un retour immediat ; le backend reste la reference.
+    if (isShortNotice && !absenceForm.is_urgent) {
+      setAbsenceError(t('planning.short_notice_error'))
+      return
+    }
+    if (absenceForm.is_urgent && absenceForm.reason.trim() === '') {
+      setAbsenceError(t('planning.urgent_reason_error'))
+      return
+    }
+
+    setAbsenceSubmitting(true)
     try {
-      await apiClient.post('/absences/', {
+      const { data } = await apiClient.post('/absences/', {
         start_datetime: absenceForm.start_datetime,
         end_datetime: absenceForm.end_datetime,
         reason: absenceForm.reason,
+        is_urgent: absenceForm.is_urgent,
       })
-      setAbsenceForm({ start_datetime: '', end_datetime: '', reason: '' })
+      setAbsenceSuccess(t('planning.patients_notified', { count: data.cancelled_appointments_count ?? 0 }))
+      setAbsenceForm(EMPTY_ABSENCE_FORM)
       loadData()
     } catch (err) {
       const data = err.response?.data
@@ -207,6 +229,7 @@ export default function ProfessionalPlanningPage() {
                   <p className={styles.cardText}>
                     {formatDateTime(a.start_datetime, i18n.language)} → {formatDateTime(a.end_datetime, i18n.language)}
                     {a.reason && ` — ${a.reason}`}
+                    {a.is_urgent && <span className={styles.urgentBadge}>{t('planning.urgent_badge')}</span>}
                   </p>
                   {deletingAbsenceId === a.id ? (
                     <div className={styles.confirmRow}>
@@ -225,10 +248,12 @@ export default function ProfessionalPlanningPage() {
           )}
 
           <form onSubmit={handleAddAbsence} className={styles.form}>
+            <p className={styles.infoText}>{t('planning.absence_info')}</p>
             <div className={styles.formRow}>
               <div className={styles.field}>
-                <label>{t('planning.start_date_label')}</label><br />
+                <label htmlFor="absence-start">{t('planning.start_date_label')}</label><br />
                 <input
+                  id="absence-start"
                   type="datetime-local"
                   value={absenceForm.start_datetime}
                   onChange={(e) => setAbsenceForm({ ...absenceForm, start_datetime: e.target.value })}
@@ -237,8 +262,9 @@ export default function ProfessionalPlanningPage() {
                 />
               </div>
               <div className={styles.field}>
-                <label>{t('planning.end_date_label')}</label><br />
+                <label htmlFor="absence-end">{t('planning.end_date_label')}</label><br />
                 <input
+                  id="absence-end"
                   type="datetime-local"
                   value={absenceForm.end_datetime}
                   onChange={(e) => setAbsenceForm({ ...absenceForm, end_datetime: e.target.value })}
@@ -247,16 +273,32 @@ export default function ProfessionalPlanningPage() {
                 />
               </div>
             </div>
-            <div className={styles.field}>
-              <label>{t('planning.reason_label')}</label><br />
+            {isShortNotice && <p className={styles.warningText} role="alert">{t('planning.short_notice_hint')}</p>}
+            <div className={styles.checkboxRow}>
               <input
+                id="absence-urgent"
+                type="checkbox"
+                checked={absenceForm.is_urgent}
+                onChange={(e) => setAbsenceForm({ ...absenceForm, is_urgent: e.target.checked })}
+              />
+              <label htmlFor="absence-urgent">{t('planning.urgent_label')}</label>
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="absence-reason">
+                {absenceForm.is_urgent ? t('planning.reason_required_label') : t('planning.reason_label')}
+              </label><br />
+              <input
+                id="absence-reason"
                 type="text"
                 value={absenceForm.reason}
                 onChange={(e) => setAbsenceForm({ ...absenceForm, reason: e.target.value })}
+                required={absenceForm.is_urgent}
+                maxLength={255}
                 className={styles.input}
               />
             </div>
             {absenceError && <p className={styles.errorText}>{absenceError}</p>}
+            {absenceSuccess && <p className={styles.successText} role="status">{absenceSuccess}</p>}
             <button type="submit" disabled={absenceSubmitting} className={styles.submitButton}>
               {absenceSubmitting ? t('planning.adding') : t('planning.add_absence_button')}
             </button>

@@ -150,3 +150,49 @@
   background: #a9c3cd;
   cursor: not-allowed;
 }
+
+/* Changement d'horaire : regle des 24h et information des patients */
+.infoText {
+  background: #e8f3f7;
+  border-left: 4px solid #0a5c78;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.warningText {
+  background: #fff4e5;
+  border-left: 4px solid #b26a00;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #5c3a00;
+}
+
+.successText {
+  color: #1e7b3c;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.urgentBadge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #fde8e7;
+  color: #b3261e;
+  font-size: 12px;
+  font-weight: 600;
+}
