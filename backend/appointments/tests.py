@@ -130,7 +130,10 @@ class AppointmentBookingRulesTestCase(APITestCase):
         self.dependent = User.objects.create_user(
             username='enfant_test', email='enfant_test@test.be', password='Password123!', role='PATIENT',
         )
-        LegalGuardianLink.objects.create(guardian=self.patient, minor=self.dependent, attested_on_honour=True)
+        LegalGuardianLink.objects.create(
+            guardian=self.patient, minor=self.dependent, attested_on_honour=True,
+            status=LegalGuardianLink.Status.APPROVED,
+        )
 
         self.secretaire = User.objects.create_user(
             username='secretaire_test', email='secretaire_test@test.be', password='Password123!', role='SECRETAIRE',

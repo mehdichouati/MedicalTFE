@@ -36,6 +36,7 @@ ACTIVE_STATUSES = (Appointment.Status.PENDING, Appointment.Status.CONFIRMED)
 def _is_guardian_of(guardian, patient_id):
     return LegalGuardianLink.objects.filter(
         guardian=guardian, minor_id=patient_id, revoked_at__isnull=True,
+        status=LegalGuardianLink.Status.APPROVED,
     ).exists()
 
 
@@ -249,6 +250,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Appointment.objects.filter(professional=user)
         dependent_ids = LegalGuardianLink.objects.filter(
             guardian=user, revoked_at__isnull=True,
+            status=LegalGuardianLink.Status.APPROVED,
         ).values_list('minor_id', flat=True)
         return Appointment.objects.filter(Q(patient=user) | Q(patient_id__in=dependent_ids))
 
