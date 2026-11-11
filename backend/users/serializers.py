@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import date
 
@@ -187,15 +188,33 @@ class AuditLogSerializer(serializers.ModelSerializer):
         fields = ('id', 'actor', 'actor_username', 'action', 'action_display', 'target_description', 'timestamp')
 
 
+# F15 — Justificatif du lien parental : formats et taille acceptes.
+PROOF_ALLOWED_EXTENSIONS = ('.pdf', '.jpg', '.jpeg', '.png')
+PROOF_MAX_SIZE = 5 * 1024 * 1024  # 5 Mo
+
+
+def _validate_proof_document(file):
+    extension = os.path.splitext(file.name)[1].lower()
+    if extension not in PROOF_ALLOWED_EXTENSIONS:
+        raise serializers.ValidationError("Formats acceptés : PDF, JPG ou PNG.")
+    if file.size > PROOF_MAX_SIZE:
+        raise serializers.ValidationError("Le fichier ne doit pas dépasser 5 Mo.")
+    return file
+
+
 class CreateDependentSerializer(serializers.Serializer):
-    """F15 — Creation d'un compte mineur par le parent, avec declaration
-    sur l'honneur (pas de document d'identite, cf. justification dans
-    LegalGuardianLink)."""
+    """F15 — Creation d'un compte mineur par le parent.
+
+    Moins de 16 ans : justificatif obligatoire, le lien reste en attente
+    (PENDING) jusqu'a la validation par le secretariat.
+    16-17 ans : declaration sur l'honneur suffisante, lien valide d'office.
+    """
 
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     date_of_birth = serializers.DateField()
     attestation = serializers.BooleanField()
+    proof_document = serializers.FileField(required=False)
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
@@ -208,6 +227,8 @@ class CreateDependentSerializer(serializers.Serializer):
         return value
 
     def validate_date_of_birth(self, value):
+        if value > date.today():
+            raise serializers.ValidationError("La date de naissance ne peut pas être dans le futur.")
         age = _calculate_age(value)
         if age >= 18:
             raise serializers.ValidationError(
@@ -222,8 +243,22 @@ class CreateDependentSerializer(serializers.Serializer):
             )
         return value
 
+    def validate_proof_document(self, value):
+        return _validate_proof_document(value)
+
+    def validate(self, attrs):
+        age = _calculate_age(attrs['date_of_birth'])
+        if age < 16 and not attrs.get('proof_document'):
+            raise serializers.ValidationError({
+                'proof_document': "Un justificatif (composition de ménage ou extrait d'acte de naissance) "
+                                  "est obligatoire pour un enfant de moins de 16 ans.",
+            })
+        return attrs
+
     def create(self, validated_data):
         guardian = self.context['request'].user
+        age = _calculate_age(validated_data['date_of_birth'])
+        needs_review = age < 16
 
         import secrets
         temp_password = secrets.token_urlsafe(12)
@@ -240,22 +275,66 @@ class CreateDependentSerializer(serializers.Serializer):
             guardian=guardian,
             minor=minor,
             attested_on_honour=True,
+            status=LegalGuardianLink.Status.PENDING if needs_review else LegalGuardianLink.Status.APPROVED,
+            proof_document=validated_data.get('proof_document') if needs_review else None,
         )
 
+        description = "en attente de validation" if needs_review else "déclaration sur l'honneur"
         AuditLog.objects.create(
             actor=guardian,
             action=AuditLog.Action.USER_CREATED,
-            target_description=f"Compte mineur {minor.username} créé par {guardian.username} (déclaration sur l'honneur)",
+            target_description=f"Compte mineur {minor.username} créé par {guardian.username} ({description})",
         )
 
         return minor
+
+
+class ResubmitProofSerializer(serializers.Serializer):
+    """F15 — Nouveau justificatif envoye par le parent apres un refus."""
+
+    proof_document = serializers.FileField()
+
+    def validate_proof_document(self, value):
+        return _validate_proof_document(value)
 
 
 class DependentSerializer(serializers.ModelSerializer):
     """F15 — Affichage d'un enfant rattache, pour la liste cote parent."""
 
     age = serializers.IntegerField(read_only=True)
+    link_status = serializers.CharField(source='guardian_link.status', read_only=True)
+    rejection_reason = serializers.CharField(source='guardian_link.rejection_reason', read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'date_of_birth', 'age', 'is_active')
+        fields = ('id', 'username', 'email', 'date_of_birth', 'age', 'is_active', 'link_status', 'rejection_reason')
+
+
+class GuardianRequestSerializer(serializers.ModelSerializer):
+    """F15 — Demande de rattachement vue par le secretariat.
+
+    Le fichier n'est jamais expose par URL : il est telecharge via une
+    route protegee (secretariat / admin uniquement)."""
+
+    guardian_username = serializers.CharField(source='guardian.username', read_only=True)
+    guardian_email = serializers.CharField(source='guardian.email', read_only=True)
+    minor_username = serializers.CharField(source='minor.username', read_only=True)
+    minor_date_of_birth = serializers.DateField(source='minor.date_of_birth', read_only=True)
+    minor_age = serializers.IntegerField(source='minor.age', read_only=True)
+    has_document = serializers.SerializerMethodField()
+    reviewed_by_username = serializers.CharField(source='reviewed_by.username', read_only=True, default=None)
+
+    class Meta:
+        model = LegalGuardianLink
+        fields = (
+            'id', 'guardian_username', 'guardian_email', 'minor_username', 'minor_date_of_birth',
+            'minor_age', 'status', 'has_document', 'rejection_reason', 'created_at',
+            'reviewed_at', 'reviewed_by_username',
+        )
+
+    def get_has_document(self, obj):
+        return bool(obj.proof_document)
+
+
+class RejectGuardianRequestSerializer(serializers.Serializer):
+    rejection_reason = serializers.CharField(max_length=255)
