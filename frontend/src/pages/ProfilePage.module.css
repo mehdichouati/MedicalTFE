@@ -142,3 +142,45 @@
 .sectionContent {
   margin-top: 12px;
 }
+.dependentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dependentInfo {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #52606d;
+}
+
+.statusBadge {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusPENDING {
+  background: #fff4e5;
+  color: #8a5300;
+}
+
+.statusAPPROVED {
+  background: #e6f4ea;
+  color: #1e6b34;
+}
+
+.statusREJECTED {
+  background: #fdecea;
+  color: #b3261e;
+}
+
+.resubmitBox {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

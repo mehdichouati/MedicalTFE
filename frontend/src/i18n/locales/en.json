@@ -154,7 +154,16 @@
     "attestation_label": "I certify on my honour that I am the legal representative (parent or guardian) of this minor.",
     "create_button": "Create the account",
     "add_button": "+ Add a child",
-    "error_generic": "Error while creating the account."
+    "error_generic": "Error while creating the account.",
+    "proof_label": "Proof document (household composition or birth certificate extract)",
+    "proof_help": "Required for a child under 16. PDF, JPG or PNG, 5 MB maximum. No identity card. The document is checked by the secretariat, then deleted.",
+    "status_PENDING": "Pending validation",
+    "status_APPROVED": "Approved",
+    "status_REJECTED": "Rejected",
+    "pending_info": "The secretariat is checking your document. You will be able to book appointments for this child once it is approved.",
+    "rejection_reason_label": "Reason for rejection",
+    "resubmit_label": "Send a new proof document",
+    "resubmit_button": "Resend the document"
   },
   "book_appointment": {
     "title": "Book an appointment",

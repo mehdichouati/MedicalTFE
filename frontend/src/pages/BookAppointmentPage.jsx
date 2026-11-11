@@ -86,7 +86,10 @@ export default function BookAppointmentPage() {
   useEffect(() => {
     apiClient.get('/public/medical-house/').then(({ data }) => setHouse(data)).catch(() => {})
     apiClient.get('/auth/dependents/')
-      .then(({ data }) => setDependents(Array.isArray(data) ? data : data.results))
+      .then(({ data }) => {
+        const list = Array.isArray(data) ? data : data.results
+        setDependents(list.filter((dep) => dep.link_status === 'APPROVED'))
+      })
       .catch(() => {})
     loadMyAppointments()
   }, [])

@@ -5,6 +5,18 @@ import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import styles from './ProfilePage.module.css'
 
+// F15 — Le justificatif n'est demande que pour un enfant de moins de 16 ans.
+function isUnder16(dateOfBirth) {
+  if (!dateOfBirth) return false
+  const birth = new Date(dateOfBirth)
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const beforeBirthday = today.getMonth() < birth.getMonth()
+    || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
+  if (beforeBirthday) age -= 1
+  return age < 16
+}
+
 function CollapsibleSection({ title, isOpen, onToggle, children }) {
   return (
     <section className={styles.section}>
@@ -27,10 +39,18 @@ export default function ProfilePage() {
   const [dependents, setDependents] = useState([])
   const [showDependentForm, setShowDependentForm] = useState(false)
   const [dependentForm, setDependentForm] = useState({
-    username: '', email: '', date_of_birth: '', attestation: false,
+    username: '', email: '', date_of_birth: '', attestation: false, proof_document: null,
   })
   const [dependentError, setDependentError] = useState('')
   const [dependentSaving, setDependentSaving] = useState(false)
+  const [resubmitFiles, setResubmitFiles] = useState({})
+  const [resubmitError, setResubmitError] = useState('')
+
+  const getFirstError = (err) => {
+    const data = err.response?.data
+    const firstError = data ? Object.values(data)[0] : null
+    return Array.isArray(firstError) ? firstError[0] : firstError || t('dependents.error_generic')
+  }
 
   const loadDependents = () => {
     apiClient.get('/auth/dependents/')
@@ -42,17 +62,38 @@ export default function ProfilePage() {
     e.preventDefault()
     setDependentError('')
     setDependentSaving(true)
+    const formData = new FormData()
+    formData.append('username', dependentForm.username)
+    formData.append('email', dependentForm.email)
+    formData.append('date_of_birth', dependentForm.date_of_birth)
+    formData.append('attestation', dependentForm.attestation)
+    if (dependentForm.proof_document) {
+      formData.append('proof_document', dependentForm.proof_document)
+    }
     try {
-      await apiClient.post('/auth/dependents/', dependentForm)
-      setDependentForm({ username: '', email: '', date_of_birth: '', attestation: false })
+      await apiClient.post('/auth/dependents/', formData)
+      setDependentForm({ username: '', email: '', date_of_birth: '', attestation: false, proof_document: null })
       setShowDependentForm(false)
       loadDependents()
     } catch (err) {
-      const data = err.response?.data
-      const firstError = data ? Object.values(data)[0] : null
-      setDependentError(Array.isArray(firstError) ? firstError[0] : firstError || t('dependents.error_generic'))
+      setDependentError(getFirstError(err))
     } finally {
       setDependentSaving(false)
+    }
+  }
+
+  const handleResubmit = async (dependentId) => {
+    const file = resubmitFiles[dependentId]
+    if (!file) return
+    setResubmitError('')
+    const formData = new FormData()
+    formData.append('proof_document', file)
+    try {
+      await apiClient.post(`/auth/dependents/${dependentId}/resubmit/`, formData)
+      setResubmitFiles((prev) => ({ ...prev, [dependentId]: null }))
+      loadDependents()
+    } catch (err) {
+      setResubmitError(getFirstError(err))
     }
   }
 
@@ -339,10 +380,42 @@ export default function ProfilePage() {
           {dependents.length === 0 && <p>{t('dependents.no_dependents')}</p>}
           {dependents.map((dep) => (
             <div key={dep.id} className={styles.dependentCard}>
-              <p className={styles.dependentName}>{dep.username}</p>
+              <div className={styles.dependentHeader}>
+                <p className={styles.dependentName}>{dep.username}</p>
+                <span className={`${styles.statusBadge} ${styles[`status${dep.link_status}`]}`}>
+                  {t(`dependents.status_${dep.link_status}`)}
+                </span>
+              </div>
               <p className={styles.dependentMeta}>{t('dependents.age_years', { age: dep.age })} — {dep.email}</p>
+              {dep.link_status === 'PENDING' && (
+                <p className={styles.dependentInfo}>{t('dependents.pending_info')}</p>
+              )}
+              {dep.link_status === 'REJECTED' && (
+                <div className={styles.resubmitBox}>
+                  <p className={styles.errorText}>
+                    {t('dependents.rejection_reason_label')} : {dep.rejection_reason}
+                  </p>
+                  <label htmlFor={`resubmit-${dep.id}`}>{t('dependents.resubmit_label')}</label>
+                  <input
+                    id={`resubmit-${dep.id}`}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setResubmitFiles((prev) => ({ ...prev, [dep.id]: e.target.files[0] }))}
+                    className={styles.input}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleResubmit(dep.id)}
+                    disabled={!resubmitFiles[dep.id]}
+                    className={styles.submitButton}
+                  >
+                    {t('dependents.resubmit_button')}
+                  </button>
+                </div>
+              )}
             </div>
           ))}
+          {resubmitError && <p className={styles.errorText}>{resubmitError}</p>}
 
           {showDependentForm ? (
             <form onSubmit={handleDependentSubmit} className={styles.dependentForm}>
@@ -376,6 +449,20 @@ export default function ProfilePage() {
                   className={styles.input}
                 />
               </div>
+              {isUnder16(dependentForm.date_of_birth) && (
+                <div className={styles.field}>
+                  <label htmlFor="dependent-proof">{t('dependents.proof_label')}</label><br />
+                  <input
+                    id="dependent-proof"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setDependentForm({ ...dependentForm, proof_document: e.target.files[0] })}
+                    required
+                    className={styles.input}
+                  />
+                  <p className={styles.dependentInfo}>{t('dependents.proof_help')}</p>
+                </div>
+              )}
               <label className={styles.attestationLabel}>
                 <input
                   type="checkbox"

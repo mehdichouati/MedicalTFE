@@ -154,7 +154,16 @@
     "attestation_label": "Je certifie sur l'honneur être le représentant légal (parent ou tuteur) de ce mineur.",
     "create_button": "Créer le compte",
     "add_button": "+ Ajouter un enfant",
-    "error_generic": "Erreur lors de la création."
+    "error_generic": "Erreur lors de la création.",
+    "proof_label": "Justificatif (composition de ménage ou extrait d'acte de naissance)",
+    "proof_help": "Obligatoire pour un enfant de moins de 16 ans. PDF, JPG ou PNG, 5 Mo maximum. Pas de carte d'identité. Le document est vérifié par le secrétariat puis supprimé.",
+    "status_PENDING": "En attente de validation",
+    "status_APPROVED": "Validé",
+    "status_REJECTED": "Refusé",
+    "pending_info": "Le secrétariat vérifie votre justificatif. Vous pourrez prendre rendez-vous pour cet enfant dès la validation.",
+    "rejection_reason_label": "Motif du refus",
+    "resubmit_label": "Envoyer un nouveau justificatif",
+    "resubmit_button": "Renvoyer le justificatif"
   },
   "book_appointment": {
     "title": "Prendre rendez-vous",
