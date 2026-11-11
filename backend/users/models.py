@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
@@ -54,6 +57,13 @@ class User(AbstractUser):
         return age is not None and age < 16
 
 
+def guardian_proof_upload_path(instance, filename):
+    """Nom de fichier aleatoire : le nom d'origine (souvent le nom de
+    l'enfant) n'est pas conserve et l'URL n'est pas devinable."""
+    extension = os.path.splitext(filename)[1].lower()
+    return f"guardian_proofs/{uuid.uuid4().hex}{extension}"
+
+
 class LegalGuardianLink(models.Model):
     """F15 — Lien entre un representant legal (parent) et un compte mineur.
 
@@ -63,13 +73,21 @@ class LegalGuardianLink(models.Model):
     parent) ; les 16-17 ans peuvent se connecter et agir eux-memes, en plus
     du parent qui garde un acces complet en parallele.
 
-    Conformite : pas de verification documentaire (carte d'identite) -
-    disproportionne au regard du RGPD (minimisation des donnees) et du cadre
-    legal belge sur le controle des cartes d'identite (reserve a des
-    personnes habilitees, AR du 25/03/2003). A la place, le parent atteste
-    sur l'honneur etre le representant legal, declaration horodatee et
-    journalisee (AuditLog) pour tracabilite en cas de litige.
+    Conformite : pour un mineur de moins de 16 ans, le parent depose un
+    justificatif proportionne (composition de menage ou extrait d'acte de
+    naissance, pas de carte d'identite) en plus de la declaration sur
+    l'honneur. Le lien reste en attente (PENDING) jusqu'a la validation par
+    le secretariat : tant qu'il n'est pas valide, le parent ne peut ni
+    reserver, ni payer, ni consulter le dossier de l'enfant. Le justificatif
+    n'est accessible qu'au secretariat et a l'administrateur, et il est
+    supprime des la decision prise (minimisation des donnees, art. 5 RGPD).
+    Chaque decision est journalisee (AuditLog).
     """
+
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'En attente de validation'
+        APPROVED = 'APPROVED', 'Validé'
+        REJECTED = 'REJECTED', 'Refusé'
 
     guardian = models.ForeignKey(
         'User', on_delete=models.CASCADE, related_name='dependents_link',
@@ -78,11 +96,23 @@ class LegalGuardianLink(models.Model):
         'User', on_delete=models.CASCADE, related_name='guardian_link',
     )
     attested_on_honour = models.BooleanField(default=False)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    proof_document = models.FileField(upload_to=guardian_proof_upload_path, null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        'User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='reviewed_guardian_links',
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.guardian} est representant legal de {self.minor}"
+
+    @property
+    def is_active(self):
+        return self.status == self.Status.APPROVED and self.revoked_at is None
 
 
 class AuditLog(models.Model):
@@ -104,6 +134,8 @@ class AuditLog(models.Model):
         APPOINTMENT_CREATED_BY_STAFF = 'APPOINTMENT_CREATED_BY_STAFF', 'Rendez-vous créé par le secrétariat'
         APPOINTMENT_CANCELLED_BY_STAFF = 'APPOINTMENT_CANCELLED_BY_STAFF', 'Rendez-vous annulé par le secrétariat'
         ABSENCE_DECLARED = 'ABSENCE_DECLARED', "Absence déclarée (changement d'horaire)"
+        GUARDIAN_LINK_APPROVED = 'GUARDIAN_LINK_APPROVED', 'Lien parental validé'
+        GUARDIAN_LINK_REJECTED = 'GUARDIAN_LINK_REJECTED', 'Lien parental refusé'
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='audit_actions',
