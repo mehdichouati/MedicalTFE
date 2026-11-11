@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, AuditLog
+from .models import User, AuditLog, LegalGuardianLink
 
 admin.site.register(User, UserAdmin)
 
@@ -25,3 +25,13 @@ class AuditLogAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(LegalGuardianLink)
+class LegalGuardianLinkAdmin(admin.ModelAdmin):
+    """F15 — Suivi des liens parentaux dans le back-office."""
+
+    list_display = ('guardian', 'minor', 'status', 'created_at', 'reviewed_by', 'reviewed_at')
+    list_filter = ('status',)
+    search_fields = ('guardian__username', 'minor__username')
+    readonly_fields = ('created_at', 'reviewed_at', 'reviewed_by')
