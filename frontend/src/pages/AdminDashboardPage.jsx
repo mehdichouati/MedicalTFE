@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import apiClient from '../api/client'
+import { getDateLocale } from '../i18n/dateLocale'
 import styles from './AdminDashboardPage.module.css'
 
 const cardBase = {
@@ -29,7 +30,7 @@ function StatCard({ label, value, accent, onClick }) {
 
 function formatDateShort(isoDate, locale) {
   const d = new Date(isoDate)
-  return d.toLocaleDateString(locale === 'en' ? 'en-GB' : 'fr-BE', { day: '2-digit', month: '2-digit' })
+  return d.toLocaleDateString(getDateLocale(locale), { day: '2-digit', month: '2-digit' })
 }
 
 export default function AdminDashboardPage() {
@@ -69,7 +70,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className={styles.cardGrid}>
-         <StatCard label={t('admin_dashboard.appointments_today')} value={summary.appointments_today} accent="#5b8def" onClick={() => navigate('/admin/appointments?date=today')} />
+          <StatCard label={t('admin_dashboard.appointments_today')} value={summary.appointments_today} accent="#5b8def" onClick={() => navigate('/admin/appointments?date=today')} />
           <StatCard label={t('admin_dashboard.pending')} value={summary.pending_appointments} accent="#f0a94e" onClick={() => navigate('/admin/appointments?status=PENDING')} />
           <StatCard label={t('admin_dashboard.completed')} value={summary.completed_appointments} accent="#4caf7d" onClick={() => navigate('/admin/appointments?status=COMPLETED')} />
           <StatCard label={t('admin_dashboard.cancelled_noshow')} value={summary.cancelled_appointments + summary.no_show_appointments} accent="#e0574f" onClick={() => navigate('/admin/appointments?status_in=CANCELLED,NO_SHOW')} />
@@ -115,7 +116,7 @@ export default function AdminDashboardPage() {
               <div key={i} className={styles.listRow}>
                 <p className={styles.listRowName}>{pro.professional__username}</p>
                 <p className={styles.listRowMeta}>
-                  {pro.professional__role} — {pro.total}
+                  {t(`roles.${pro.professional__role}`)} — {pro.total}
                 </p>
               </div>
             ))}

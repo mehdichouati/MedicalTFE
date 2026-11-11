@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient, { fetchAllPages } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { getDateLocale, getWeekdayInitials } from '../i18n/dateLocale'
 import styles from './ProfessionalAppointmentsPage.module.css'
 
 const STATUS_COLORS = {
@@ -13,11 +14,8 @@ const STATUS_COLORS = {
   NO_SHOW: { background: '#fdf2f2', color: '#b3261e' },
 }
 
-const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-const WEEKDAY_LABELS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-
 function formatDateTime(isoString, locale) {
-  return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
+  return new Date(isoString).toLocaleString(getDateLocale(locale), {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
@@ -118,7 +116,6 @@ function UploadDocumentForm({ patientId, onUploaded }) {
 
 export default function ProfessionalAppointmentsPage() {
   const { t, i18n } = useTranslation()
-  const isEnglish = i18n.language?.startsWith('en')
   const { user } = useAuth()
   const [appointments, setAppointments] = useState([])
   const [error, setError] = useState('')
@@ -177,11 +174,11 @@ export default function ProfessionalAppointmentsPage() {
     .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
 
   const monthLabel = new Date(calendarMonth.year, calendarMonth.month, 1)
-    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { month: 'long', year: 'numeric' })
+    .toLocaleDateString(getDateLocale(i18n.language), { month: 'long', year: 'numeric' })
   const weeks = buildMonthGrid(calendarMonth.year, calendarMonth.month)
-  const weekdayLabels = isEnglish ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_FR
+  const weekdayLabels = getWeekdayInitials(i18n.language)
   const selectedDateLabel = new Date(selectedDate + 'T00:00:00')
-    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+    .toLocaleDateString(getDateLocale(i18n.language), { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
     <div className={styles.page}>

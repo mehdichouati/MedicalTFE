@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
+import { getDateLocale } from '../i18n/dateLocale'
 import styles from './ProfessionalPlanningPage.module.css'
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6]
@@ -11,7 +12,7 @@ const SCHEDULE_CHANGE_NOTICE_MS = 24 * 60 * 60 * 1000
 const EMPTY_ABSENCE_FORM = { start_datetime: '', end_datetime: '', reason: '', is_urgent: false }
 
 function formatDateTime(isoString, locale) {
-  return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
+  return new Date(isoString).toLocaleString(getDateLocale(locale), {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }

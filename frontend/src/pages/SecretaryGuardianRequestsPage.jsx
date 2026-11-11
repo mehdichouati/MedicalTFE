@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient, { fetchAllPages } from '../api/client'
+import { getDateLocale } from '../i18n/dateLocale'
 import styles from './SecretaryGuardianRequestsPage.module.css'
 
 const STATUS_FILTERS = ['PENDING', 'APPROVED', 'REJECTED']
 
-function formatDate(isoString, isEnglish) {
+function formatDate(isoString, locale) {
   if (!isoString) return ''
-  return new Date(isoString).toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', {
+  return new Date(isoString).toLocaleDateString(getDateLocale(locale), {
     day: '2-digit', month: '2-digit', year: 'numeric',
   })
 }
@@ -24,7 +25,6 @@ function getErrorMessage(err, fallback) {
 // F15 — Validation des liens parentaux par le secretariat.
 export default function SecretaryGuardianRequestsPage() {
   const { t, i18n } = useTranslation()
-  const isEnglish = i18n.language?.startsWith('en')
 
   const [statusFilter, setStatusFilter] = useState('PENDING')
   const [requests, setRequests] = useState([])
@@ -151,16 +151,16 @@ export default function SecretaryGuardianRequestsPage() {
                 {t('guardian_requests.guardian_label')} : {request.guardian_username} ({request.guardian_email})
               </p>
               <p className={styles.cardMeta}>
-                {t('guardian_requests.birth_date_label')} : {formatDate(request.minor_date_of_birth, isEnglish)}
+                {t('guardian_requests.birth_date_label')} : {formatDate(request.minor_date_of_birth, i18n.language)}
                 {' · '}
-                {t('guardian_requests.requested_on_label')} : {formatDate(request.created_at, isEnglish)}
+                {t('guardian_requests.requested_on_label')} : {formatDate(request.created_at, i18n.language)}
               </p>
 
               {request.status !== 'PENDING' && request.reviewed_by_username && (
                 <p className={styles.cardMeta}>
                   {t('guardian_requests.reviewed_by_label', {
                     name: request.reviewed_by_username,
-                    date: formatDate(request.reviewed_at, isEnglish),
+                    date: formatDate(request.reviewed_at, i18n.language),
                   })}
                 </p>
               )}

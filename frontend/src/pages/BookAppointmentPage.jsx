@@ -3,20 +3,18 @@ import { Link, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { getDateLocale, getWeekdayInitials } from '../i18n/dateLocale'
 import styles from './BookAppointmentPage.module.css'
 
 const CANCELLABLE_STATUSES = ['PENDING', 'CONFIRMED']
 const LATE_CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000
 
-const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-const WEEKDAY_LABELS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-
 function formatSlotTime(isoString, locale) {
-  return new Date(isoString).toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-BE', { hour: '2-digit', minute: '2-digit' })
+  return new Date(isoString).toLocaleTimeString(getDateLocale(locale), { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatAppointmentDateTime(isoString, locale) {
-  return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
+  return new Date(isoString).toLocaleString(getDateLocale(locale), {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
@@ -44,7 +42,6 @@ export default function BookAppointmentPage() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const isEnglish = i18n.language?.startsWith('en')
 
   const now = new Date()
   const todayISO = toISODate(now.getFullYear(), now.getMonth(), now.getDate())
@@ -162,9 +159,9 @@ export default function BookAppointmentPage() {
 
   const professionals = house?.staff?.filter((s) => ['MEDECIN', 'KINE', 'PSYCHOLOGUE'].includes(s.role)) || []
   const monthLabel = new Date(calendarMonth.year, calendarMonth.month, 1)
-    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { month: 'long', year: 'numeric' })
+    .toLocaleDateString(getDateLocale(i18n.language), { month: 'long', year: 'numeric' })
   const weeks = buildMonthGrid(calendarMonth.year, calendarMonth.month)
-  const weekdayLabels = isEnglish ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_FR
+  const weekdayLabels = getWeekdayInitials(i18n.language)
 
   if (success) {
     return (
@@ -284,7 +281,7 @@ export default function BookAppointmentPage() {
                       onClick={() => setSelectedSlot(slot)}
                       className={isSelected ? styles.slotButtonSelected : styles.slotButton}
                     >
-                      {formatSlotTime(slot.start, isEnglish ? 'en' : 'fr')}
+                      {formatSlotTime(slot.start, i18n.language)}
                     </button>
                   )
                 })}
@@ -332,7 +329,7 @@ export default function BookAppointmentPage() {
             return (
               <div key={appt.id} className={styles.appointmentCard}>
                 <div className={styles.appointmentInfo}>
-                  <p className={styles.appointmentDate}>{formatAppointmentDateTime(appt.start_datetime, isEnglish ? 'en' : 'fr')}</p>
+                  <p className={styles.appointmentDate}>{formatAppointmentDateTime(appt.start_datetime, i18n.language)}</p>
                   <p className={styles.appointmentMeta}>
                     {appt.professional_username} — {t(`roles.${appt.professional_role}`, appt.professional_role)}
                     {' — '}{appt.medical_house_name}

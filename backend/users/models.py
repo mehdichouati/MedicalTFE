@@ -19,7 +19,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=20, blank=True)
-    language = models.CharField(max_length=5, default='fr', choices=[('fr', 'Français'), ('en', 'English')])
+    language = models.CharField(max_length=5, default='fr', choices=[('fr', 'Français'), ('en', 'English'), ('nl', 'Nederlands')])
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     # F16 — Numero d'habilitation officiel : INAMI (medecin, kine) ou

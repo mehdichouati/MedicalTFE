@@ -281,6 +281,7 @@ export default function ProfilePage() {
             <select value={language} onChange={(e) => setLanguage(e.target.value)} className={styles.input}>
               <option value="fr">Français</option>
               <option value="en">English</option>
+              <option value="nl">Nederlands</option>
             </select>
           </div>
           <button type="submit" disabled={savingProfile} className={styles.submitButton}>
@@ -336,7 +337,7 @@ export default function ProfilePage() {
       </CollapsibleSection>
 
       <CollapsibleSection
-        title={t('profile.notifications_section', 'Notifications')}
+        title={t('profile.notifications_section')}
         isOpen={!!openSections.notifications}
         onToggle={() => toggleSection('notifications')}
       >
@@ -347,7 +348,7 @@ export default function ProfilePage() {
               checked={emailEnabled}
               onChange={(e) => setEmailEnabled(e.target.checked)}
             />
-            {t('profile.email_notifications', 'Recevoir les notifications par email')}
+            {t('profile.email_notifications')}
           </label>
           <button type="submit" disabled={savingNotif} className={styles.notifSaveButton}>
             {savingNotif ? '...' : t('common.save')}

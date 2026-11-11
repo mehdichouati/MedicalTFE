@@ -2,18 +2,17 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import apiClient, { fetchAllPages } from '../api/client'
+import { getDateLocale, getWeekdayInitials } from '../i18n/dateLocale'
 import styles from './SecretaryAppointmentsPage.module.css'
 
-const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-const WEEKDAY_LABELS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const CANCELLABLE_STATUSES = ['PENDING', 'CONFIRMED']
 
 function formatSlotTime(isoString, locale) {
-  return new Date(isoString).toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-BE', { hour: '2-digit', minute: '2-digit' })
+  return new Date(isoString).toLocaleTimeString(getDateLocale(locale), { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatDateTime(isoString, locale) {
-  return new Date(isoString).toLocaleString(locale === 'en' ? 'en-GB' : 'fr-BE', {
+  return new Date(isoString).toLocaleString(getDateLocale(locale), {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
@@ -43,7 +42,6 @@ function buildMonthGrid(year, month) {
 
 export default function SecretaryAppointmentsPage() {
   const { t, i18n } = useTranslation()
-  const isEnglish = i18n.language?.startsWith('en')
   const now = new Date()
   const todayISO = toLocalISODate(now)
 
@@ -182,11 +180,11 @@ export default function SecretaryAppointmentsPage() {
     .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
 
   const monthLabel = new Date(calendarMonth.year, calendarMonth.month, 1)
-    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { month: 'long', year: 'numeric' })
+    .toLocaleDateString(getDateLocale(i18n.language), { month: 'long', year: 'numeric' })
   const weeks = buildMonthGrid(calendarMonth.year, calendarMonth.month)
-  const weekdayLabels = isEnglish ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_FR
+  const weekdayLabels = getWeekdayInitials(i18n.language)
   const selectedDateLabel = new Date(selectedDate + 'T00:00:00')
-    .toLocaleDateString(isEnglish ? 'en-GB' : 'fr-BE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+    .toLocaleDateString(getDateLocale(i18n.language), { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
     <div className={styles.page}>
@@ -322,7 +320,7 @@ export default function SecretaryAppointmentsPage() {
                           onClick={() => setSelectedSlot(slot)}
                           className={isSelected ? styles.slotButtonSelected : styles.slotButton}
                         >
-                          {formatSlotTime(slot.start, isEnglish ? 'en' : 'fr')}
+                          {formatSlotTime(slot.start, i18n.language)}
                         </button>
                       )
                     })}
