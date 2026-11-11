@@ -69,7 +69,9 @@
     "link_dashboard": "Dashboard",
     "link_dashboard_subtitle": "Statistics and management",
     "link_profile": "My profile",
-    "link_profile_subtitle": "Your information, preferences"
+    "link_profile_subtitle": "Your information, preferences",
+    "link_guardian_requests": "Child accounts",
+    "link_guardian_requests_subtitle": "Check parents' documents"
   },
   "history": {
     "title": "My history",
@@ -405,5 +407,27 @@
     "reviews_prev": "Previous reviews",
     "reviews_next": "Next reviews",
     "reviews_empty": "No reviews yet."
+  },
+  "guardian_requests": {
+    "title": "Child account validation",
+    "intro": "Check the document sent by the parent, then approve or reject the link. The document is deleted as soon as you have made your decision.",
+    "load_error": "Unable to load the requests.",
+    "document_error": "Unable to open the document.",
+    "action_error": "Error while processing the request.",
+    "filter_PENDING": "Pending",
+    "filter_APPROVED": "Approved",
+    "filter_REJECTED": "Rejected",
+    "empty": "No requests.",
+    "guardian_label": "Parent",
+    "birth_date_label": "Born on",
+    "requested_on_label": "Requested on",
+    "reviewed_by_label": "Processed by {{name}} on {{date}}",
+    "no_document": "No document attached.",
+    "view_document": "View the document",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reason_label": "Reason for rejection",
+    "reason_placeholder": "E.g. unreadable document",
+    "confirm_reject": "Confirm rejection"
   }
 }

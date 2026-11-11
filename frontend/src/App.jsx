@@ -12,6 +12,7 @@ import PaymentPage from './pages/PaymentPage'
 import ProfessionalAppointmentsPage from './pages/ProfessionalAppointmentsPage'
 import ProfessionalPlanningPage from './pages/ProfessionalPlanningPage'
 import SecretaryAppointmentsPage from './pages/SecretaryAppointmentsPage'
+import SecretaryGuardianRequestsPage from './pages/SecretaryGuardianRequestsPage'
 import BookAppointmentPage from './pages/BookAppointmentPage'
 import ProfessionalPatientsPage from './pages/ProfessionalPatientsPage'
 import PatientDetailPage from './pages/PatientDetailPage'
@@ -89,6 +90,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <SecretaryAppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/secretary/guardian-requests"
+            element={
+              <ProtectedRoute>
+                <SecretaryGuardianRequestsPage />
               </ProtectedRoute>
             }
           />

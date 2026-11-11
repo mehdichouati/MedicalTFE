@@ -69,7 +69,9 @@
     "link_dashboard": "Tableau de bord",
     "link_dashboard_subtitle": "Statistiques et gestion",
     "link_profile": "Mon profil",
-    "link_profile_subtitle": "Vos informations, préférences"
+    "link_profile_subtitle": "Vos informations, préférences",
+    "link_guardian_requests": "Comptes enfants",
+    "link_guardian_requests_subtitle": "Valider les justificatifs des parents"
   },
   "history": {
     "title": "Mon historique",
@@ -405,5 +407,27 @@
     "reviews_prev": "Avis précédents",
     "reviews_next": "Avis suivants",
     "reviews_empty": "Aucun avis pour le moment."
+  },
+  "guardian_requests": {
+    "title": "Validation des comptes enfants",
+    "intro": "Vérifiez le justificatif envoyé par le parent, puis validez ou refusez le rattachement. Le justificatif est supprimé dès que vous avez pris votre décision.",
+    "load_error": "Impossible de charger les demandes.",
+    "document_error": "Impossible d'ouvrir le justificatif.",
+    "action_error": "Erreur lors du traitement de la demande.",
+    "filter_PENDING": "En attente",
+    "filter_APPROVED": "Validées",
+    "filter_REJECTED": "Refusées",
+    "empty": "Aucune demande.",
+    "guardian_label": "Parent",
+    "birth_date_label": "Né(e) le",
+    "requested_on_label": "Demande du",
+    "reviewed_by_label": "Traitée par {{name}} le {{date}}",
+    "no_document": "Aucun justificatif joint.",
+    "view_document": "Voir le justificatif",
+    "approve": "Valider",
+    "reject": "Refuser",
+    "reason_label": "Motif du refus",
+    "reason_placeholder": "Ex. : document illisible",
+    "confirm_reject": "Confirmer le refus"
   }
 }
