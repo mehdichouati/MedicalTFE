@@ -141,6 +141,8 @@
     "dpo_intro": "Conformément au RGPD, vous pouvez contacter notre Délégué à la Protection des Données (DPO) pour toute question relative au traitement de vos données de santé, ou pour exercer vos droits d'accès, de rectification ou d'effacement.",
     "dpo_email_label": "Contact DPO",
     "dpo_legal_note": "Traitement fondé sur le contrat de soins et, le cas échéant, votre consentement explicite (art. 9 RGPD).",
+    "notifications_section": "Notifications",
+    "email_notifications": "Recevoir les notifications par email",
     "username": "Nom d'utilisateur",
     "username_change_note": "Attention : ceci modifiera aussi votre identifiant de connexion.",
     "email": "Adresse email",
