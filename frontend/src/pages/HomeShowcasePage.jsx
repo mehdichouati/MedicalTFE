@@ -1,22 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '../context/AuthContext'
 import apiClient from '../api/client'
-import LanguageSwitcher from '../components/LanguageSwitcher'
 import styles from './HomeShowcasePage.module.css'
 
-const HIGHLIGHTS = [
-  { icon: '🩺', titleKey: 'showcase.highlight_1_title', textKey: 'showcase.highlight_1_text' },
-  { icon: '📅', titleKey: 'showcase.highlight_2_title', textKey: 'showcase.highlight_2_text' },
-  { icon: '🔒', titleKey: 'showcase.highlight_3_title', textKey: 'showcase.highlight_3_text' },
-  { icon: '🤝', titleKey: 'showcase.highlight_4_title', textKey: 'showcase.highlight_4_text' },
+// Categories de professionnels affichees sur la vitrine.
+const CATEGORIES = [
+  { role: 'MEDECIN', icon: '🩺' },
+  { role: 'KINE', icon: '💪' },
+  { role: 'PSYCHOLOGUE', icon: '🧠' },
 ]
 
-const ROLE_ICONS = {
-  MEDECIN: '🩺',
-  KINE: '💪',
-  PSYCHOLOGUE: '🧠',
-}
+// Actualites statiques (textes dans les fichiers de traduction).
+const NEWS = ['news_1', 'news_2']
 
 // F16 — Registres officiels permettant au patient de verifier lui-meme
 // l'habilitation d'un professionnel.
@@ -34,49 +31,79 @@ function formatLicenseNumber(member) {
 }
 
 function Stars({ rating }) {
+  const rounded = Math.round(rating)
   return (
-    <span className={styles.stars}>
-      {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
+    <span className={styles.stars} aria-hidden="true">
+      {'★'.repeat(rounded)}{'☆'.repeat(5 - rounded)}
     </span>
   )
 }
 
 export default function HomeShowcasePage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const { user } = useAuth()
+  const location = useLocation()
   const [house, setHouse] = useState(null)
-  const reviewsScrollRef = useRef(null)
-
-  const scrollReviews = (direction) => {
-    if (!reviewsScrollRef.current) return
-    const amount = 300
-    reviewsScrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' })
-  }
+  const [openCategory, setOpenCategory] = useState(null)
 
   useEffect(() => {
     apiClient.get('/public/medical-house/')
       .then(({ data }) => setHouse(data))
-      .catch(() => {})
+      .catch(() => setHouse(null))
   }, [])
+
+  // Fait defiler jusqu'a la section demandee (ex. /#professionnels).
+  useEffect(() => {
+    if (!location.hash) return
+    const section = document.getElementById(location.hash.slice(1))
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [location.hash, house])
+
+  const staff = house?.staff || []
+  const latestReview = house?.reviews?.find((review) => review.comment)
+  const bookingLink = user?.role === 'PATIENT' ? '/book' : user ? '/app' : '/login'
+
+  const toggleCategory = (role) => {
+    setOpenCategory((current) => (current === role ? null : role))
+  }
+
+  const formatRating = (rating) =>
+    new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 }).format(rating)
 
   return (
     <div className={styles.page}>
-      <div className={styles.topBar}>
-        <LanguageSwitcher />
+      {/* ----- Bandeau d'informations rapides ----- */}
+      <div className={styles.infoBar}>
+        <div className={styles.infoBarInner}>
+          {house?.phone_number && (
+            <a href={`tel:${house.phone_number.replace(/\s/g, '')}`} className={styles.infoItem}>
+              <span aria-hidden="true">📞</span> {house.phone_number}
+            </a>
+          )}
+          <span className={`${styles.infoItem} ${styles.infoHours}`}>
+            <span aria-hidden="true">🕐</span> {t('footer.hours_weekdays')} · {t('footer.hours_saturday')}
+          </span>
+          <span className={`${styles.infoItem} ${styles.infoEmergency}`}>
+            <a href="tel:1733">{t('footer.on_call')}</a> · <a href="tel:112">{t('footer.emergency')}</a>
+          </span>
+        </div>
       </div>
 
+      {/* ----- Bandeau principal (hero) ----- */}
       <section className={styles.hero}>
         <div className={styles.heroText}>
-          <h1 className={styles.heroTitle}>{house?.name || t('showcase.default_house_name')}</h1>
-          <p className={styles.heroSubtitle}>
-            {t('showcase.hero_subtitle')}
-          </p>
+          <p className={styles.heroHouse}>{house?.name || t('showcase.default_house_name')}</p>
+          <h1 className={styles.heroTitle}>{t('showcase.hero_title')}</h1>
+          <p className={styles.heroSubtitle}>{t('showcase.hero_subtitle')}</p>
           <div className={styles.heroActions}>
-            <Link to="/login" className={styles.btnPrimary}>
-              {t('showcase.login_button')}
+            <Link to={bookingLink} className={styles.btnPrimary}>
+              <span aria-hidden="true">📅</span> {t('showcase.hero_book')}
             </Link>
-            <Link to="/register" className={styles.btnSecondary}>
-              {t('showcase.register_button')}
-            </Link>
+            <a href="#professionnels" className={styles.btnSecondary}>
+              {t('showcase.hero_team')}
+            </a>
           </div>
         </div>
         <div className={styles.heroImageWrap}>
@@ -84,58 +111,77 @@ export default function HomeShowcasePage() {
         </div>
       </section>
 
-      <section className={styles.sectionAlt}>
-        <h2 className={styles.sectionTitle}>
-          {t('showcase.why_choose_title', { name: house?.name || t('showcase.default_house_name_lowercase') })}
-        </h2>
-        <div className={styles.highlightGrid}>
-          {HIGHLIGHTS.map((h) => (
-            <div key={h.titleKey} className={styles.highlightCard}>
-              <div className={styles.highlightIcon} aria-hidden="true">{h.icon}</div>
-              <h3 className={styles.highlightTitle}>{t(h.titleKey)}</h3>
-              <p className={styles.highlightText}>{t(h.textKey)}</p>
-            </div>
-          ))}
+      {/* ----- Nos professionnels ----- */}
+      <section id="professionnels" className={styles.section}>
+        <h2 className={styles.sectionTitle}>{t('nav.professionals')}</h2>
+        <div className={styles.categoryGrid}>
+          {CATEGORIES.map((category) => {
+            const count = staff.filter((member) => member.role === category.role).length
+            const isOpen = openCategory === category.role
+            return (
+              <button
+                key={category.role}
+                type="button"
+                className={isOpen ? `${styles.categoryCard} ${styles.categoryCardOpen}` : styles.categoryCard}
+                aria-expanded={isOpen}
+                aria-controls="team-list"
+                onClick={() => toggleCategory(category.role)}
+              >
+                <span className={styles.categoryIcon} aria-hidden="true">{category.icon}</span>
+                <span className={styles.categoryTitle}>{t(`showcase.category_${category.role}`)}</span>
+                <span className={styles.categoryCount}>{t('showcase.practitioners_count', { count })}</span>
+                <span className={styles.categoryLink}>
+                  {isOpen ? t('showcase.hide_team') : t('showcase.see_team')} {isOpen ? '↑' : '→'}
+                </span>
+              </button>
+            )
+          })}
         </div>
+
+        {openCategory && (
+          <div id="team-list" className={styles.teamGrid}>
+            {staff.filter((member) => member.role === openCategory).map((member) => (
+              <div key={member.id} className={styles.teamCard}>
+                <p className={styles.teamName}>{member.full_name}</p>
+                <p className={styles.teamRole}>{t(`roles.${member.role}`, member.role)}</p>
+                {member.license_number && (
+                  <p className={styles.teamLicense}>
+                    {member.role === 'PSYCHOLOGUE' ? t('showcase.license_compsy') : t('showcase.license_inami')}
+                    {' '}{formatLicenseNumber(member)}
+                  </p>
+                )}
+              </div>
+            ))}
+            {staff.every((member) => member.role !== openCategory) && (
+              <p className={styles.emptyText}>{t('showcase.team_empty')}</p>
+            )}
+          </div>
+        )}
       </section>
 
-      <section className={styles.waitingRoomSection}>
-        <img src="/images/waiting_room.jpg" alt={t('showcase.waiting_room_alt')} className={styles.waitingRoomImage} />
-        <div className={styles.waitingRoomText}>
-          <h2 className={styles.waitingRoomTitle}>{t('showcase.waiting_room_title')}</h2>
-          <p className={styles.waitingRoomBody}>
-            {t('showcase.waiting_room_body')}
-          </p>
-        </div>
-      </section>
-
-      <section className={styles.sectionAlt}>
-        <h2 className={styles.sectionTitleSm}>{t('showcase.team_title')}</h2>
-        <img src="/images/team1.jpg" alt={t('showcase.team_alt')} className={styles.teamImage} />
-        <div className={styles.teamGrid}>
-          {house?.staff?.map((member) => (
-            <div key={member.id} className={styles.teamCard}>
-              <div className={styles.teamAvatar} aria-hidden="true">{ROLE_ICONS[member.role] || '👤'}</div>
-              <p className={styles.teamName}>{member.full_name}</p>
-              <p className={styles.teamRole}>{t(`roles.${member.role}`, member.role)}</p>
-              {member.license_number && (
-                <p className={styles.teamLicense}>
-                  {member.role === 'PSYCHOLOGUE'
-                    ? t('showcase.license_compsy')
-                    : t('showcase.license_inami')}
-                  {' '}{formatLicenseNumber(member)}
-                </p>
-              )}
-            </div>
-          ))}
-          {(!house?.staff || house.staff.length === 0) && (
-            <p className={styles.emptyText}>{t('showcase.team_empty')}</p>
-          )}
-        </div>
-
-        <div className={styles.verifyBox}>
-          <p className={styles.verifyNote}>{t('showcase.verify_note')}</p>
-          <div className={styles.verifyLinks}>
+      {/* ----- Infos pratiques ----- */}
+      <section id="infos-pratiques" className={styles.practical}>
+        <div className={styles.practicalInner}>
+          <h2 className={styles.srOnly}>{t('nav.practical_info')}</h2>
+          <div className={styles.practicalItem}>
+            <h3 className={styles.practicalTitle}><span aria-hidden="true">🕐</span> {t('showcase.hours_title')}</h3>
+            <p className={styles.practicalText}>
+              {t('footer.hours_weekdays')}<br />
+              {t('footer.hours_saturday')}
+            </p>
+          </div>
+          <div className={styles.practicalItem}>
+            <h3 className={styles.practicalTitle}><span aria-hidden="true">📍</span> {t('showcase.address_title')}</h3>
+            {house && (
+              <address className={styles.practicalText}>
+                {house.address}<br />
+                {house.postal_code} {house.city}
+              </address>
+            )}
+          </div>
+          <div className={styles.practicalItem}>
+            <h3 className={styles.practicalTitle}><span aria-hidden="true">✅</span> {t('showcase.verify_title')}</h3>
+            <p className={styles.practicalText}>{t('showcase.verify_text')}</p>
             <a href={INAMI_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyLink}>
               {t('showcase.verify_inami')}
             </a>
@@ -146,45 +192,45 @@ export default function HomeShowcasePage() {
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.reviewsHeading}>
-          {t('showcase.reviews_title')}{' '}
-          {house?.average_rating && (
-            <span className={styles.reviewsMeta}>
-              {t('showcase.reviews_meta', { rating: house.average_rating, count: house.review_count })}
-            </span>
-          )}
-        </h2>
-        {house?.reviews && house.reviews.length > 0 ? (
-          <div className={styles.reviewsCarouselWrap}>
-            <button type="button" onClick={() => scrollReviews('left')} className={styles.carouselArrow} aria-label={t('showcase.reviews_prev')}>
-              ‹
-            </button>
-            <div className={styles.reviewsCarousel} ref={reviewsScrollRef}>
-              {house.reviews.map((review) => (
-                <div key={review.id} className={styles.reviewCard}>
-                  <Stars rating={review.rating} />
-                  {review.comment && <p className={styles.reviewComment}>{review.comment}</p>}
-                  <p className={styles.reviewAuthor}>{review.author}</p>
-                </div>
-              ))}
-            </div>
-            <button type="button" onClick={() => scrollReviews('right')} className={styles.carouselArrow} aria-label={t('showcase.reviews_next')}>
-              ›
-            </button>
-          </div>
-        ) : (
-          <p className={styles.emptyText}>{t('showcase.reviews_empty')}</p>
-        )}
+      {/* ----- Actualites ----- */}
+      <section id="actualites" className={styles.section}>
+        <h2 className={styles.sectionTitle}>{t('nav.news')}</h2>
+        <div className={styles.newsGrid}>
+          {NEWS.map((key) => (
+            <article key={key} className={styles.newsCard}>
+              <p className={styles.newsDate}>{t(`showcase.${key}_date`)}</p>
+              <h3 className={styles.newsTitle}>{t(`showcase.${key}_title`)}</h3>
+              <p className={styles.newsText}>{t(`showcase.${key}_text`)}</p>
+            </article>
+          ))}
+          <article className={`${styles.newsCard} ${styles.newsCardWarning}`}>
+            <p className={styles.newsDate}>{t('showcase.news_fee_label')}</p>
+            <h3 className={styles.newsTitle}>{t('showcase.news_fee_title')}</h3>
+            <p className={styles.newsText}>{t('showcase.news_fee_text')}</p>
+          </article>
+        </div>
       </section>
 
-      <footer className={styles.footer}>
-        <h3 className={styles.footerTitle}>{house?.name}</h3>
-        <p className={styles.footerText}>
-          {house?.address}, {house?.postal_code} {house?.city}
-        </p>
-        {house?.phone_number && <p className={styles.footerTextSm}>{house.phone_number}</p>}
-      </footer>
+      {/* ----- Avis des patients ----- */}
+      <section className={styles.sectionReviews}>
+        <h2 className={styles.srOnly}>{t('showcase.reviews_title')}</h2>
+        <div className={styles.reviewSummary}>
+          {house?.average_rating ? (
+            <>
+              <p className={styles.reviewScore}>{formatRating(house.average_rating)}/5</p>
+              <div>
+                <Stars rating={house.average_rating} />
+                <p className={styles.reviewMeta}>
+                  {t('showcase.reviews_count', { count: house.review_count })}
+                  {latestReview && <> · « {latestReview.comment} »</>}
+                </p>
+              </div>
+            </>
+          ) : (
+            <p className={styles.emptyText}>{t('showcase.reviews_empty')}</p>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
