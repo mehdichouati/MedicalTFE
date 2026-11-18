@@ -88,6 +88,8 @@ class PublicMedicalHouseView(APIView):
             'postal_code': house.postal_code,
             'phone_number': house.phone_number,
             'email': house.email,
+            # Numero BCE : mention legale obligatoire, affichee dans le footer.
+            'company_number': house.company_number,
             'staff': staff_data,
             'reviews': reviews_data,
             'average_rating': average_rating,

@@ -13,9 +13,17 @@ class MedicalHouseStaffInline(admin.TabularInline):
 
 @admin.register(MedicalHouse)
 class MedicalHouseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city', 'postal_code', 'phone_number', 'is_active', 'created_at')
+    list_display = ('name', 'city', 'postal_code', 'phone_number', 'company_number', 'is_active', 'created_at')
     list_filter = ('is_active', 'city')
-    search_fields = ('name', 'city', 'postal_code')
+    search_fields = ('name', 'city', 'postal_code', 'company_number')
+    fieldsets = (
+        ('Identité', {
+            'fields': ('name', 'company_number', 'is_active'),
+        }),
+        ('Coordonnées', {
+            'fields': ('address', 'postal_code', 'city', 'phone_number', 'email'),
+        }),
+    )
     inlines = [MedicalHouseStaffInline]
 
 
