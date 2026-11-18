@@ -2,6 +2,7 @@ from datetime import timedelta
 from unittest.mock import Mock, patch
 
 import stripe
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -11,7 +12,7 @@ from appointments.views import _apply_cancellation_policy
 from medical_houses.models import MedicalHouse
 from users.models import AuditLog, User
 
-from .models import Payment
+from .models import Invoice, Payment
 
 
 class PaymentTestCaseBase(APITestCase):
@@ -204,3 +205,90 @@ class CancellationPolicyTestCase(PaymentTestCaseBase):
         self.assertEqual(payment.status, Payment.Status.REFUNDED)
         self.assertEqual(payment.refunded_amount_cents, 2500)
         mock_refund.assert_called_once_with(payment_intent='pi_cancel_test_3')
+
+
+class InvoiceTestCase(PaymentTestCaseBase):
+    """F5 — Factures : numerotation continue, numero stable, droits d'acces
+    et format du numero BCE."""
+
+    def setUp(self):
+        super().setUp()
+        self.appointment.status = Appointment.Status.COMPLETED
+        self.appointment.save()
+        self.payment = Payment.objects.create(
+            appointment=self.appointment, patient=self.patient,
+            amount_cents=2500, status=Payment.Status.SUCCEEDED,
+        )
+        self.year = timezone.localdate().year
+
+    def _create_paid_appointment(self, days):
+        appointment = Appointment.objects.create(
+            patient=self.patient, professional=self.medecin, medical_house=self.house,
+            start_datetime=timezone.now() + timedelta(days=days),
+            end_datetime=timezone.now() + timedelta(days=days, minutes=30),
+            status=Appointment.Status.COMPLETED,
+        )
+        return Payment.objects.create(
+            appointment=appointment, patient=self.patient,
+            amount_cents=2500, status=Payment.Status.SUCCEEDED,
+        )
+
+    def test_numerotation_continue_par_annee(self):
+        second_payment = self._create_paid_appointment(days=6)
+
+        first = Invoice.for_payment(self.payment)
+        second = Invoice.for_payment(second_payment)
+
+        self.assertEqual(first.number, f"{self.year}-000001")
+        self.assertEqual(second.number, f"{self.year}-000002")
+
+    def test_meme_numero_si_facture_redemandee(self):
+        first = Invoice.for_payment(self.payment)
+        again = Invoice.for_payment(self.payment)
+
+        self.assertEqual(first.pk, again.pk)
+        self.assertEqual(Invoice.objects.count(), 1)
+
+    def test_patient_telecharge_sa_facture_pdf(self):
+        self.client.force_authenticate(user=self.patient)
+
+        response = self.client.get(f'/api/payments/receipt/{self.appointment.id}/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn(f"facture-{self.year}-000001.pdf", response['Content-Disposition'])
+        content = b''.join(response.streaming_content)
+        self.assertTrue(content.startswith(b'%PDF'))
+
+        # Un deuxieme telechargement ne cree pas de nouvelle facture.
+        self.client.get(f'/api/payments/receipt/{self.appointment.id}/')
+        self.assertEqual(Invoice.objects.count(), 1)
+
+    def test_pas_de_facture_si_consultation_non_terminee(self):
+        self.appointment.status = Appointment.Status.CONFIRMED
+        self.appointment.save()
+        self.client.force_authenticate(user=self.patient)
+
+        response = self.client.get(f'/api/payments/receipt/{self.appointment.id}/')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Invoice.objects.count(), 0)
+
+    def test_autre_patient_ne_peut_pas_telecharger_la_facture(self):
+        other_patient = User.objects.create_user(
+            username='other_pay', email='other_pay@test.be', password='Password123!', role='PATIENT',
+        )
+        self.client.force_authenticate(user=other_patient)
+
+        response = self.client.get(f'/api/payments/receipt/{self.appointment.id}/')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Invoice.objects.count(), 0)
+
+    def test_numero_bce_au_mauvais_format_refuse(self):
+        self.house.company_number = '123456789'
+        with self.assertRaises(ValidationError):
+            self.house.full_clean()
+
+        self.house.company_number = '0123.456.789'
+        self.house.full_clean()
