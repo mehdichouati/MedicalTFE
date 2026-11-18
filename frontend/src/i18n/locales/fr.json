@@ -411,9 +411,6 @@
     "team_empty": "Équipe à venir.",
     "license_inami": "N° INAMI :",
     "license_compsy": "N° Commission des Psychologues :",
-    "verify_note": "Chaque professionnel est vérifié par notre administration. Vous pouvez contrôler vous-même son habilitation dans les registres officiels :",
-    "verify_inami": "Vérifier un médecin ou un kiné (INAMI)",
-    "verify_compsy": "Vérifier un psychologue (Commission des Psychologues)",
     "reviews_title": "Avis de nos patients",
     "reviews_empty": "Aucun avis pour le moment.",
     "hero_title": "Votre santé, au cœur de votre quartier",
@@ -429,8 +426,8 @@
     "hide_team": "Masquer l'équipe",
     "hours_title": "Horaires",
     "address_title": "Adresse",
-    "verify_title": "Vérifier un praticien",
-    "verify_text": "Les numéros INAMI et Compsy de nos praticiens sont affichés. Vous pouvez les contrôler dans les registres officiels :",
+    "verify_title": "Praticiens vérifiés",
+    "verify_text": "Numéros INAMI et Compsy affichés pour chaque praticien.",
     "news_1_date": "12 novembre 2026",
     "news_1_title": "Campagne de vaccination contre la grippe",
     "news_1_text": "Prenez rendez-vous chez votre médecin généraliste pour vous faire vacciner.",
@@ -441,7 +438,9 @@
     "news_fee_title": "Absence non prévenue",
     "news_fee_text": "5 € sont retenus en cas d'annulation à moins de 24 h ou d'absence au rendez-vous.",
     "reviews_count_one": "{{count}} avis de patient",
-    "reviews_count_other": "{{count}} avis de patients"
+    "reviews_count_other": "{{count}} avis de patients",
+    "directions": "Itinéraire",
+    "address_unavailable": "Adresse bientôt disponible."
   },
   "guardian_requests": {
     "title": "Validation des comptes enfants",

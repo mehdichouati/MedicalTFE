@@ -7,6 +7,13 @@ import styles from './Header.module.css'
 
 const PROFESSIONAL_ROLES = ['MEDECIN', 'KINE', 'PSYCHOLOGUE']
 
+// Liens du visiteur : ils menent aux sections du site vitrine.
+const VISITOR_LINKS = [
+  { to: '/#professionnels', labelKey: 'nav.professionals' },
+  { to: '/#infos-pratiques', labelKey: 'nav.practical_info' },
+  { to: '/#actualites', labelKey: 'nav.news' },
+]
+
 // Retourne les liens du menu principal selon le role de l'utilisateur.
 function getNavLinks(role) {
   if (role === 'PATIENT') {
@@ -89,13 +96,21 @@ export default function Header() {
                 {t('nav.home')}
               </NavLink>
             </li>
-            {user && getNavLinks(user.role).map((link) => (
-              <li key={link.to}>
-                <NavLink to={link.to} className={navLinkClass} onClick={closeMenu}>
-                  {t(link.labelKey)}
-                </NavLink>
-              </li>
-            ))}
+            {user
+              ? getNavLinks(user.role).map((link) => (
+                <li key={link.to}>
+                  <NavLink to={link.to} className={navLinkClass} onClick={closeMenu}>
+                    {t(link.labelKey)}
+                  </NavLink>
+                </li>
+              ))
+              : VISITOR_LINKS.map((link) => (
+                <li key={link.to}>
+                  <Link to={link.to} className={styles.navLink} onClick={closeMenu}>
+                    {t(link.labelKey)}
+                  </Link>
+                </li>
+              ))}
           </ul>
 
           <div className={styles.actions}>

@@ -30,6 +30,31 @@ function formatLicenseNumber(member) {
   return number
 }
 
+// Petites icones SVG (rendu identique sur tous les ordinateurs).
+const ICON_PATHS = {
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  pin: <><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>,
+  shield: <><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></>,
+}
+
+function Icon({ name }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ICON_PATHS[name]}
+    </svg>
+  )
+}
+
 function Stars({ rating }) {
   const rounded = Math.round(rating)
   return (
@@ -163,31 +188,57 @@ export default function HomeShowcasePage() {
       <section id="infos-pratiques" className={styles.practical}>
         <div className={styles.practicalInner}>
           <h2 className={styles.srOnly}>{t('nav.practical_info')}</h2>
-          <div className={styles.practicalItem}>
-            <h3 className={styles.practicalTitle}><span aria-hidden="true">🕐</span> {t('showcase.hours_title')}</h3>
-            <p className={styles.practicalText}>
-              {t('footer.hours_weekdays')}<br />
-              {t('footer.hours_saturday')}
-            </p>
+
+          <div className={styles.practicalCard}>
+            <span className={styles.practicalIcon}><Icon name="clock" /></span>
+            <div>
+              <h3 className={styles.practicalTitle}>{t('showcase.hours_title')}</h3>
+              <p className={styles.practicalText}>
+                {t('footer.hours_weekdays')}<br />
+                {t('footer.hours_saturday')}
+              </p>
+            </div>
           </div>
-          <div className={styles.practicalItem}>
-            <h3 className={styles.practicalTitle}><span aria-hidden="true">📍</span> {t('showcase.address_title')}</h3>
-            {house && (
-              <address className={styles.practicalText}>
-                {house.address}<br />
-                {house.postal_code} {house.city}
-              </address>
-            )}
+
+          <div className={styles.practicalCard}>
+            <span className={styles.practicalIcon}><Icon name="pin" /></span>
+            <div>
+              <h3 className={styles.practicalTitle}>{t('showcase.address_title')}</h3>
+              {house ? (
+                <>
+                  <address className={styles.practicalText}>
+                    {house.address}<br />
+                    {house.postal_code} {house.city}
+                  </address>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${house.address}, ${house.postal_code} ${house.city}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.practicalLink}
+                  >
+                    {t('showcase.directions')} ↗
+                  </a>
+                </>
+              ) : (
+                <p className={styles.practicalText}>{t('showcase.address_unavailable')}</p>
+              )}
+            </div>
           </div>
-          <div className={styles.practicalItem}>
-            <h3 className={styles.practicalTitle}><span aria-hidden="true">✅</span> {t('showcase.verify_title')}</h3>
-            <p className={styles.practicalText}>{t('showcase.verify_text')}</p>
-            <a href={INAMI_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyLink}>
-              {t('showcase.verify_inami')}
-            </a>
-            <a href={COMPSY_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyLink}>
-              {t('showcase.verify_compsy')}
-            </a>
+
+          <div className={styles.practicalCard}>
+            <span className={styles.practicalIcon}><Icon name="shield" /></span>
+            <div>
+              <h3 className={styles.practicalTitle}>{t('showcase.verify_title')}</h3>
+              <p className={styles.practicalText}>{t('showcase.verify_text')}</p>
+              <div className={styles.verifyLinks}>
+                <a href={INAMI_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyPill}>
+                  INAMI ↗
+                </a>
+                <a href={COMPSY_SEARCH_URL} target="_blank" rel="noopener noreferrer" className={styles.verifyPill}>
+                  Compsy ↗
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
