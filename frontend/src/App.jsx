@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import Layout from './components/Layout'
 import HomeShowcasePage from './pages/HomeShowcasePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -26,138 +27,144 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<HomeShowcasePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/triage"
-            element={
-              <ProtectedRoute>
-                <TriagePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <ProtectedRoute>
-                <HistoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pay/:appointmentId"
-            element={
-              <ProtectedRoute>
-                <PaymentPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my-appointments"
-            element={
-              <ProtectedRoute>
-                <ProfessionalAppointmentsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/planning"
-            element={
-              <ProtectedRoute>
-                <ProfessionalPlanningPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/secretary"
-            element={
-              <ProtectedRoute>
-                <SecretaryAppointmentsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/secretary/guardian-requests"
-            element={
-              <ProtectedRoute>
-                <SecretaryGuardianRequestsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/book"
-            element={
-              <ProtectedRoute>
-                <BookAppointmentPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my-patients"
-            element={
-              <ProtectedRoute>
-                <ProfessionalPatientsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/patient/:id"
-            element={
-              <ProtectedRoute>
-                <PatientDetailPage />
-              </ProtectedRoute>
-            }
-          />
-         
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute>
-                <AdminDashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute>
-                <AdminUsersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/appointments"
-            element={
-              <ProtectedRoute>
-                <AdminAppointmentsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/reviews"
-            element={
-              <ProtectedRoute>
-                <AdminReviewsPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Site vitrine : header + footer, contenu sur toute la largeur */}
+          <Route element={<Layout fullWidth />}>
+            <Route path="/" element={<HomeShowcasePage />} />
+          </Route>
+
+          {/* Pages de l'application : header + footer, contenu centre */}
+          <Route element={<Layout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/triage"
+              element={
+                <ProtectedRoute>
+                  <TriagePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <HistoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pay/:appointmentId"
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-appointments"
+              element={
+                <ProtectedRoute>
+                  <ProfessionalAppointmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/planning"
+              element={
+                <ProtectedRoute>
+                  <ProfessionalPlanningPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/secretary"
+              element={
+                <ProtectedRoute>
+                  <SecretaryAppointmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/secretary/guardian-requests"
+              element={
+                <ProtectedRoute>
+                  <SecretaryGuardianRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/book"
+              element={
+                <ProtectedRoute>
+                  <BookAppointmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-patients"
+              element={
+                <ProtectedRoute>
+                  <ProfessionalPatientsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patient/:id"
+              element={
+                <ProtectedRoute>
+                  <PatientDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute>
+                  <AdminUsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/appointments"
+              element={
+                <ProtectedRoute>
+                  <AdminAppointmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/reviews"
+              element={
+                <ProtectedRoute>
+                  <AdminReviewsPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

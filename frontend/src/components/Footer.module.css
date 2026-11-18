@@ -1,0 +1,115 @@
+/* ===== Pied de page commun a toutes les pages ===== */
+
+.footer {
+  margin-top: auto;
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 20px;
+}
+
+/* ----- Colonnes ----- */
+
+.columns {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 32px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.brandMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--color-primary);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.title {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.text,
+.address {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.link {
+  width: fit-content;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.6;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ----- Bas de page ----- */
+
+.bottom {
+  margin: 32px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+}
+
+/* ===== Tablette : 2 colonnes ===== */
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+/* ===== Petit mobile : 1 colonne ===== */
+
+@media (max-width: 480px) {
+  .inner {
+    padding: 32px 20px 16px;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
