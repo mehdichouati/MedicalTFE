@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import HomeShowcasePage from './pages/HomeShowcasePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import LegalPage from './pages/LegalPage'
 import HomePage from './pages/HomePage'
 import TriagePage from './pages/TriagePage'
 import HistoryPage from './pages/HistoryPage'
@@ -36,6 +37,8 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/legal" element={<LegalPage kind="legal" />} />
+            <Route path="/privacy" element={<LegalPage kind="privacy" />} />
             <Route
               path="/app"
               element={
