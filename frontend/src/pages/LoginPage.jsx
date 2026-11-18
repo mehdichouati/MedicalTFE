@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
-import LanguageSwitcher from '../components/LanguageSwitcher'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
@@ -34,32 +33,33 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.langSwitcherRow}>
-        <LanguageSwitcher />
-      </div>
       <h1>{t('login.title')}</h1>
       <form onSubmit={handleSubmit}>
         <div className={styles.field}>
-          <label>{t('login.username')}</label><br />
+          <label htmlFor="login-username">{t('login.username')}</label>
           <input
+            id="login-username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
             required
             className={styles.input}
           />
         </div>
         <div className={styles.field}>
-          <label>{t('login.password')}</label><br />
+          <label htmlFor="login-password">{t('login.password')}</label>
           <input
+            id="login-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             required
             className={styles.input}
           />
         </div>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>}
         <button type="submit" disabled={submitting} className={styles.submitButton}>
           {submitting ? t('login.submitting') : t('login.submit')}
         </button>
