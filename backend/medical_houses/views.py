@@ -38,6 +38,10 @@ class PublicMedicalHouseView(APIView):
     permet au patient de verifier lui-meme l'habilitation du professionnel.
     """
 
+    # Page publique : on n'essaie pas de lire le token JWT. Sans cela, un
+    # token expire envoye par le navigateur provoquait une erreur 401 alors
+    # que ces informations sont publiques.
+    authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, pk=None):

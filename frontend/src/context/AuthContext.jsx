@@ -16,6 +16,7 @@ export function AuthProvider({ children }) {
         i18n.changeLanguage(data.language)
       }
     } catch {
+      // Session invalide : client.js a deja supprime les tokens morts.
       setUser(null)
     } finally {
       setLoading(false)
@@ -23,8 +24,9 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
+    // Un refresh token suffit : client.js renouvellera le token d'acces.
+    const hasSession = localStorage.getItem('access_token') || localStorage.getItem('refresh_token')
+    if (hasSession) {
       fetchProfile()
     } else {
       setLoading(false)
@@ -38,10 +40,21 @@ export function AuthProvider({ children }) {
     await fetchProfile()
   }
 
-  const logout = () => {
+  const logout = async () => {
+    const refreshToken = localStorage.getItem('refresh_token')
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     setUser(null)
+
+    // Met le refresh token sur liste noire cote serveur : meme vole,
+    // il ne pourra plus servir a obtenir un nouveau token d'acces.
+    if (refreshToken) {
+      try {
+        await apiClient.post('/auth/logout/', { refresh: refreshToken })
+      } catch {
+        // Token deja expire ou invalide : rien d'autre a faire.
+      }
+    }
   }
 
   return (

@@ -23,6 +23,9 @@ from .permissions import IsSecretaryOrAdmin
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
+    # Inscription publique : on ignore un eventuel token JWT expire
+    # (sinon DRF repond 401 avant meme de verifier AllowAny).
+    authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
 
