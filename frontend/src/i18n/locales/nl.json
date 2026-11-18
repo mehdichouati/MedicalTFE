@@ -24,6 +24,30 @@
     "next": "Volgende",
     "page_of": "Pagina {{current}} / {{total}}"
   },
+  "nav": {
+    "home": "Home",
+    "professionals": "Onze zorgverleners",
+    "practical_info": "Praktische info",
+    "news": "Nieuws",
+    "main_label": "Hoofdnavigatie",
+    "open_menu": "Menu openen",
+    "close_menu": "Menu sluiten",
+    "language_label": "Taal kiezen"
+  },
+  "footer": {
+    "tagline": "Eerstelijnszorg voor de hele buurt.",
+    "contact_title": "Contact",
+    "emergency_title": "Spoed",
+    "on_call": "Huisarts van wacht: 1733",
+    "emergency": "Noodgeval: 112",
+    "hours_weekdays": "Ma–vr 8u–19u",
+    "hours_saturday": "Za 9u–12u",
+    "legal_title": "Juridische informatie",
+    "company_number": "KBO {{number}}",
+    "legal_notice": "Wettelijke vermeldingen",
+    "privacy": "Privacy (AVG)",
+    "rights": "© {{year}} {{name}} · Alle rechten voorbehouden"
+  },
   "login": {
     "title": "Aanmelden",
     "username": "Gebruikersnaam",
