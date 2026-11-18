@@ -24,6 +24,30 @@
     "next": "Suivant",
     "page_of": "Page {{current}} / {{total}}"
   },
+  "nav": {
+    "home": "Accueil",
+    "professionals": "Nos professionnels",
+    "practical_info": "Infos pratiques",
+    "news": "Actualités",
+    "main_label": "Navigation principale",
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "language_label": "Choisir la langue"
+  },
+  "footer": {
+    "tagline": "Soins de première ligne pour tout le quartier.",
+    "contact_title": "Contact",
+    "emergency_title": "Urgences",
+    "on_call": "Médecin de garde : 1733",
+    "emergency": "Urgence : 112",
+    "hours_weekdays": "Lun–ven 8h–19h",
+    "hours_saturday": "Sam 9h–12h",
+    "legal_title": "Informations légales",
+    "company_number": "BCE {{number}}",
+    "legal_notice": "Mentions légales",
+    "privacy": "Confidentialité (RGPD)",
+    "rights": "© {{year}} {{name}} · Tous droits réservés"
+  },
   "login": {
     "title": "Connexion",
     "username": "Nom d'utilisateur",

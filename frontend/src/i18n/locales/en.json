@@ -24,6 +24,30 @@
     "next": "Next",
     "page_of": "Page {{current}} / {{total}}"
   },
+  "nav": {
+    "home": "Home",
+    "professionals": "Our professionals",
+    "practical_info": "Practical info",
+    "news": "News",
+    "main_label": "Main navigation",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "language_label": "Choose language"
+  },
+  "footer": {
+    "tagline": "Primary care for the whole neighbourhood.",
+    "contact_title": "Contact",
+    "emergency_title": "Emergencies",
+    "on_call": "Doctor on call: 1733",
+    "emergency": "Emergency: 112",
+    "hours_weekdays": "Mon–Fri 8am–7pm",
+    "hours_saturday": "Sat 9am–12pm",
+    "legal_title": "Legal information",
+    "company_number": "CBE {{number}}",
+    "legal_notice": "Legal notice",
+    "privacy": "Privacy (GDPR)",
+    "rights": "© {{year}} {{name}} · All rights reserved"
+  },
   "login": {
     "title": "Login",
     "username": "Username",
