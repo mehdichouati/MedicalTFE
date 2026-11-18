@@ -1,0 +1,134 @@
+/* ===== Pages legales (mentions legales, confidentialite) ===== */
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--color-text);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 32px;
+}
+
+.updated {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+.intro {
+  margin: 20px 0 0;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ----- Encadre d'identite ----- */
+
+.identity {
+  margin-top: 28px;
+  padding: 20px 24px;
+  border-radius: 12px;
+  background: var(--color-info-bg);
+}
+
+.identityTitle {
+  margin: 0 0 8px;
+  color: var(--color-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.identityName {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.identityText {
+  margin: 4px 0 0;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.identityList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin: 12px 0 0;
+}
+
+.identityList dt {
+  font-size: 13px;
+}
+
+.identityList dd {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.identityList a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.identityList a:hover {
+  text-decoration: underline;
+}
+
+/* ----- Sections ----- */
+
+.section {
+  margin-top: 32px;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  color: var(--color-text);
+  font-size: 20px;
+}
+
+.text {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.list {
+  margin: 8px 0 0;
+  padding-left: 22px;
+  line-height: 1.7;
+}
+
+.list li + li {
+  margin-top: 4px;
+}
+
+.otherLink {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.otherLink a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.otherLink a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Mobile ===== */
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 26px;
+  }
+
+  .identity {
+    padding: 16px;
+  }
+}

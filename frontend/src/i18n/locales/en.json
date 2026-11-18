@@ -48,6 +48,115 @@
     "privacy": "Privacy (GDPR)",
     "rights": "© {{year}} {{name}} · All rights reserved"
   },
+  "legal_common": {
+    "updated": "Last updated: November 2026",
+    "company_number": "Company number (CBE)",
+    "phone": "Phone",
+    "email": "Email"
+  },
+  "legal": {
+    "title": "Legal notice",
+    "intro": "This information is published in accordance with the Belgian Code of Economic Law (art. XII.6), which requires every professional website to clearly identify its publisher.",
+    "identity_title": "Website publisher",
+    "sections": [
+      {
+        "title": "Activity",
+        "text": "The medical centre provides primary healthcare (general practice, physiotherapy, psychology). Each practitioner is registered with INAMI or the Psychologists' Commission; their number is shown on the home page and can be checked in the official registers."
+      },
+      {
+        "title": "VAT",
+        "text": "Healthcare services are exempt from VAT (art. 44, § 1, 1° of the Belgian VAT Code)."
+      },
+      {
+        "title": "Hosting",
+        "text": "This website was built as part of a final-year project. The hosting provider's details will be added when the site goes into production."
+      },
+      {
+        "title": "Intellectual property",
+        "text": "The texts, images and logos on this website belong to the medical centre. Any reproduction without prior written permission is prohibited."
+      },
+      {
+        "title": "Liability",
+        "text": "The information on this website is general and does not replace a consultation. In an emergency, call 112; outside opening hours, call the doctor on call at 1733."
+      },
+      {
+        "title": "Personal data",
+        "text": "How we process your personal data is described in our privacy policy."
+      },
+      {
+        "title": "Applicable law",
+        "text": "This legal notice is governed by Belgian law."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "This page explains which personal data we process, why, how long we keep it and what your rights are, in accordance with the General Data Protection Regulation (GDPR) and the Belgian law of 30 July 2018.",
+    "identity_title": "Data controller",
+    "sections": [
+      {
+        "title": "Data we process",
+        "items": [
+          "Identification data: first and last name, username, email address, phone number, date of birth and, if you add one, profile photo.",
+          "Health data: reason for the consultation, answers to the triage questionnaire and the record kept by your practitioner.",
+          "Payment data: amount and status of the payment. Your card details are handled only by Stripe and are never stored on our servers.",
+          "For a patient under 16: the supporting document sent by the parent or guardian."
+        ]
+      },
+      {
+        "title": "Why we use it",
+        "items": [
+          "To manage your appointments and account (performance of a contract, art. 6.1.b GDPR).",
+          "To treat you and keep your patient record (art. 9.2.h GDPR: healthcare, under professional secrecy), with the explicit consent you gave when signing up.",
+          "To issue invoices and meet our accounting obligations (legal obligation, art. 6.1.c GDPR).",
+          "To send you reminders and appointment changes (performance of a contract)."
+        ]
+      },
+      {
+        "title": "How long we keep it",
+        "items": [
+          "Patient record: at least 30 years and at most 50 years after the last contact, as required by article 35 of the law of 22 April 2019 on the quality of healthcare practice.",
+          "Invoices: for the legal retention period of accounting documents.",
+          "User account: as long as the account is active."
+        ]
+      },
+      {
+        "title": "Who can access it",
+        "items": [
+          "Your practitioner and, if needed, the other practitioners of the medical centre who treat you.",
+          "The reception staff, only to manage appointments and accounts of minors.",
+          "Stripe, for online payment.",
+          "We never sell or rent your data."
+        ]
+      },
+      {
+        "title": "How we protect it",
+        "text": "Communications are encrypted (HTTPS), passwords are hashed, sessions expire automatically and every sensitive access is recorded in an audit log."
+      },
+      {
+        "title": "Your rights",
+        "items": [
+          "Access: get a copy of your data and your patient record.",
+          "Rectification: correct inaccurate data.",
+          "Erasure: ask for your data to be deleted, within the legal retention periods for patient records and invoices.",
+          "Restriction and objection: ask for the use of your data to be restricted.",
+          "Portability: receive your data in a readable format."
+        ]
+      },
+      {
+        "title": "Exercising your rights",
+        "text": "Send your request by email to the address shown above. We reply within one month."
+      },
+      {
+        "title": "Complaints",
+        "text": "If you believe your data is not being processed correctly, you can file a complaint with the Data Protection Authority (APD/GBA), rue de la Presse 35, 1000 Brussels, www.dataprotectionauthority.be."
+      },
+      {
+        "title": "Cookies",
+        "text": "This website uses no advertising or analytics cookies. Only the information needed for it to work (your login session and chosen language) is kept in your browser."
+      }
+    ]
+  },
   "login": {
     "title": "Login",
     "username": "Username",

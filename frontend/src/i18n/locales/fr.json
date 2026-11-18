@@ -48,6 +48,115 @@
     "privacy": "Confidentialité (RGPD)",
     "rights": "© {{year}} {{name}} · Tous droits réservés"
   },
+  "legal_common": {
+    "updated": "Dernière mise à jour : novembre 2026",
+    "company_number": "Numéro d'entreprise (BCE)",
+    "phone": "Téléphone",
+    "email": "E-mail"
+  },
+  "legal": {
+    "title": "Mentions légales",
+    "intro": "Ces informations sont publiées conformément au Code de droit économique belge (art. XII.6), qui impose à tout site professionnel d'identifier clairement son éditeur.",
+    "identity_title": "Éditeur du site",
+    "sections": [
+      {
+        "title": "Activité",
+        "text": "La maison médicale propose des soins de santé de première ligne (médecine générale, kinésithérapie, psychologie). Chaque praticien est enregistré auprès de l'INAMI ou de la Commission des Psychologues ; son numéro est affiché sur la page d'accueil et peut être vérifié dans les registres officiels."
+      },
+      {
+        "title": "TVA",
+        "text": "Les prestations de soins sont exemptées de TVA (art. 44, § 1er, 1° du Code de la TVA)."
+      },
+      {
+        "title": "Hébergement",
+        "text": "Ce site est réalisé dans le cadre d'un travail de fin d'études. Les coordonnées de l'hébergeur seront ajoutées lors de la mise en production."
+      },
+      {
+        "title": "Propriété intellectuelle",
+        "text": "Les textes, images et logos de ce site appartiennent à la maison médicale. Toute reproduction sans autorisation écrite préalable est interdite."
+      },
+      {
+        "title": "Responsabilité",
+        "text": "Les informations du site sont données à titre général et ne remplacent pas une consultation. En cas d'urgence, appelez le 112 ; en dehors des heures d'ouverture, le médecin de garde au 1733."
+      },
+      {
+        "title": "Données personnelles",
+        "text": "Le traitement de vos données personnelles est décrit dans notre politique de confidentialité."
+      },
+      {
+        "title": "Droit applicable",
+        "text": "Ces mentions légales sont soumises au droit belge."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "intro": "Cette page explique quelles données personnelles nous traitons, pourquoi, combien de temps nous les gardons et quels sont vos droits, conformément au Règlement général sur la protection des données (RGPD) et à la loi belge du 30 juillet 2018.",
+    "identity_title": "Responsable du traitement",
+    "sections": [
+      {
+        "title": "Données que nous traitons",
+        "items": [
+          "Données d'identification : nom, prénom, nom d'utilisateur, adresse e-mail, téléphone, date de naissance et, si vous en ajoutez une, photo de profil.",
+          "Données de santé : motif de consultation, réponses au questionnaire d'orientation et dossier tenu par votre praticien.",
+          "Données de paiement : montant et statut du paiement. Vos données de carte bancaire sont traitées uniquement par Stripe et ne sont jamais enregistrées sur nos serveurs.",
+          "Pour un patient de moins de 16 ans : le document justificatif envoyé par le parent ou tuteur."
+        ]
+      },
+      {
+        "title": "Pourquoi nous les utilisons",
+        "items": [
+          "Gérer vos rendez-vous et votre compte (exécution du contrat, art. 6.1.b RGPD).",
+          "Vous soigner et tenir votre dossier patient (art. 9.2.h RGPD : soins de santé, sous le secret professionnel), avec votre consentement explicite donné à l'inscription.",
+          "Établir les factures et respecter nos obligations comptables (obligation légale, art. 6.1.c RGPD).",
+          "Vous envoyer les rappels et les changements de rendez-vous (exécution du contrat)."
+        ]
+      },
+      {
+        "title": "Combien de temps nous les gardons",
+        "items": [
+          "Dossier patient : au minimum 30 ans et au maximum 50 ans après le dernier contact, comme l'impose l'article 35 de la loi du 22 avril 2019 relative à la qualité de la pratique des soins de santé.",
+          "Factures : pendant la durée légale de conservation des documents comptables.",
+          "Compte utilisateur : tant que le compte est actif."
+        ]
+      },
+      {
+        "title": "Qui peut y accéder",
+        "items": [
+          "Votre praticien et, si nécessaire, les autres praticiens de la maison médicale qui vous soignent.",
+          "Le secrétariat, uniquement pour la gestion des rendez-vous et des comptes de mineurs.",
+          "Stripe, pour le paiement en ligne.",
+          "Nous ne vendons ni ne louons jamais vos données."
+        ]
+      },
+      {
+        "title": "Comment nous les protégeons",
+        "text": "Les échanges sont chiffrés (HTTPS), les mots de passe sont hachés, les sessions expirent automatiquement et chaque accès sensible est enregistré dans un journal d'audit."
+      },
+      {
+        "title": "Vos droits",
+        "items": [
+          "Accès : obtenir une copie de vos données et de votre dossier patient.",
+          "Rectification : corriger une donnée inexacte.",
+          "Effacement : demander la suppression de vos données, dans la limite des durées de conservation légales du dossier patient et des factures.",
+          "Limitation et opposition : demander que l'utilisation de vos données soit limitée.",
+          "Portabilité : recevoir vos données dans un format lisible."
+        ]
+      },
+      {
+        "title": "Exercer vos droits",
+        "text": "Envoyez votre demande par e-mail à l'adresse indiquée ci-dessus. Nous vous répondons dans un délai d'un mois."
+      },
+      {
+        "title": "Réclamation",
+        "text": "Si vous estimez que vos données ne sont pas traitées correctement, vous pouvez introduire une plainte auprès de l'Autorité de protection des données (APD), rue de la Presse 35, 1000 Bruxelles, www.autoriteprotectiondonnees.be."
+      },
+      {
+        "title": "Cookies",
+        "text": "Ce site n'utilise aucun cookie publicitaire ni de mesure d'audience. Seules les informations nécessaires au fonctionnement (votre session de connexion et la langue choisie) sont gardées dans votre navigateur."
+      }
+    ]
+  },
   "login": {
     "title": "Connexion",
     "username": "Nom d'utilisateur",

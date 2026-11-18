@@ -48,6 +48,115 @@
     "privacy": "Privacy (AVG)",
     "rights": "© {{year}} {{name}} · Alle rechten voorbehouden"
   },
+  "legal_common": {
+    "updated": "Laatst bijgewerkt: november 2026",
+    "company_number": "Ondernemingsnummer (KBO)",
+    "phone": "Telefoon",
+    "email": "E-mail"
+  },
+  "legal": {
+    "title": "Wettelijke vermeldingen",
+    "intro": "Deze informatie wordt gepubliceerd overeenkomstig het Belgische Wetboek van economisch recht (art. XII.6), dat elke professionele website verplicht haar uitgever duidelijk te vermelden.",
+    "identity_title": "Uitgever van de website",
+    "sections": [
+      {
+        "title": "Activiteit",
+        "text": "Het medisch huis biedt eerstelijnszorg aan (huisartsgeneeskunde, kinesitherapie, psychologie). Elke zorgverlener is geregistreerd bij het RIZIV of de Psychologencommissie; het nummer staat op de startpagina en kan in de officiële registers worden nagegaan."
+      },
+      {
+        "title": "Btw",
+        "text": "Zorgverstrekkingen zijn vrijgesteld van btw (art. 44, § 1, 1° van het Btw-Wetboek)."
+      },
+      {
+        "title": "Hosting",
+        "text": "Deze website werd gemaakt in het kader van een eindwerk. De gegevens van de hostingprovider worden toegevoegd bij de ingebruikname."
+      },
+      {
+        "title": "Intellectuele eigendom",
+        "text": "De teksten, afbeeldingen en logo's van deze website behoren toe aan het medisch huis. Elke overname zonder voorafgaande schriftelijke toestemming is verboden."
+      },
+      {
+        "title": "Aansprakelijkheid",
+        "text": "De informatie op deze website is algemeen en vervangt geen consultatie. Bel bij een noodgeval 112; buiten de openingsuren de huisarts van wacht op 1733."
+      },
+      {
+        "title": "Persoonsgegevens",
+        "text": "Hoe wij uw persoonsgegevens verwerken, leest u in ons privacybeleid."
+      },
+      {
+        "title": "Toepasselijk recht",
+        "text": "Deze wettelijke vermeldingen vallen onder het Belgische recht."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Privacybeleid",
+    "intro": "Deze pagina legt uit welke persoonsgegevens wij verwerken, waarom, hoe lang wij ze bewaren en wat uw rechten zijn, overeenkomstig de Algemene Verordening Gegevensbescherming (AVG) en de Belgische wet van 30 juli 2018.",
+    "identity_title": "Verwerkingsverantwoordelijke",
+    "sections": [
+      {
+        "title": "Welke gegevens wij verwerken",
+        "items": [
+          "Identificatiegegevens: naam, voornaam, gebruikersnaam, e-mailadres, telefoonnummer, geboortedatum en, als u er een toevoegt, profielfoto.",
+          "Gezondheidsgegevens: reden van de consultatie, antwoorden op de oriëntatievragenlijst en het dossier dat uw zorgverlener bijhoudt.",
+          "Betalingsgegevens: bedrag en status van de betaling. Uw kaartgegevens worden enkel door Stripe verwerkt en nooit op onze servers opgeslagen.",
+          "Voor een patiënt jonger dan 16 jaar: het bewijsstuk dat de ouder of voogd heeft opgestuurd."
+        ]
+      },
+      {
+        "title": "Waarom wij ze gebruiken",
+        "items": [
+          "Uw afspraken en account beheren (uitvoering van de overeenkomst, art. 6.1.b AVG).",
+          "U verzorgen en uw patiëntendossier bijhouden (art. 9.2.h AVG: gezondheidszorg, onder beroepsgeheim), met de uitdrukkelijke toestemming die u bij de inschrijving gaf.",
+          "Facturen opmaken en onze boekhoudkundige verplichtingen nakomen (wettelijke verplichting, art. 6.1.c AVG).",
+          "U herinneringen en wijzigingen van afspraken sturen (uitvoering van de overeenkomst)."
+        ]
+      },
+      {
+        "title": "Hoe lang wij ze bewaren",
+        "items": [
+          "Patiëntendossier: minstens 30 jaar en hoogstens 50 jaar na het laatste contact, zoals artikel 35 van de wet van 22 april 2019 inzake de kwaliteitsvolle praktijkvoering in de gezondheidszorg oplegt.",
+          "Facturen: gedurende de wettelijke bewaartermijn van boekhoudkundige stukken.",
+          "Gebruikersaccount: zolang de account actief is."
+        ]
+      },
+      {
+        "title": "Wie er toegang toe heeft",
+        "items": [
+          "Uw zorgverlener en, indien nodig, de andere zorgverleners van het medisch huis die u behandelen.",
+          "Het secretariaat, enkel voor het beheer van afspraken en accounts van minderjarigen.",
+          "Stripe, voor de online betaling.",
+          "Wij verkopen of verhuren uw gegevens nooit."
+        ]
+      },
+      {
+        "title": "Hoe wij ze beschermen",
+        "text": "De communicatie is versleuteld (HTTPS), wachtwoorden worden gehasht, sessies verlopen automatisch en elke gevoelige toegang wordt in een auditlogboek geregistreerd."
+      },
+      {
+        "title": "Uw rechten",
+        "items": [
+          "Inzage: een kopie krijgen van uw gegevens en uw patiëntendossier.",
+          "Verbetering: een onjuist gegeven laten corrigeren.",
+          "Wissing: vragen om uw gegevens te wissen, binnen de wettelijke bewaartermijnen van het patiëntendossier en de facturen.",
+          "Beperking en bezwaar: vragen om het gebruik van uw gegevens te beperken.",
+          "Overdraagbaarheid: uw gegevens in een leesbaar formaat ontvangen."
+        ]
+      },
+      {
+        "title": "Uw rechten uitoefenen",
+        "text": "Stuur uw verzoek per e-mail naar het hierboven vermelde adres. Wij antwoorden binnen een maand."
+      },
+      {
+        "title": "Klacht",
+        "text": "Als u vindt dat uw gegevens niet correct worden verwerkt, kunt u een klacht indienen bij de Gegevensbeschermingsautoriteit (GBA), Drukpersstraat 35, 1000 Brussel, www.gegevensbeschermingsautoriteit.be."
+      },
+      {
+        "title": "Cookies",
+        "text": "Deze website gebruikt geen advertentie- of analysecookies. Enkel de informatie die nodig is voor de werking (uw inlogsessie en de gekozen taal) wordt in uw browser bewaard."
+      }
+    ]
+  },
   "login": {
     "title": "Aanmelden",
     "username": "Gebruikersnaam",
