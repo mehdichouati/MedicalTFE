@@ -1,33 +1,25 @@
-.page {
-  background: #f7f9fb;
-  min-height: 100vh;
-  font-family: system-ui, sans-serif;
-  color: #1a1a2e;
-}
+/* ===== Espace connecte (/app) ===== */
 
-.container {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 48px 24px;
+.page {
+  color: var(--color-text);
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: 8px;
 }
 
 .title {
-  color: #0a5c78;
-  font-size: 32px;
   margin: 0;
+  color: var(--color-primary);
+  font-size: 32px;
 }
 
 .subtitle {
-  color: #52606d;
   margin-top: 6px;
+  color: var(--color-text-muted);
 }
+
+/* ----- Cartes d'acces rapide ----- */
 
 .cardGrid {
   display: grid;
@@ -37,41 +29,54 @@
 }
 
 .card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.08);
-  border: 1px solid #eef1f4;
-  text-decoration: none;
-  color: #1a1a2e;
   display: block;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-bg);
+  box-shadow: 0 2px 10px rgba(10, 92, 120, 0.08);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .cardIcon {
-  font-size: 28px;
   margin-bottom: 10px;
+  font-size: 28px;
 }
 
 .cardTitle {
   margin: 0;
-  font-weight: 700;
+  color: var(--color-primary);
   font-size: 16px;
-  color: #0a5c78;
+  font-weight: 700;
 }
 
 .cardSubtitle {
   margin: 4px 0 0;
+  color: var(--color-text-muted);
   font-size: 13px;
-  color: #52606d;
 }
 
-.logoutButton {
-  margin-top: 36px;
-  padding: 10px 22px;
-  background: #fff;
-  color: #0a5c78;
-  border: 2px solid #0a5c78;
-  border-radius: 24px;
-  font-size: 14px;
-  cursor: pointer;
+/* ===== Mobile ===== */
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 26px;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+    margin-top: 24px;
+  }
 }
