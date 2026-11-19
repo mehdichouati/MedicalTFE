@@ -112,11 +112,22 @@ export default function HistoryPage() {
   }
 
   useEffect(() => {
-    Promise.all([
-      apiClient.get('/patients/history/'),
-      apiClient.get('/payments/'),
-      apiClient.get('/medical-documents/'),
-    ])
+    const params = new URLSearchParams(window.location.search)
+    const paymentIntentId = params.get('payment_intent')
+
+    // Retour de Stripe : on resynchronise le paiement avant de charger la liste.
+    const syncPayment = paymentIntentId
+      ? apiClient.post('/payments/sync/', { payment_intent: paymentIntentId })
+        .catch(() => {})
+        .finally(() => window.history.replaceState(null, '', window.location.pathname))
+      : Promise.resolve()
+
+    syncPayment
+      .then(() => Promise.all([
+        apiClient.get('/patients/history/'),
+        apiClient.get('/payments/'),
+        apiClient.get('/medical-documents/'),
+      ]))
       .then(([historyRes, paymentsRes, documentsRes]) => {
         setHistory(historyRes.data)
         setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : paymentsRes.data.results)

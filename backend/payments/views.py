@@ -152,6 +152,40 @@ class CreatePaymentIntentView(APIView):
         })
 
 
+class SyncPaymentView(APIView):
+    """F4 — Resynchronise un paiement avec Stripe au retour du formulaire.
+
+    POST /api/payments/sync/  { "payment_intent": "pi_..." }
+    Le statut est lu cote serveur chez Stripe : le frontend ne fait que
+    transmettre l'identifiant, il ne decide jamais du resultat.
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        intent_id = request.data.get('payment_intent')
+        if not intent_id:
+            return Response(
+                {'detail': "Le champ 'payment_intent' est requis."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payment = Payment.objects.filter(stripe_payment_intent_id=intent_id).first()
+        if payment is None:
+            return Response({'detail': 'Paiement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        if user.role == 'PATIENT' and payment.patient_id != user.id:
+            if not _is_guardian_of(user, payment.patient_id):
+                return Response({'detail': "Vous n'avez pas accès à ce paiement."}, status=status.HTTP_403_FORBIDDEN)
+
+        intent = stripe.PaymentIntent.retrieve(intent_id)
+        if intent.status == 'succeeded':
+            _mark_payment_succeeded(payment)
+
+        return Response({'status': payment.status})
+
+
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
